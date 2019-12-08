@@ -9,7 +9,7 @@
  *          objetos e que é capaz de alocar memoria dinâmicamente e de dealocar
  *          memória quando necessáro. Este ficheiro contém apenas um 'protótipo'
  *          que é compilado para um objeto real quando os macros VEC_TYPE;
- *          VEC_NAME; VEC_DEALOC(X) e VEC_CMP(X, Y, Z) são definidos antes de
+ *          VEC_NAME e VEC_DEALOC(X) são definidos antes de
  *          incluir o ficheiro.
  * @version 0.1
  * @date    2019-12-04
@@ -20,22 +20,18 @@
  * #define  VEC_TYPE             char*
  * #define  VEC_NAME             strvec
  * #define  VEC_DEALOC(X)        free(X)
- * #define  VEC_CMP(X, Y, Z)     !strcmp(*X, *Y)
  * #include "./vector.h"
  * #undef   VEC_TYPE
  * #undef   VEC_NAME
  * #undef   VEC_DEALOC
- * #undef   VEC_CMP
  *
  * #define  VEC_TYPE             int
  * #define  VEC_NAME             intvec
  * #define  VEC_DEALOC(x)
- * #define  VEC_CMP(X, Y, Z)     (*X) == (*Y)
  * #include "./vector.h"
  * #undef   VEC_TYPE
  * #undef   VEC_NAME
  * #undef   VEC_DEALOC
- * #undef   VEC_CMP
  * @endcode
  */
 
@@ -47,9 +43,6 @@
  *                  prefixo.
  * @def VEC_DEALOC(X)
  *                  Maneira de dealocar VEC_TYPE, se necessário.
- * @def VEC_CMP(X, Y, Z)
- *                  Onde X, Y são VEC_TYPE* e Z é void*, deve de retornar
- *                  verdadeiro se X==Y, Z é passado pelo utilizador.
  * @def PASTER(X, Y)
  *                  Macro auxiliar para juntar VEC_NAME e Y.
  * @def EVAL(X, Y)
@@ -72,17 +65,14 @@
 #define VEC_DEALOC(x)
 #endif
 
-#ifndef VEC_CMP
-#define VEC_CMP(X, Y, Z) X == Y
-#endif
-
 #define PASTER(X, Y) X##Y
 #define EVAL(X, Y) PASTER(X, Y)
 #define VEC_FUN(X) EVAL(VEC_NAME, X)
 
 /**
  * @brief           Struct com o nome VEC_NAME que contém o tipo de dados
- *                  VEC_TYPE e informação sobre o numero de objetos guardado.
+ *                  VEC_TYPE e informação sobre o numero de objetos guardado,
+ *                  pode guardar [0, ~((size_t)0)[ elemntos.
  */
 typedef struct {
     size_t alocated;    ///< Tamanho alocado de objetos.
@@ -297,21 +287,53 @@ int VEC_FUN(_adjust)(VEC_NAME* const v) {
 }
 
 /**
- * @brief           Encontra 'find' no vetor 'v'
- * @details         Procura pelo objeto 'find' no vetor 'v' utilizando o macro
- *                  'VEC_CMP' para comparar 'find' a cada um dos objetos do
- *                  vetor.
+ * @brief           Aplica a função 'predicate' a todos os elementos do vetor
+ *                  'v', do menor ao maior index.
+ * @details         O vetor 'v' é iterado, do primeiro ao último elemeto,
+ *                  aplicando 'predicate' a todos os elementos até que o vetor
+ *                  acabe ou até que 'predicate' retorne verdadeiro.
  * @param v         Pointeiro para o vetor sob o qual operar.
- * @param find      Ponteiro para o objeto ao qual queremos comparar.
- * @param userData  Dados definidos quando a função é chamada, este é o
- *                  parâmetro Z do macro 'VEC_CMP'.
- * @returns         O index do primeiro objeto que foi comparado com 'find' com
- *                  sucesso.
- * @returns         ~0 caso não tenha encontrado nenhum objeto.
+ * @param predicate Função que é chamada por cada elemento do vetor, se esta
+ *                  função retornar verdadeiro a iteração pára. Os argumentos
+ *                  desta função são: (1) o elemento que está a ser iterado;
+ *                  (2) um ponteiro do tipo 'void*' que é passado ao chamar
+ *                  _iterateFW.
+ * @param userData  Dados passados pelo utilizador à função 'predicate'.
+ * @returns         O index do objeto cuja função predicate primeiro returnou
+ *                  verdade.
+ * @returns         ~0 caso a todos os elementos foram iterados sem que
+ *                  'predicate' tenha retornado 0.
  */
-size_t VEC_FUN(_find)(VEC_NAME* const v, VEC_TYPE* find, void* userData) {
+size_t VEC_FUN(_iterateFW)
+(VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData) {
     for (size_t i = 0; i < v->size; i++) {
-        if(VEC_CMP(find, &v->data[i], userData)) return i;
+        if( predidate(v->data[i], userData) ) return i;
+    }
+    return ~((size_t)0);
+}
+
+/**
+ * @brief           Aplica a função 'predicate' a todos os elementos do vetor
+ *                  'v', do maior ao menor index.
+ * @details         O vetor 'v' é iterado, do último ao primeiro elemeto,
+ *                  aplicando 'predicate' a todos os elementos até que o vetor
+ *                  acabe ou até que 'predicate' retorne verdadeiro.
+ * @param v         Pointeiro para o vetor sob o qual operar.
+ * @param predicate Função que é chamada por cada elemento do vetor, se esta
+ *                  função retornar verdadeiro a iteração pára. Os argumentos
+ *                  desta função são: (1) o elemento que está a ser iterado;
+ *                  (2) um ponteiro do tipo 'void*' que é passado ao chamar
+ *                  _iterateBW.
+ * @param userData  Dados passados pelo utilizador à função 'predicate'.
+ * @returns         O index do objeto cuja função predicate primeiro returnou
+ *                  verdade.
+ * @returns         ~0 caso a todos os elementos foram iterados sem que
+ *                  'predicate' tenha retornado 0.
+ */
+size_t VEC_FUN(_iterateBW)
+(VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData) {
+    for (size_t i = v->size-1; i != ~((size_t)0); i--) {
+        if( predidate(v->data[i], userData) ) return i;
     }
     return ~((size_t)0);
 }
@@ -338,18 +360,6 @@ int VEC_FUN(_reserve)(VEC_NAME* const v, size_t space) {
     v->alocated = space;
     v->data = newData;
     return 1;
-}
-
-/**
- * @brief           Wrapper para que o macro 'VEC_CMP' possa ser chamado após a
- *                  inclusão do ficheio vector.h.
- * @param X         O parametro X do macro 'VEC_CMP'.
- * @param Y         O parametro Y do macro 'VEC_CMP'.
- * @param userData  O parametro Z do macro 'VEC_CMP'.
- * @returns         O resultado do macro 'VEC_CMP'.
- */
-int VEC_FUN(_CMP)(VEC_TYPE* const X, VEC_TYPE* const Y, void* userData) {
-    return VEC_CMP(X, Y, userData);
 }
 
 /**
