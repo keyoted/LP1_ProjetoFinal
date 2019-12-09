@@ -145,8 +145,9 @@ void freeEncomenda(encomenda* e) {
 */
 
 
-#define CLIENTE 0
-#define DIRETOR 1
+#define CLIENTE     0
+#define DIRETOR     1
+#define DESATIVADO  2
 
 typedef struct {
     char* nome;
