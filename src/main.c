@@ -1,6 +1,6 @@
-#include <stdio.h>
+#include <stdint.h>
 #include <string.h>
-#include <ctype.h>
+#include <memory.h>
 
 /*
     As empresas de distribuição e logística representam uma atividade muito
@@ -39,8 +39,8 @@
 typedef struct {
     char* nome;
     char* tratamentoEspecial;
-    uint16_t gramas;
-    uint16_t milimetrosCubicos
+    uint64_t gramas;
+    uint64_t milimetrosCubicos
 } artigo;
 
 int ePesado(artigo* a) {
@@ -175,7 +175,7 @@ int eCCValido (uint8_t cc[12]) {
     return 1;
 }
 
-utilizador* novoUtilizador() {
+utilizador* newUtilizador() {
     utilizador* u = calloc(1, sizeof(utilizador));
     u->adereco = newMorada();
     u->tipo = CLIENTE;
