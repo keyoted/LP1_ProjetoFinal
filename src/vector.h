@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include <stdlib.h>
 #include <memory.h>
 
@@ -9,29 +8,41 @@
  *          objetos e que é capaz de alocar memoria dinâmicamente e de dealocar
  *          memória quando necessáro. Este ficheiro contém apenas um 'protótipo'
  *          que é compilado para um objeto real quando os macros VEC_TYPE;
- *          VEC_NAME e VEC_DEALOC(X) são definidos antes de
- *          incluir o ficheiro.
+ *          VEC_NAME e VEC_DEALOC(X) são definidos antes de incluir o ficheiro.
+ *          VEC_IMPLEMENTATION e VEC_DECLARATION terão também que ser definidos
+ *          (mesmo que sem nenhum valor) de modo a ativar a implementação e a
+ *          declaração das funções que dizem respeito ao vetor que está a ser
+ *          criado. Por omição da defenição de ambos os macros, VEC_DECLARATION
+ *          é definido automaticamente.
  * @version 0.1
  * @date    2019-12-04
  *
  * @copyright Copyright (c) 2019
  * @section example_sec Exemplo
  * @code{c}
+ *
+ *
+ * #ifndef  strPVec_H
+ * #define  strPvec_H
  * #define  VEC_TYPE             char*
- * #define  VEC_NAME             strvec
+ * #define  VEC_NAME             strVec
  * #define  VEC_DEALOC(X)        free(X)
  * #include "./vector.h"
  * #undef   VEC_TYPE
  * #undef   VEC_NAME
  * #undef   VEC_DEALOC
+ * #endif
  *
+ * #ifndef  intVec_H
+ * #define  intVec_H
  * #define  VEC_TYPE             int
- * #define  VEC_NAME             intvec
- * #define  VEC_DEALOC(x)
+ * #define  VEC_NAME             intVec
+ * #define  VEC_DEALOC(X)
  * #include "./vector.h"
  * #undef   VEC_TYPE
  * #undef   VEC_NAME
  * #undef   VEC_DEALOC
+ * #endif
  * @endcode
  */
 
@@ -51,6 +62,14 @@
  * @def VEC_FUN(X)
  *                  Macro responsavél por adicionar VEC_NAME antes do nome de
  *                  cada função.
+ * @def VEC_IMPLEMENTATION
+ *                  Se este macro estiver definido as implementações das funções
+ *                  do vetor são ativadas.VEC_DECLARATION é definida por omição
+ *                  de VEC_IMPLEMENTATION e VEC_DECLARATION.
+ * @def VEC_DECLARATION
+ *                  Se este macro estiver definido as declarações das funções do
+ *                  vetor são ativadas. VEC_DECLARATION é definida por omição de
+ *                  VEC_IMPLEMENTATION e VEC_DECLARATION.
  */
 
 #ifndef VEC_TYPE
@@ -69,6 +88,11 @@
 #define EVAL(X, Y) PASTER(X, Y)
 #define VEC_FUN(X) EVAL(VEC_NAME, X)
 
+#if defined(VEC_IMPLEMENTATION) || defined(VEC_DECLARATION)
+#else
+#define VEC_DECLARATION
+#endif
+
 /**
  * @brief           Struct com o nome VEC_NAME que contém o tipo de dados
  *                  VEC_TYPE e informação sobre o numero de objetos guardado,
@@ -80,6 +104,8 @@ typedef struct {
     VEC_TYPE* data;     ///< Começa em data[0] e acaba em data[size-1].
 } VEC_NAME;
 
+
+#ifdef VEC_IMPLEMENTATION
 /**
  * @brief           Aumenta v, se necessário e possivél, para que se possa
  *                  adicionar mais objetos no final.
@@ -307,7 +333,7 @@ int VEC_FUN(_adjust)(VEC_NAME* const v) {
 size_t VEC_FUN(_iterateFW)
 (VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData) {
     for (size_t i = 0; i < v->size; i++) {
-        if( predidate(v->data[i], userData) ) return i;
+        if( predicate(v->data[i], userData) ) return i;
     }
     return ~((size_t)0);
 }
@@ -333,7 +359,7 @@ size_t VEC_FUN(_iterateFW)
 size_t VEC_FUN(_iterateBW)
 (VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData) {
     for (size_t i = v->size-1; i != ~((size_t)0); i--) {
-        if( predidate(v->data[i], userData) ) return i;
+        if( predicate(v->data[i], userData) ) return i;
     }
     return ~((size_t)0);
 }
@@ -370,3 +396,23 @@ int VEC_FUN(_reserve)(VEC_NAME* const v, size_t space) {
 void VEC_FUN(_DEALOC)(VEC_TYPE const X) {
     VEC_DEALOC(X);
 }
+#endif
+
+#ifdef VEC_DECLARATION
+int VEC_FUN(_addCell) (VEC_NAME* const v);
+VEC_NAME VEC_FUN(_new)();
+int VEC_FUN(_push)(VEC_NAME* const v, VEC_TYPE const newObj);
+void VEC_FUN(_moveBelow)(VEC_NAME* const v, const size_t i);
+int VEC_FUN(_moveAbove)(VEC_NAME* const v, const size_t i);
+VEC_TYPE VEC_FUN(_pop)(VEC_NAME* const v);
+VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const size_t position);
+void VEC_FUN(_free)(VEC_NAME* const v);
+void VEC_FUN(_removeAt)(VEC_NAME* const v, size_t position);
+int VEC_FUN(_adjust)(VEC_NAME* const v);
+int VEC_FUN(_reserve)(VEC_NAME* const v, size_t space);
+void VEC_FUN(_DEALOC)(VEC_TYPE const X);
+size_t VEC_FUN(_iterateFW)
+                (VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData);
+size_t VEC_FUN(_iterateBW)
+                (VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData);
+#endif
