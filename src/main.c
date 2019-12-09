@@ -1,22 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-
-
-#define VEC_TYPE char*
-#define VEC_NAME strvec
-#define VEC_DEALOC(X) printf("Supostamente iria apagar '%s'\n", X)
-#include "./vector.h"
-#undef VEC_TYPE
-#undef VEC_NAME
-#undef VEC_DEALOC
-
-#define VEC_TYPE int
-#define VEC_NAME intvec
-#define VEC_DEALOC(X)
-#include "./vector.h"
-#undef VEC_TYPE
-#undef VEC_NAME
-#undef VEC_DEALOC
+#include <ctype.h>
 
 /*
     As empresas de distribuição e logística representam uma atividade muito
@@ -46,11 +30,36 @@
     Artigo -
     Representa um objeto que será transportado. Este pode requerer tratamento
     especial(definido de forma textual dentro do artigo), e necessita da
-    definição de peso e volume. Um artigo com pesosuperior a 20 quilogramas
+    definição de peso e volume. Um artigo com peso superior a 20 quilogramas
     deverá ser automaticamente considerado Artigo Pesado.
     Se o volume for superior a 0,125 metros cúbicos (equivalente a  uma caixa
     quadradade lado 50 centímetros) então deve ser considerado volumoso;
 */
+
+typedef struct {
+    char* nome;
+    char* tratamentoEspecial;
+    uint16_t gramas;
+    uint16_t milimetrosCubicos
+} artigo;
+
+int ePesado(artigo* a) {
+    return a->gramas > 20000;
+}
+
+int eVolumoso(artigo* a) {
+    return a->milimetrosCubicos > (500 * 500 * 500);
+}
+
+artigo* newArtigo() {
+    return calloc(1, sizeof(artigo));
+}
+
+void freeArtigo(artigo* a) {
+    free(a->nome);
+    free(a->tratamentoEspecial);
+    free(a);
+}
 
 /*
     Encomenda -
@@ -60,12 +69,63 @@
     serviço regular;
 */
 
+typedef struct {
+    char* morada;
+    uint8_t codigoPostal[7];
+} morada;
+
+morada* newMorada() {
+    return calloc(1, sizeof(morada));
+}
+
+void freeMorada(morada* m) {
+    free(m->morada);
+    free(m);
+}
+
+typedef enum {
+    URGENTE,
+    REGULAR
+} urgenciaEntrega;
+
+#define VEC_TYPE artigo*
+#define VEC_NAME artigoPvec
+#define VEC_DEALOC(X) freeArtigo(X);
+#include "./vector.h"
+#undef VEC_TYPE
+#undef VEC_NAME
+#undef VEC_DEALOC
+
+typedef struct {
+    artigoPvec artigos;
+    morada* origem;
+    morada* destino;
+    urgenciaEntrega urgencia;
+} encomenda;
+
+encomenda* newEncomenda() {
+    encomenda* e = malloc(sizeof(encomenda));
+    e->artigos = artigoPvec_new();
+    e->origem = newMorada();
+    e->destino = newMorada();
+    e->urgencia = REGULAR;
+}
+
+void freeEncomenda(encomenda* e) {
+    artigoPvec_free(&e->artigos);
+    freeMorada(e->origem);
+    freeMorada(e->destino);
+    free(e);
+}
+
 /*
     Custo de transporte -
     Representao valor final que o cliente terá de pagar à empresa transportadora
     de acordo com o tipo de encomenda, a distância percorrida (em quilómetros),
     e com a região de origem e de destino;
 */
+
+// ??????????????
 
 /*
     Cliente -
@@ -82,6 +142,50 @@
     toda a informação guardada, nomeadamente sobre clientes, transportes
     realizados, entre outros.
 */
+
+typedef enum {
+    CLIENTE,
+    DIRETOR
+} tipoUtilizador;
+
+
+typedef struct {
+    char* nome;
+    uint8_t NIF[9];
+    uint8_t CC[12];
+    morada* adereco;
+    tipoUtilizador tipo;
+} utilizador;
+
+int eCCValido (uint8_t cc[12]) {
+    int i = 0;
+    // Assegurar 9 digitos
+    for(i; i < 9; ++i)
+        if(!isdigit(cc[i]))
+            return 0;
+    // Assegurar 2 digitos alfanuméricos
+    for(i; i < 11; ++i) {
+        if(isalnum(cc[i])) {
+            cc[i] = (char)toupper(cc[i]);
+        } else return 0;
+    }
+    // Asegurar ultimo digito
+    if(! isdigit(cc[11])) return 0;
+
+    return 1;
+}
+
+utilizador* novoUtilizador() {
+    utilizador* u = calloc(1, sizeof(utilizador));
+    u->adereco = newMorada();
+    u->tipo = CLIENTE;
+}
+
+void freeUtilizador(utilizador* u) {
+    free(u->nome);
+    freeMorada(u->adereco);
+    free(u);
+}
 
 /*
     Funcionalidades comuns -
@@ -148,33 +252,5 @@
 */
 
 int main() {
-    strvec sv = strvec_new();
-    strvec* s = &sv;
-
-    strvec_push(s, " 0 ");
-    strvec_push(s, " 1 ");
-    strvec_push(s, " 2 ");
-    strvec_push(s, " 3 ");
-    strvec_push(s, " 4 ");
-    strvec_push(s, " 5 ");
-    strvec_push(s, " 6 ");
-    strvec_push(s, " 7 ");
-    strvec_push(s, " 8 ");
-    strvec_push(s, " 9 ");
-    strvec_push(s, " 10 ");
-    strvec_push(s, " 11 ");
-    strvec_push(s, " 12 ");
-
-    strvec_removeAt(s, 12);
-
-    for(size_t i=0; i < sv.size; ++i) {
-      printf("%s", sv.data[i]);
-    }
-    printf("\n");
-    strvec_removeAt(s, 11);
-
-    char* find = " 2 ";
-    printf("%zu\n", strvec_find(s, &find, NULL));
-    strvec_free(s);
     return 0;
 }
