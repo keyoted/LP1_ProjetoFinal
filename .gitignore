@@ -1,3 +1,4 @@
 doc
 bin/*
 .vscode
+src/test.c
