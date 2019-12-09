@@ -83,10 +83,8 @@ void freeMorada(morada* m) {
     free(m);
 }
 
-typedef enum {
-    URGENTE,
-    REGULAR
-} urgenciaEntrega;
+#define URGENTE 1
+#define REGULAR 0
 
 #define VEC_TYPE artigo*
 #define VEC_NAME artigoPvec
@@ -100,7 +98,8 @@ typedef struct {
     artigoPvec artigos;
     morada* origem;
     morada* destino;
-    urgenciaEntrega urgencia;
+    uint8_t urgencia;
+    uint64_t precoCentimos;
 } encomenda;
 
 encomenda* newEncomenda() {
@@ -109,6 +108,8 @@ encomenda* newEncomenda() {
     e->origem = newMorada();
     e->destino = newMorada();
     e->urgencia = REGULAR;
+    e->precoCentimos = 0;
+    return e;
 }
 
 void freeEncomenda(encomenda* e) {
@@ -143,18 +144,16 @@ void freeEncomenda(encomenda* e) {
     realizados, entre outros.
 */
 
-typedef enum {
-    CLIENTE,
-    DIRETOR
-} tipoUtilizador;
 
+#define CLIENTE 0
+#define DIRETOR 1
 
 typedef struct {
     char* nome;
     uint8_t NIF[9];
     uint8_t CC[12];
     morada* adereco;
-    tipoUtilizador tipo;
+    uint8_t tipo;
 } utilizador;
 
 int eCCValido (uint8_t cc[12]) {
