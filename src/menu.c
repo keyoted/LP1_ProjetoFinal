@@ -5,7 +5,7 @@ void cleanInputBuffer(){
     while ((ch = getchar()) != '\n' && ch != EOF);
 }
 
-char* inputString (FILE* fp) {
+char* readString (FILE* fp) {
     size_t alocado = 20;
     size_t tamanho = 0;
     char* str = malloc(sizeof(char)*alocado);
@@ -25,7 +25,7 @@ char* inputString (FILE* fp) {
     else return str;
 }
 
-int readIntFromStdin(int* const value) {
+int readInt(int* const value) {
     if (scanf("%d", value) != 1) {
         printf("*** ERRO: Não foi inserido um número válido.\n");
         cleanInputBuffer();
@@ -35,9 +35,9 @@ int readIntFromStdin(int* const value) {
     return 1;
 }
 
-int lerNumeroEntre(int min, int max, int* const op) {
+int readIntMinMax(int min, int max, int* const op) {
     printf("insira um numero entre [%d e %d] $ ", min, max);
-    if( readIntFromStdin(op) ) {
+    if( readInt(op) ) {
         if(*op >= min) {
             if(*op <= max) {
                 return 1;
@@ -49,31 +49,26 @@ int lerNumeroEntre(int min, int max, int* const op) {
     return 0;
 }
 
-int menu_selecao_display_iter(char* item, void* userdata) {
-    printf("   %*d   |   %s\n", 8, ++(*((int*)userdata)), item);
+int printItemPredicate(char* item, int* userdata) {
+    printf("   %*d   |   %s\n", 8, ++(*userdata), item);
     return 0;
 }
 
 // itens, separados por \n
-void menu_selecao_display(const strVec itens) {
-    printf("--------------------------------------------------------------------------------\n");
-    printf("                         *** Selecione a sua opção ***                          \n");
-    printf("   Opção      |   Item\n");
-    printf("         -2   |   Reimprimir\n");
-    printf("         -1   |   Sair\n");
-    int i = -1;
-    strVec_iterateFW((strVec*)(&itens), &menu_selecao_display_iter, &i);
-    printf("--------------------------------------------------------------------------------\n");
-}
-
-// itens, separados por \n
 // retorna o numero selecionado
-int menu_selecao(const strVec itens) {
+int menuSelection(const strVec itens) {
     int op = -2;
     int max = itens.size;
     while(op == -2) {
-        menu_selecao_display(itens);
-        while (!lerNumeroEntre(-2, max-1, &op));
+        printf("--------------------------------------------------------------------------------\n");
+        printf("                         *** Selecione a sua opção ***                          \n");
+        printf("   Opção      |   Item\n");
+        printf("         -2   |   Reimprimir\n");
+        printf("         -1   |   Sair\n");
+        int i = -1;
+        strVec_iterateFW((strVec*)(&itens), (strVec_predicate_t)&printItemPredicate, &i);
+        printf("--------------------------------------------------------------------------------\n");
+        while (!readIntMinMax(-2, max-1, &op));
     }
     return op;
 }

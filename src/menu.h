@@ -18,10 +18,12 @@
 
 // lê op entre [min, max]
 // retorna 0 em erro, 1 de outro modo
-int lerNumeroEntre(int min, int max, int* const op);
+int readIntMinMax(int min, int max, int* const op);
 
 // retorna o numero selecionado
-int menu_selecao(const strVec itens) ;
+int menuSelection(const strVec itens) ;
+
+int printItemPredicate(char* item, int* userdata);
 
 
 #endif
