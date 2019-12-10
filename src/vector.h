@@ -156,12 +156,11 @@ int VEC_FUN(_addCell) (VEC_NAME* const v) {
  * @return          Um vetor vazio.
  */
 VEC_NAME VEC_FUN(_new)() {
-    VEC_NAME v;
-    v.size = 0;
-    v.alocated = 0;
-    v.data = NULL;
-    VEC_FUN(_addCell)(&v);
-    return v;
+    return (VEC_NAME) {
+        .size = 0,
+        .alocated = 0,
+        .data = NULL
+    };
 }
 
 /**

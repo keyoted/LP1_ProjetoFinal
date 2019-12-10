@@ -18,14 +18,21 @@ int utilizador_eCCValido (uint8_t cc[12]) {
     return 1;
 }
 
-utilizador* newUtilizador() {
-    utilizador* u = calloc(1, sizeof(utilizador));
-    u->adereco    = newMorada();
-    u->tipo       = CLIENTE;
+int utilizador_eNIFValido (uint8_t NIF[9]) {
+    int i = 0;
+    // Assegurar 9 digitos
+    for(i; i < 9; ++i)
+        if(!isdigit(NIF[i]))
+            return 0;
+
+    return 1;
 }
 
-void freeUtilizador(utilizador* u) {
-    free(u->nome);
-    freeMorada(u->adereco);
-    free(u);
+utilizador newUtilizador() {
+    return (utilizador) { .tipo = DESATIVADO, .adereco = newMorada(), .nome = strdup("undef")};
+}
+
+void freeUtilizador(utilizador u) {
+    free(u.nome);
+    freeMorada(u.adereco);
 }

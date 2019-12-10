@@ -1,10 +1,9 @@
 #include "morada.h"
 
-morada* newMorada() {
-    return calloc(1, sizeof(morada));
+morada newMorada() {
+    return (morada){ .morada = strdup("undef") };
 }
 
-void freeMorada(morada* m) {
-    free(m->morada);
-    free(m);
+void freeMorada(morada m) {
+    free(m.morada);
 }

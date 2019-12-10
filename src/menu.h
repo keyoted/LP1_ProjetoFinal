@@ -1,10 +1,10 @@
 #ifndef MENU_H
 #define MENU_H
 
-#ifndef  strVec_H
-#define  strVec_H
+#ifndef  strvec_H
+#define  strvec_H
 #define  VEC_TYPE             char*
-#define  VEC_NAME             strVec
+#define  VEC_NAME             strvec
 #define  VEC_DEALOC(X)        free(X)
 #include "./vector.h"
 #undef   VEC_TYPE
@@ -14,16 +14,20 @@
 
 #include <stdio.h>
 #include <memory.h>
+#include <stdarg.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include "utilities.h"
 
 // lê op entre [min, max]
 // retorna 0 em erro, 1 de outro modo
-int readIntMinMax(int min, int max, int* const op);
-
+int   menu_readIntMinMax        (int min, int max, int* const op);
 // retorna o numero selecionado
-int menuSelection(const strVec itens) ;
-
-int printItemPredicate(char* item, int* userdata);
-
+int   menu_selection            (const strvec* itens) ;
+char* menu_readString           (FILE* fp);
+void  menu_printDiv             ();
+void  menu_printError           (char* err, ...);
+void  menu_printInfo            (char* info, ...);
+void  menu_printHeader          (char* header);
 
 #endif

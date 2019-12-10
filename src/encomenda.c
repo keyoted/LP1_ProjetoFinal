@@ -1,23 +1,23 @@
 #include "encomenda.h"
 
-encomenda* newEncomenda() {
-    encomenda* e     = calloc(1, sizeof(encomenda));
-    e->artigos       = artigoPvec_new();
-    e->origem        = newMorada();
-    e->destino       = newMorada();
-    e->urgencia      = REGULAR;
-    e->precoCentimos = 0;
-    return e;
+encomenda newEncomenda() {
+    return (encomenda) {
+        .artigos       = artigovec_new(),
+        .origem        = newMorada(),
+        .destino       = newMorada(),
+        .urgencia      = REGULAR,
+        .precoCentimos = 0,
+        .estado        = EM_ENTREGA
+    };
 }
 
-void freeEncomenda(encomenda* e) {
-    artigoPVec_free(&e->artigos);
-    freeMorada(e->origem);
-    freeMorada(e->destino);
-    free(e);
+void freeEncomenda(encomenda e) {
+    artigovec_free(&e.artigos);
+    freeMorada(e.origem);
+    freeMorada(e.destino);
 }
 
 // TODO: Implementar
-uint64_t encomendaCalcPreco (encomenda* e) {
+uint64_t encomendaCalcPreco (encomenda e) {
     return 100;
 }

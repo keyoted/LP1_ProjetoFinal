@@ -5,6 +5,10 @@
 #define  VEC_IMPLEMENTATION
 #include "menu.h"
 
+
+typedef void(*callback_t)();
+
+
 /*
     As empresas de distribuição e logística representam uma atividade muito
     importante no atual sistema económico. Um forte impulsionador terá sido a
@@ -84,15 +88,117 @@
     necessárias para implementarasseguintes funcionalidades:
 */
 
+#ifndef artigovec_H
+#define artigovec_H
+#define VEC_TYPE         artigo
+#define VEC_NAME         artigovec
+#define VEC_DEALOC(X)    freeArtigo(X)
+#include "./vector.h"
+#undef VEC_TYPE
+#undef VEC_NAME
+#undef VEC_DEALOC
+#endif
+
+#ifndef encomendavec_H
+#define encomendavec_H
+#define VEC_TYPE         encomenda
+#define VEC_NAME         encomendavec
+#define VEC_DEALOC(X)    freeEncomenda(X)
+#include "./vector.h"
+#undef VEC_TYPE
+#undef VEC_NAME
+#undef VEC_DEALOC
+#endif
+
+#ifndef utilizadorvec_H
+#define utilizadorvec_H
+#define VEC_TYPE         utilizador
+#define VEC_NAME         utilizadorvec
+#define VEC_DEALOC(X)    freeUtilizador(X)
+#include "./vector.h"
+#undef VEC_TYPE
+#undef VEC_NAME
+#undef VEC_DEALOC
+#endif
+
+#ifndef callbackvec_H
+#define callbackvec_H
+#define VEC_TYPE         callback_t
+#define VEC_NAME         callbackvec
+#define VEC_DEALOC(X)
+#include "./vector.h"
+#undef VEC_TYPE
+#undef VEC_NAME
+#undef VEC_DEALOC
+#endif
+
+artigovec     artigos;
+encomendavec  encomendas;
+utilizadorvec utilizadores;
+utilizador*   utilizadorAtual = NULL;
+callbackvec   history;
+
 /*
     Gestão de utilizadores -
-    Deverá ser possível a um cliente criar, edita reremover o seu perfil de
+    Deverá ser possível a um cliente criar, editar e remover o seu perfil de
     utilizador. Note que a remoção de um clientenão deve ter como resultado a
     remoção de toda a informação relativa a esse cliente,mas apenas a
     “marcação” como removido, não permitindo novo acesso, ou introdução de novas
     encomendas. O Diretor pode realizar qualquer uma das operações de
     manipulação de clientes inclusive reativar um cliente removido.
 */
+
+void novoRegisto() {
+    menu_printDiv();
+    menu_printHeader("Novo Registo");
+    if(utilizadores.size != 0) {
+        menu_printInfo("ainda tem um projeto aberto, tem a certeza que quer descartar os dados do projeto?");
+        switch (menu_selection(&(strvec){
+            .data = (char*[]){"Descartar projeto"},
+            .size = 1
+        })) {
+            case -1: callbackvec_pop(&history)(); return;
+            case  0: break;
+        }
+    }
+
+    artigovec_free     (&artigos);
+    encomendavec_free  (&encomendas);
+    utilizadorvec_free (&utilizadores);
+    artigos      = artigovec_new();
+    encomendas   = encomendavec_new();
+    utilizadores = utilizadorvec_new();
+
+    menu_printHeader("Registar Novo Diretor");
+
+    utilizadorvec_push(&utilizadores, newUtilizador());
+    utilizador* diretor = & utilizadores.data[0];
+    diretor->tipo = DIRETOR;
+
+    free(diretor->nome);
+    printf("Introduzir Nome $ ");
+    diretor->nome = menu_readString(stdin);
+
+    char* stmp;
+    do {
+        printf("Introduzir NIF $ ");
+        stmp = menu_readString(stdin);
+        if (strlen(stmp) != 9) {
+            menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
+        } else if (!utilizador_eNIFValido(stmp)) {
+            menu_printError("NIF introduzido é inválido.");
+        } else {
+            memcpy(&diretor->NIF, stmp, sizeof(uint8_t)*9);
+            break;
+        }
+    } while (1);
+    menu_printInfo("diretor criado com sucesso!");
+    callbackvec_pop(&history)();
+}
+
+void loginMenu() {
+    callbackvec_pop(&history)();
+}
 
 /*
     Gestão de encomendas -
@@ -125,6 +231,16 @@
     permitindo persisti-los ao longo de diferentes utilizações.
 */
 
+void guardarDados() {
+    // TODO: Implement
+    callbackvec_pop(&history)();
+}
+
+void carregarDados() {
+    // TODO: Implement
+    callbackvec_pop(&history)();
+}
+
 /*
     Memória dinâmica -
     A aplicação deve, sempre que se justificar, utilizar memória dinâmica no
@@ -140,6 +256,39 @@
     no relatório
 */
 
+void inicioMenu() {
+    menu_printDiv();
+    menu_printHeader("Início");
+    switch (menu_selection(&(strvec){
+        .size = 4,
+        .data = (char*[]){"Carregar dados", "Guardar dados", "Novo registo", "Log In"}
+    })) {
+        case -1: return;
+        case  0: callbackvec_push(&history, &inicioMenu); carregarDados (); return;
+        case  1: callbackvec_push(&history, &inicioMenu); guardarDados  (); return;
+        case  2: callbackvec_push(&history, &inicioMenu); novoRegisto   (); return;
+        case  3: callbackvec_push(&history, &inicioMenu); loginMenu     (); return;
+    }
+}
+
+
+void start() {
+    menu_printHeader("A Iniciar");
+    inicioMenu();
+    menu_printHeader("A Terminar");
+}
+
 int main() {
+    artigos      = artigovec_new();
+    encomendas   = encomendavec_new();
+    utilizadores = utilizadorvec_new();
+    history      = callbackvec_new();
+
+    start();
+
+    artigovec_free     (&artigos);
+    encomendavec_free  (&encomendas);
+    utilizadorvec_free (&utilizadores);
+    callbackvec_free   (&history);
     return 0;
 }

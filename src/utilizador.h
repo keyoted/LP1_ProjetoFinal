@@ -1,18 +1,26 @@
+#ifndef UTILIZADOR_H
+#define UTILIZADOR_H
+
 #define CLIENTE     0
 #define DIRETOR     1
 #define DESATIVADO  2
 
 #include <stdint.h>
+#include <stdlib.h>
 #include "morada.h"
+#include "utilities.h"
 
 typedef struct {
     char*   nome;
     uint8_t NIF[9];
     uint8_t CC[12];
-    morada* adereco;
+    morada  adereco;
     uint8_t tipo;
 } utilizador;
 
-int         utilizador_eCCValido (uint8_t cc[12]);
-utilizador* newUtilizador        ();
-void        freeUtilizador       (utilizador* u);
+int        utilizador_eCCValido  (uint8_t cc[12]);
+int        utilizador_eNIFValido (uint8_t NIF[9]);
+utilizador newUtilizador         ();
+void       freeUtilizador        (utilizador u);
+
+#endif
