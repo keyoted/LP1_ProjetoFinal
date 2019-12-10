@@ -2,6 +2,9 @@
 #include <string.h>
 #include <memory.h>
 
+#define  VEC_IMPLEMENTATION
+#include "menu.h"
+
 /*
     As empresas de distribuição e logística representam uma atividade muito
     importante no atual sistema económico. Um forte impulsionador terá sido a
@@ -36,30 +39,7 @@
     quadradade lado 50 centímetros) então deve ser considerado volumoso;
 */
 
-typedef struct {
-    char* nome;
-    char* tratamentoEspecial;
-    uint64_t gramas;
-    uint64_t milimetrosCubicos
-} artigo;
-
-int ePesado(artigo* a) {
-    return a->gramas > 20000;
-}
-
-int eVolumoso(artigo* a) {
-    return a->milimetrosCubicos > (500 * 500 * 500);
-}
-
-artigo* newArtigo() {
-    return calloc(1, sizeof(artigo));
-}
-
-void freeArtigo(artigo* a) {
-    free(a->nome);
-    free(a->tratamentoEspecial);
-    free(a);
-}
+#include "artigo.h"
 
 /*
     Encomenda -
@@ -69,56 +49,6 @@ void freeArtigo(artigo* a) {
     serviço regular;
 */
 
-typedef struct {
-    char* morada;
-    uint8_t codigoPostal[7];
-} morada;
-
-morada* newMorada() {
-    return calloc(1, sizeof(morada));
-}
-
-void freeMorada(morada* m) {
-    free(m->morada);
-    free(m);
-}
-
-#define URGENTE 1
-#define REGULAR 0
-
-#define VEC_TYPE artigo*
-#define VEC_NAME artigoPvec
-#define VEC_DEALOC(X) freeArtigo(X);
-#include "./vector.h"
-#undef VEC_TYPE
-#undef VEC_NAME
-#undef VEC_DEALOC
-
-typedef struct {
-    artigoPvec artigos;
-    morada* origem;
-    morada* destino;
-    uint8_t urgencia;
-    uint64_t precoCentimos;
-} encomenda;
-
-encomenda* newEncomenda() {
-    encomenda* e = malloc(sizeof(encomenda));
-    e->artigos = artigoPvec_new();
-    e->origem = newMorada();
-    e->destino = newMorada();
-    e->urgencia = REGULAR;
-    e->precoCentimos = 0;
-    return e;
-}
-
-void freeEncomenda(encomenda* e) {
-    artigoPvec_free(&e->artigos);
-    freeMorada(e->origem);
-    freeMorada(e->destino);
-    free(e);
-}
-
 /*
     Custo de transporte -
     Representao valor final que o cliente terá de pagar à empresa transportadora
@@ -126,7 +56,7 @@ void freeEncomenda(encomenda* e) {
     e com a região de origem e de destino;
 */
 
-// ??????????????
+#include "encomenda.h"
 
 /*
     Cliente -
@@ -144,48 +74,7 @@ void freeEncomenda(encomenda* e) {
     realizados, entre outros.
 */
 
-
-#define CLIENTE     0
-#define DIRETOR     1
-#define DESATIVADO  2
-
-typedef struct {
-    char* nome;
-    uint8_t NIF[9];
-    uint8_t CC[12];
-    morada* adereco;
-    uint8_t tipo;
-} utilizador;
-
-int eCCValido (uint8_t cc[12]) {
-    int i = 0;
-    // Assegurar 9 digitos
-    for(i; i < 9; ++i)
-        if(!isdigit(cc[i]))
-            return 0;
-    // Assegurar 2 digitos alfanuméricos
-    for(i; i < 11; ++i) {
-        if(isalnum(cc[i])) {
-            cc[i] = (char)toupper(cc[i]);
-        } else return 0;
-    }
-    // Asegurar ultimo digito
-    if(! isdigit(cc[11])) return 0;
-
-    return 1;
-}
-
-utilizador* newUtilizador() {
-    utilizador* u = calloc(1, sizeof(utilizador));
-    u->adereco = newMorada();
-    u->tipo = CLIENTE;
-}
-
-void freeUtilizador(utilizador* u) {
-    free(u->nome);
-    freeMorada(u->adereco);
-    free(u);
-}
+#include "utilizador.h"
 
 /*
     Funcionalidades comuns -
