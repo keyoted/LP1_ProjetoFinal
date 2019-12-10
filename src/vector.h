@@ -103,7 +103,7 @@ typedef struct {
     size_t size;        ///< Tamanho de objetos que foi populado.
     VEC_TYPE* data;     ///< Começa em data[0] e acaba em data[size-1].
 } VEC_NAME;
-
+typedef int(*VEC_FUN(_predicate_t))(VEC_TYPE, void*);
 
 #ifdef VEC_IMPLEMENTATION
 /**
@@ -331,7 +331,7 @@ int VEC_FUN(_adjust)(VEC_NAME* const v) {
  *                  'predicate' tenha retornado 0.
  */
 size_t VEC_FUN(_iterateFW)
-(VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData) {
+(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
     for (size_t i = 0; i < v->size; i++) {
         if( predicate(v->data[i], userData) ) return i;
     }
@@ -357,7 +357,7 @@ size_t VEC_FUN(_iterateFW)
  *                  'predicate' tenha retornado 0.
  */
 size_t VEC_FUN(_iterateBW)
-(VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData) {
+(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
     for (size_t i = v->size-1; i != ~((size_t)0); i--) {
         if( predicate(v->data[i], userData) ) return i;
     }
@@ -412,7 +412,7 @@ int VEC_FUN(_adjust)(VEC_NAME* const v);
 int VEC_FUN(_reserve)(VEC_NAME* const v, size_t space);
 void VEC_FUN(_DEALOC)(VEC_TYPE const X);
 size_t VEC_FUN(_iterateFW)
-                (VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData);
+                (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
 size_t VEC_FUN(_iterateBW)
-                (VEC_NAME* v, int(*predicate)(VEC_TYPE, void*), void* userData);
+                (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
 #endif
