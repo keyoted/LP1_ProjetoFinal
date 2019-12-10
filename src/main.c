@@ -5,10 +5,6 @@
 #define  VEC_IMPLEMENTATION
 #include "menu.h"
 
-
-typedef void(*callback_t)();
-
-
 /*
     As empresas de distribuição e logística representam uma atividade muito
     importante no atual sistema económico. Um forte impulsionador terá sido a
@@ -121,22 +117,10 @@ typedef void(*callback_t)();
 #undef VEC_DEALOC
 #endif
 
-#ifndef callbackvec_H
-#define callbackvec_H
-#define VEC_TYPE         callback_t
-#define VEC_NAME         callbackvec
-#define VEC_DEALOC(X)
-#include "./vector.h"
-#undef VEC_TYPE
-#undef VEC_NAME
-#undef VEC_DEALOC
-#endif
-
 artigovec     artigos;
 encomendavec  encomendas;
 utilizadorvec utilizadores;
-utilizador*   utilizadorAtual = NULL;
-callbackvec   history;
+size_t        utilizadorAtual = ~(size_t)0;
 
 /*
     Gestão de utilizadores -
@@ -148,17 +132,110 @@ callbackvec   history;
     manipulação de clientes inclusive reativar um cliente removido.
 */
 
-void novoRegisto() {
+void interface_diretor() {
+    // TODO: implemantar
+}
+
+void interface_utilizador() {
+    // TODO: implementar
+}
+
+void interface_novoRegisto();
+void funcional_carregarDados();
+
+void interface_registoUtilizador() {
+    menu_printDiv();
+    menu_printHeader("Registo de Novo Utilizador");
+
+    while (utilizadores.size == 0) {
+        menu_printInfo("ainda não tem um registo aberto, quer criar um novo registo?");
+        switch (menu_selection(&(strvec){
+            .data = (char*[]){"Criar um novo registo", "Carregar registo de ficheiro"},
+            .size = 2
+        })) {
+            case -1: return;
+            case  0: interface_novoRegisto();   break;
+            case  1: funcional_carregarDados(); break;
+        }
+    }
+
+    menu_printHeader("Registar Novo Utilizador");
+    utilizador u = newUtilizador();
+
+    printf("Introduzir Nome $ ");
+    free(u.nome);
+    u.nome = menu_readString(stdin);
+
+    char* stmp = NULL;
+    do {
+        printf("Introduzir NIF $ ");
+        if(stmp) free(stmp);
+        stmp = menu_readString(stdin);
+        if (strlen(stmp) != 9) {
+            menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
+        } else if (!utilizador_eNIFValido(stmp)) {
+            menu_printError("NIF introduzido é inválido.");
+        } else {
+            memcpy(&u.NIF, stmp, sizeof(uint8_t)*9);
+            break;
+        }
+    } while (1);
+
+    printf("Introduzir Morada $ ");
+    if(stmp) free(stmp);
+    u.adereco.morada = menu_readString(stdin);
+
+    do {
+        printf("Introduzir Código Postal (XXXX-XXX) $ ");
+        if(stmp) free(stmp);
+        stmp = menu_readString(stdin);
+        if (strlen(stmp) != 8) {
+            menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
+        } else {
+            u.adereco.codigoPostal[0] = stmp[0];
+            u.adereco.codigoPostal[1] = stmp[1];
+            u.adereco.codigoPostal[2] = stmp[2];
+            u.adereco.codigoPostal[3] = stmp[3];
+            u.adereco.codigoPostal[4] = stmp[5];
+            u.adereco.codigoPostal[5] = stmp[6];
+            u.adereco.codigoPostal[6] = stmp[7];
+            if (!morada_eCPValido(u.adereco.codigoPostal)) {
+                menu_printError("Código Postal introduzido é inválido.");
+            } else break;
+        }
+    } while (1);
+
+    do {
+        printf("Introduzir numero do cartao de cidadão $ ");
+        if(stmp) free(stmp);
+        stmp = menu_readString(stdin);
+        if (strlen(stmp) != 12) {
+            menu_printError("tem que introduzir 12 characteres, %d introduzidos.", strlen(stmp));
+        } else if (!utilizador_eCCValido(stmp)) {
+            menu_printError("CC introduzido é inválido.");
+        } else {
+            memcpy(&u.CC, stmp, sizeof(uint8_t)*12);
+            break;
+        }
+    } while (1);
+
+    u.tipo = CLIENTE;
+
+    utilizadorvec_push(&utilizadores, u);
+
+    menu_printInfo("utilizador %s (%.9s) adicionado com sucesso!", u.nome, u.NIF);
+}
+
+void interface_novoRegisto() {
     menu_printDiv();
     menu_printHeader("Novo Registo");
     if(utilizadores.size != 0) {
-        menu_printInfo("ainda tem um projeto aberto, tem a certeza que quer descartar os dados do projeto?");
+        menu_printInfo("ainda tem um registo aberto, tem a certeza que quer descartar os dados do registo?");
         switch (menu_selection(&(strvec){
-            .data = (char*[]){"Descartar projeto"},
+            .data = (char*[]){"Descartar registo"},
             .size = 1
         })) {
-            case -1: callbackvec_pop(&history)(); return;
-            case  0: break;
+            case -1: return;
         }
     }
 
@@ -175,13 +252,14 @@ void novoRegisto() {
     utilizador* diretor = & utilizadores.data[0];
     diretor->tipo = DIRETOR;
 
-    free(diretor->nome);
     printf("Introduzir Nome $ ");
+    free(diretor->nome);
     diretor->nome = menu_readString(stdin);
 
-    char* stmp;
+    char* stmp = NULL;
     do {
         printf("Introduzir NIF $ ");
+        if(stmp) free(stmp);
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
@@ -193,11 +271,46 @@ void novoRegisto() {
         }
     } while (1);
     menu_printInfo("diretor criado com sucesso!");
-    callbackvec_pop(&history)();
 }
 
-void loginMenu() {
-    callbackvec_pop(&history)();
+int loginInterfaceVecPredicate(utilizador element, char* compare) {
+    return strcmp(element.NIF, compare) == 0;
+}
+
+void interface_login() {
+    char* stmp = NULL;
+    while (1) {
+        if (utilizadorAtual != ~(size_t)0) utilizadorAtual = ~(size_t)0;
+        menu_printDiv();
+        menu_printHeader("Efetuar Login ?");
+        switch (menu_selection(&(strvec){
+            .data = (char*[]){"Efetuar login"},
+            .size = 1
+        })) {
+            case -1: return;
+        }
+        printf("Introduzir NIF $ ");
+        if(stmp) free(stmp);
+        stmp = menu_readString(stdin);
+        if (strlen(stmp) != 9) {
+            menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
+        } else if (!utilizador_eNIFValido(stmp)) {
+            menu_printError("NIF introduzido é inválido.");
+        } else {
+            size_t index = utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_predicate_t)&loginInterfaceVecPredicate, stmp);
+            if(index == 0) {
+                menu_printInfo("login efetuado como diretor.");
+                utilizadorAtual = 0;
+                interface_diretor();
+            } else if ( index != (~((size_t)0)) ) {
+                menu_printInfo("login efetuado com sucesso.");
+                utilizadorAtual = index;
+                interface_utilizador();
+            } else {
+                menu_printError("NIF não reconhecido como um utilizador.");
+            }
+        }
+    }
 }
 
 /*
@@ -231,14 +344,12 @@ void loginMenu() {
     permitindo persisti-los ao longo de diferentes utilizações.
 */
 
-void guardarDados() {
+void funcional_guardarDados() {
     // TODO: Implement
-    callbackvec_pop(&history)();
 }
 
-void carregarDados() {
+void funcional_carregarDados() {
     // TODO: Implement
-    callbackvec_pop(&history)();
 }
 
 /*
@@ -256,39 +367,35 @@ void carregarDados() {
     no relatório
 */
 
-void inicioMenu() {
-    menu_printDiv();
-    menu_printHeader("Início");
-    switch (menu_selection(&(strvec){
-        .size = 4,
-        .data = (char*[]){"Carregar dados", "Guardar dados", "Novo registo", "Log In"}
-    })) {
-        case -1: return;
-        case  0: callbackvec_push(&history, &inicioMenu); carregarDados (); return;
-        case  1: callbackvec_push(&history, &inicioMenu); guardarDados  (); return;
-        case  2: callbackvec_push(&history, &inicioMenu); novoRegisto   (); return;
-        case  3: callbackvec_push(&history, &inicioMenu); loginMenu     (); return;
+void interface_inicio() {
+    while (1) {
+        menu_printDiv();
+        menu_printHeader("Início");
+        switch (menu_selection(&(strvec){
+            .size = 5,
+            .data = (char*[]){"Log In", "Registar utilizador", "Carregar dados", "Guardar dados", "Novo registo"}
+        })) {
+            case -1: return;
+            case  0: interface_login             (); break;
+            case  1: interface_registoUtilizador (); break;
+            case  2: funcional_carregarDados     (); break;
+            case  3: funcional_guardarDados      (); break;
+            case  4: interface_novoRegisto       (); break;
+        }
     }
-}
-
-
-void start() {
-    menu_printHeader("A Iniciar");
-    inicioMenu();
-    menu_printHeader("A Terminar");
 }
 
 int main() {
     artigos      = artigovec_new();
     encomendas   = encomendavec_new();
     utilizadores = utilizadorvec_new();
-    history      = callbackvec_new();
 
-    start();
+    menu_printHeader("A Iniciar");
+    interface_inicio();
+    menu_printHeader("A Terminar");
 
     artigovec_free     (&artigos);
     encomendavec_free  (&encomendas);
     utilizadorvec_free (&utilizadores);
-    callbackvec_free   (&history);
     return 0;
 }
