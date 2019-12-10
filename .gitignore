@@ -2,3 +2,5 @@ doc
 bin/*
 .vscode
 src/test.c
+build/*
+!build/CMakeLists.txt
