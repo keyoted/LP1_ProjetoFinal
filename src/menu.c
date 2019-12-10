@@ -73,6 +73,7 @@ int menu_selection (const strvec* itens) {
         int i = -1;
         strvec_iterateFW((strvec*)itens, (strvec_predicate_t)&vecPrintItemPredicate, &i);
         while (!menu_readIntMinMax(-2, max-1, &op));
+        menu_printDiv();
     }
     return op;
 }
