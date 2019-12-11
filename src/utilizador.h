@@ -18,8 +18,8 @@ typedef struct {
     uint8_t tipo;
 } utilizador;
 
-int        utilizador_eCCValido  (uint8_t cc[12]);
-int        utilizador_eNIFValido (uint8_t NIF[9]);
+int        utilizador_eCCValido  (uint8_t* cc);
+int        utilizador_eNIFValido (uint8_t* NIF);
 utilizador newUtilizador         ();
 void       freeUtilizador        (utilizador u);
 

@@ -173,7 +173,7 @@ void interface_registoUtilizador() {
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
-        } else if (!utilizador_eNIFValido(stmp)) {
+        } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {
             menu_printError("NIF introduzido é inválido.");
         } else {
             memcpy(&u.NIF, stmp, sizeof(uint8_t)*9);
@@ -211,7 +211,7 @@ void interface_registoUtilizador() {
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 12) {
             menu_printError("tem que introduzir 12 characteres, %d introduzidos.", strlen(stmp));
-        } else if (!utilizador_eCCValido(stmp)) {
+        } else if (!utilizador_eCCValido((uint8_t*)stmp)) {
             menu_printError("CC introduzido é inválido.");
         } else {
             memcpy(&u.CC, stmp, sizeof(uint8_t)*12);
@@ -263,7 +263,7 @@ void interface_novoRegisto() {
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
-        } else if (!utilizador_eNIFValido(stmp)) {
+        } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {
             menu_printError("NIF introduzido é inválido.");
         } else {
             memcpy(&diretor->NIF, stmp, sizeof(uint8_t)*9);
@@ -274,7 +274,7 @@ void interface_novoRegisto() {
 }
 
 int loginInterfaceVecPredicate(utilizador element, char* compare) {
-    return strcmp(element.NIF, compare) == 0;
+    return strcmp((char*)element.NIF, compare) == 0;
 }
 
 void interface_login() {
@@ -294,7 +294,7 @@ void interface_login() {
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
-        } else if (!utilizador_eNIFValido(stmp)) {
+        } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {
             menu_printError("NIF introduzido é inválido.");
         } else {
             size_t index = utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_predicate_t)&loginInterfaceVecPredicate, stmp);

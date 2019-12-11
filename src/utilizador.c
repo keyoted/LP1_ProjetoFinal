@@ -1,13 +1,13 @@
 #include "utilizador.h"
 
-int utilizador_eCCValido (uint8_t cc[12]) {
+int utilizador_eCCValido (uint8_t* cc) {
     int i = 0;
     // Assegurar 9 digitos
-    for(i; i < 9; ++i)
+    for(; i < 9; ++i)
         if(!isdigit(cc[i]))
             return 0;
     // Assegurar 2 digitos alfanuméricos
-    for(i; i < 11; ++i) {
+    for(; i < 11; ++i) {
         if(isalnum(cc[i])) {
             cc[i] = (char)toupper(cc[i]);
         } else return 0;
@@ -18,10 +18,10 @@ int utilizador_eCCValido (uint8_t cc[12]) {
     return 1;
 }
 
-int utilizador_eNIFValido (uint8_t NIF[9]) {
+int utilizador_eNIFValido (uint8_t* NIF) {
     int i = 0;
     // Assegurar 9 digitos
-    for(i; i < 9; ++i)
+    for(; i < 9; ++i)
         if(!isdigit(NIF[i]))
             return 0;
 

@@ -12,6 +12,6 @@ typedef struct {
 
 morada newMorada        ();
 void   freeMorada       (morada m);
-int    morada_eCPValido (uint8_t CP[7]);
+int    morada_eCPValido (uint8_t* CP);
 
 #endif
