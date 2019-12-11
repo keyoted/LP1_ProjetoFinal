@@ -54,7 +54,7 @@ int menu_readIntMinMax (int min, int max, int* const op) {
             if(*op <= max) {
                 return 1;
             }
-            else menu_printError("[%d] não é menor ou igual a [%d].", *op, max);
+            else menu_printError("[%d] é maior que [%d].", *op, max);
         }
         else menu_printError("[%d] é menor que [%d].", *op, min);
     }
