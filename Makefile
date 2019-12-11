@@ -8,6 +8,6 @@ build_debug:
 build:
 	cd build; cmake -DCMAKE_BUILD_TYPE=Release ./; make
 
-clear:
+clean:
 	rm -rf bin/*
 	rm -rf build/CMakeFiles

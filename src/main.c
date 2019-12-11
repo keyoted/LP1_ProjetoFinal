@@ -143,6 +143,11 @@ void interface_utilizador() {
 void interface_novoRegisto();
 void funcional_carregarDados();
 
+int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t* compare) {
+    if(element.tipo == DESATIVADO) return 0;
+    return memcmp(element.NIF, compare, sizeof(uint8_t) * 9) == 0;
+}
+
 void interface_registoUtilizador() {
     menu_printDiv();
     menu_printHeader("Registo de Novo Utilizador");
@@ -176,8 +181,13 @@ void interface_registoUtilizador() {
         } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {
             menu_printError("NIF introduzido é inválido.");
         } else {
-            memcpy(&u.NIF, stmp, sizeof(uint8_t)*9);
-            break;
+            size_t index = utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_predicate_t)&utilizadorAtivadoNIFCompareVecPredicate, stmp);
+            if(index != (~((size_t)0))) {
+                menu_printError("NIF já existente no sistema.");
+            } else {
+                memcpy(&u.NIF, stmp, sizeof(uint8_t)*9);
+                break;
+            }
         }
     } while (1);
 
@@ -273,10 +283,6 @@ void interface_novoRegisto() {
     menu_printInfo("diretor criado com sucesso!");
 }
 
-int loginInterfaceVecPredicate(utilizador element, char* compare) {
-    return strcmp((char*)element.NIF, compare) == 0;
-}
-
 void interface_login() {
     char* stmp = NULL;
     while (1) {
@@ -297,7 +303,7 @@ void interface_login() {
         } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {
             menu_printError("NIF introduzido é inválido.");
         } else {
-            size_t index = utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_predicate_t)&loginInterfaceVecPredicate, stmp);
+            size_t index = utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_predicate_t)&utilizadorAtivadoNIFCompareVecPredicate, stmp);
             if(index == 0) {
                 menu_printInfo("login efetuado como diretor.");
                 utilizadorAtual = 0;
