@@ -61,8 +61,6 @@ int menu_readIntMinMax (int min, int max, int* const op) {
     return 0;
 }
 
-// itens, separados por \n
-// retorna o numero selecionado
 int menu_selection (const strvec* itens) {
     int op = -2;
     int max = itens->size;
