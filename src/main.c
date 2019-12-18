@@ -117,10 +117,13 @@
 #undef VEC_DEALOC
 #endif
 
-artigovec     artigos;
-encomendavec  encomendas;
-utilizadorvec utilizadores;
-size_t        utilizadorAtual = ~(size_t)0;
+artigovec     artigos;                          // Artigos da seção atual, que ainda não foram formalizados numa encomenda
+encomendavec  encomendas;                       // Encomendas formalizadas pelo utilizador
+utilizadorvec utilizadores;                     // Utilizadores existentes no registo, index 0 é diretor
+size_t        utilizadorAtual = ~(size_t)0;     // Index do utilizador atual
+float         multiplicadorPreco[10][10];       // Mapeia [Origem][Destino]
+uint64_t      precoPorKm_cent;                  // Preço por kilometro em centimos
+uint64_t     tabelaPrecoTipoTransporte_cent[5]; // Preço em centimos por cada tipo de transporte
 
 /*
     Gestão de utilizadores -
@@ -132,8 +135,41 @@ size_t        utilizadorAtual = ~(size_t)0;
     manipulação de clientes inclusive reativar um cliente removido.
 */
 
+void interface_alterar_tabela_precos(){
+    //TODO: Implementar
+}
+     
+void interface_alterar_tabela_distancias(){
+    //TODO: Implementar
+}
+ 
+void interface_alterar_utilizadores(){
+    //TODO: Implementar
+}
+      
+void interface_editar_estados_encomendas(){
+    //TODO: Implementar
+}
+ 
 void interface_diretor() {
-    // TODO: implemantar
+    while (1) {
+        switch (menu_selection(&(strvec){
+            .data = (char*[]){
+                "Alterar tabela de preços", 
+                "Alterar tabela de distancias",
+                "Alterar estado dos utilizadores",
+                "Alterar estados das encomendas"
+            },
+            .size = 4
+        })) {
+            case -1: return;
+            case  0: interface_alterar_tabela_precos();     break;
+            case  1: interface_alterar_tabela_distancias(); break;
+            case  2: interface_alterar_utilizadores();      break;
+            case  3: interface_editar_estados_encomendas(); break;
+        }
+    }
+    
 }
 
 void interface_utilizador() {
