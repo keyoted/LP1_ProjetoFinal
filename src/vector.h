@@ -4,7 +4,7 @@
 /**
  * @file    vector.h
  * @author  André Botelho (keyoted@gmail.com)
- * @brief   Protótipo para um vetor, um objeto que comtém um numero variável de
+ * @brief   Protótipo para um vetor, um objeto que contém um numero variável de
  *          objetos e que é capaz de alocar memoria dinâmicamente e de dealocar
  *          memória quando necessáro. Este ficheiro contém apenas um 'protótipo'
  *          que é compilado para um objeto real quando os macros VEC_TYPE;
@@ -112,7 +112,7 @@ typedef int(*VEC_FUN(_predicate_t))(VEC_TYPE, void*);
  * @param v         Vetor a que queremos adicionar espaço.
  * @returns         0 se tentou mas não conseguiu alocar memória.
  * @returns         1 se alocou memória.
- * @returns         2 se não o necessiou de alocar memoria.
+ * @returns         2 se não necessitou de alocar memoria.
  */
 int VEC_FUN(_addCell) (VEC_NAME* const v) {
     if(v->alocated == 0) {

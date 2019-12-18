@@ -1,17 +1,17 @@
 # Tarefas
 
-☐ Corrigir função de calcular os preços
+☐ Corrigir função de calcular os preços @started(19-12-18 10:31)
 ○ Função de calcular preço da encomenda @done(19-12-18 04:19)
     ○ Tabela de preços da distância @done(19-12-18 04:19)
     ○ Função que calcule o preço de cada artigo @done(19-12-18 04:19)
         ○ Tabela preço das caracteristicas @done(19-12-18 04:19)
 ☐ Guardar dados em ficheiro
 ☐ Carregar dados de ficheiro
-☐ Menu cliente
-    ☐ Editar os seus dados pessoais
-    ☐ Desativar a sua conta
+○ Menu cliente @done(19-12-18 15:55)
+    ○ Editar os seus dados pessoais @done(19-12-18 15:55)
+    ○ Desativar a sua conta @done(19-12-18 15:56)
     ☐ Efetuar uma incomenda
-        ☐ Inseriri artigos
+        ☐ Inserir artigos
     ☐ Cancelar encomenda
 ○ Menu diretor @started(19-12-18 04:19) @done(19-12-18 04:26) @lasted(7m41s)
     ☐ Alteração da tabela de preços das caracteristicas

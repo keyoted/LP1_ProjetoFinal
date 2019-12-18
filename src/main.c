@@ -2,6 +2,8 @@
 #include <string.h>
 #include <memory.h>
 
+#define UTILIZADOR_INVALIDO ~((size_t)0)
+
 #define  VEC_IMPLEMENTATION
 #include "menu.h"
 
@@ -117,13 +119,13 @@
 #undef VEC_DEALOC
 #endif
 
-artigovec     artigos;                          // Artigos da seção atual, que ainda não foram formalizados numa encomenda
-encomendavec  encomendas;                       // Encomendas formalizadas pelo utilizador
-utilizadorvec utilizadores;                     // Utilizadores existentes no registo, index 0 é diretor
-size_t        utilizadorAtual = ~(size_t)0;     // Index do utilizador atual
-float         multiplicadorPreco[10][10];       // Mapeia [Origem][Destino]
-uint64_t      precoPorKm_cent;                  // Preço por kilometro em centimos
-uint64_t     tabelaPrecoTipoTransporte_cent[5]; // Preço em centimos por cada tipo de transporte
+artigovec     artigos;                           // Artigos da seção atual, que ainda não foram formalizados numa encomenda
+encomendavec  encomendas;                        // Encomendas formalizadas pelo utilizador
+utilizadorvec utilizadores;                      // Utilizadores existentes no registo, index 0 é diretor
+size_t        utilizadorAtual = UTILIZADOR_INVALIDO;      // Index do utilizador atual
+float         multiplicadorPreco[10][10];        // Mapeia [Origem][Destino]
+uint64_t      precoPorKm_cent;                   // Preço por kilometro em centimos
+uint64_t      tabelaPrecoTipoTransporte_cent[6]; // Preço em centimos por cada tipo de transporte {Regular, urgente, volumoso, fragil, pesado, preco_por_km}
 
 /*
     Gestão de utilizadores -
@@ -134,6 +136,11 @@ uint64_t     tabelaPrecoTipoTransporte_cent[5]; // Preço em centimos por cada t
     encomendas. O Diretor pode realizar qualquer uma das operações de
     manipulação de clientes inclusive reativar um cliente removido.
 */
+
+int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t* compare) {
+    if(element.tipo == UTILIZADOR_DESATIVADO) return 0;
+    return memcmp(element.NIF, compare, sizeof(uint8_t) * 9) == 0;
+}
 
 void interface_editar_diretor() {
     menu_printDiv();
@@ -166,7 +173,59 @@ void interface_editar_diretor() {
 }
 
 void interface_editar_utilizador(size_t index) {
-    //TODO: Implementar
+    menu_printDiv();
+    menu_printHeader("Edição de Utilizador");
+    utilizador u = utilizadores.data[utilizadorAtual];
+
+    printf("Introduzir Nome (%s) $ ", u.nome);
+    free(u.nome);
+    u.nome = menu_readString(stdin);
+
+    char* stmp = NULL;
+
+    printf("Introduzir Morada (%s) $ ", u.adereco.morada);
+    if(stmp) free(stmp);
+    u.adereco.morada = menu_readString(stdin);
+
+    do {
+        printf("Introduzir Código Postal (XXXX-XXX) (%c%c%c%c-%c%c%c) $ ", u.adereco.codigoPostal[0], u.adereco.codigoPostal[1], u.adereco.codigoPostal[2], u.adereco.codigoPostal[3], u.adereco.codigoPostal[4], u.adereco.codigoPostal[5], u.adereco.codigoPostal[6]);
+        if(stmp) free(stmp);
+        stmp = menu_readString(stdin);
+        if (strlen(stmp) != 8) {
+            menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
+        } else {
+            u.adereco.codigoPostal[0] = stmp[0];
+            u.adereco.codigoPostal[1] = stmp[1];
+            u.adereco.codigoPostal[2] = stmp[2];
+            u.adereco.codigoPostal[3] = stmp[3];
+            u.adereco.codigoPostal[4] = stmp[5];
+            u.adereco.codigoPostal[5] = stmp[6];
+            u.adereco.codigoPostal[6] = stmp[7];
+            if (!morada_eCPValido(u.adereco.codigoPostal)) {
+                menu_printError("Código Postal introduzido é inválido.");
+            } else break;
+        }
+    } while (1);
+
+    do {
+        printf("Introduzir numero do cartao de cidadão (%c%c%c%c%c%c%c%c%c%c%c%c) $ ", u.CC[0], u.CC[1], u.CC[2], u.CC[3], u.CC[4], u.CC[5], u.CC[6], u.CC[7], u.CC[8], u.CC[9], u.CC[10], u.CC[11]);
+        if(stmp) free(stmp);
+        stmp = menu_readString(stdin);
+        if (strlen(stmp) != 12) {
+            menu_printError("tem que introduzir 12 characteres, %d introduzidos.", strlen(stmp));
+        } else if (!utilizador_eCCValido((uint8_t*)stmp)) {
+            menu_printError("CC introduzido é inválido.");
+        } else {
+            memcpy(&u.CC, stmp, sizeof(uint8_t)*12);
+            break;
+        }
+    } while (1);
+
+    u.tipo = UTILIZADOR_CLIENTE;
+
+    utilizadores.data[utilizadorAtual]=u;
+
+    menu_printInfo("utilizador %s (%.9s) editado com sucesso!", u.nome, u.NIF);
 }
 
 void interface_alterar_tabela_precos(){
@@ -235,8 +294,8 @@ void interface_alterar_utilizadores(){
 }
 
 void printEncomenda(encomenda u) {
-    if(u.urgencia == ENCOMENDA_REGULAR) printf("REGULAR ");
-    else printf("URGENTE ");
+    if(u.tipoTransporte && ENCOMENDA_TIPO_URGENTE) printf("URGENTE ");
+    else printf("REGULAR ");
 
     switch (u.estado){
         case ENCOMENDA_EXPEDIDA:    printf("EXPEDIDA"); break;
@@ -317,17 +376,52 @@ void interface_diretor() {
     
 }
 
-void interface_utilizador() {
-    // TODO: implementar
+void funcional_desativar_perfil(){
+    utilizadores.data[utilizadorAtual].tipo=UTILIZADOR_DESATIVADO;
+    utilizadorAtual= ~0;
+    menu_printInfo("utilizador desativado com sucesso!!");
+}
+
+void interface_criar_encomenda(){
+    
+}
+
+void interface_consultar_estados_encomendas(){
+    //TODO implementar
+}
+
+void interface_consultar_tabela_de_precos(){
+    //TODO implementar
+}
+
+void interface_cliente() {
+    while (1) {
+        if(utilizadorAtual==UTILIZADOR_INVALIDO) return;
+        menu_printDiv();
+        menu_printHeader("Menu de Cliente");
+        strvec vetorOp = (strvec){
+            .data = (char*[]){
+                "Editar perfil", 
+                "Remover perfil",
+                "Criar nova encomenda",
+                "Consultar estado de encomendas",
+                "Consultar tabela de preços"
+            },
+            .size = 5
+        };
+        switch (menu_selection(&vetorOp)) {
+            case -1: return;
+            case  0: interface_editar_utilizador(utilizadorAtual);     break;
+            case  1: funcional_desativar_perfil(); break;
+            case  2: interface_criar_encomenda();      break;
+            case  3: interface_consultar_estados_encomendas(); break;
+            case  4: interface_consultar_tabela_de_precos(); break;
+        }
+    }
 }
 
 void interface_novoRegisto();
 void funcional_carregarDados();
-
-int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t* compare) {
-    if(element.tipo == UTILIZADOR_DESATIVADO) return 0;
-    return memcmp(element.NIF, compare, sizeof(uint8_t) * 9) == 0;
-}
 
 void interface_registoUtilizador() {
     menu_printDiv();
@@ -472,7 +566,7 @@ void interface_login() {
             } else if ( index != (~((size_t)0)) ) {
                 menu_printInfo("login efetuado com sucesso.");
                 utilizadorAtual = index;
-                interface_utilizador();
+                interface_cliente();
             } else {
                 menu_printError("NIF não reconhecido como um utilizador.");
             }
