@@ -5,9 +5,9 @@ encomenda newEncomenda() {
         .artigos       = artigovec_new(),
         .origem        = newMorada(),
         .destino       = newMorada(),
-        .urgencia      = REGULAR,
+        .urgencia      = ENCOMENDA_REGULAR,
         .precoCentimos = 0,
-        .estado        = EM_ENTREGA
+        .estado        = ENCOMENDA_EM_ENTREGA
     };
 }
 

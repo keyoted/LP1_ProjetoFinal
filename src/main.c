@@ -206,42 +206,92 @@ void interface_alterar_utilizadores(){
         }
         // Option was gotten -------------------------
         if(op == -1) return;
-        while (1) {
-            menu_printDiv();
-            menu_printHeader("Selecionar operação");
-            printf("Utilizador selecionado:");
-            printUtilizador(utilizadores.data[op]);
-            int fnc = menu_selection(&(strvec){
-            .data = (char*[]){
-                "Ativar utilizador", 
-                "Desativar utilizador",
-                "Editar utilizador"},
-            .size = 3
-            });
-            if(fnc == -1) break;
-            else if(fnc == 0) { 
-                if(op==0) {menu_printError("Diretor está sempre ativo"); break; }
-                utilizadores.data[op].tipo == UTILIZADOR_CLIENTE; 
-                break; 
-            }
-            else if(fnc == 1) { 
-                if(op==0) {menu_printError("Diretor está sempre ativo"); break; }
-                utilizadores.data[op].tipo == UTILIZADOR_DESATIVADO; 
-                break; 
-            }
-            else if(fnc == 2) { 
-                if(op==0) interface_editar_diretor();
-                else interface_editar_utilizador(op); 
-                break; 
-            }
+
+        menu_printDiv();
+        menu_printHeader("Selecionar operação");
+        printf("Utilizador selecionado:");
+        printUtilizador(utilizadores.data[op]);
+        int fnc = menu_selection(&(strvec){
+        .data = (char*[]){
+            "Ativar utilizador", 
+            "Desativar utilizador",
+            "Editar utilizador"},
+        .size = 3
+        });
+        if(fnc == 0) { 
+            if(op==0) {menu_printError("Diretor está sempre ativo"); break; }
+            utilizadores.data[op].tipo == UTILIZADOR_CLIENTE; 
+        }
+        else if(fnc == 1) { 
+            if(op==0) {menu_printError("Diretor está sempre ativo"); break; }
+            utilizadores.data[op].tipo == UTILIZADOR_DESATIVADO; 
+        }
+        else if(fnc == 2) { 
+            if(op==0) interface_editar_diretor();
+            else interface_editar_utilizador(op); 
         }
         
     }
-    
+}
+
+void printEncomenda(encomenda u) {
+    if(u.urgencia == ENCOMENDA_REGULAR) printf("REGULAR ");
+    else printf("URGENTE ");
+
+    switch (u.estado){
+        case ENCOMENDA_EXPEDIDA:    printf("EXPEDIDA"); break;
+        case ENCOMENDA_CANCELADA:   printf("CANCELADA"); break;
+        case ENCOMENDA_EM_ENTREGA:  printf("EM_ENTREGA"); break;
+        case ENCOMENDA_ENTREGUE:    printf("ENTREGUE"); break;
+    }
+
+    printf(" (%c%c%c%c%c%c%c%c%c)\n", u.NIF_cliente[0], u.NIF_cliente[1], u.NIF_cliente[2], u.NIF_cliente[3], u.NIF_cliente[4], u.NIF_cliente[5], u.NIF_cliente[6], u.NIF_cliente[7], u.NIF_cliente[8]);
+}
+
+int vecPrintEncomendaPredicate (encomenda item, int* userdata) {
+    printf("   %*d   |   ", 8, ++(*userdata));
+    printEncomenda(item);
+    printf("\n");    
+    return 0;
 }
 
 void interface_editar_estados_encomendas(){
-    //TODO: Implementar
+    while (1) {
+        menu_printDiv();
+        menu_printHeader("Selecionar Encomenda Para Editar");
+        // Get option ---------------------------------
+        int op = -2;
+        int max = encomendas.size;
+        while(op == -2) {
+            printf("   Opção      |   Item\n");
+            printf("         -2   |   Reimprimir\n");
+            printf("         -1   |   Sair\n");
+            int i = -1;
+            encomendavec_iterateFW(&encomendas, (encomendavec_predicate_t)&vecPrintEncomendaPredicate, (void*)&i);
+            while (!menu_readIntMinMax(-2, max-1, &op));
+            menu_printDiv();
+        }
+        // Option was gotten -------------------------
+        if(op == -1) return;
+
+        menu_printDiv();
+        menu_printHeader("Selecionar operação");
+        printf("Utilizador selecionado:");
+        printEncomenda(encomendas.data[op]);
+        int fnc = menu_selection(&(strvec){
+            .data = (char*[]){
+                "Marcar encomenda como expedida",
+                "Marcar encomenda como cancelada",
+                "Marcar encomenda como em entrega"
+                "Marcar encomenda como entregue"
+            },
+            .size = 4
+        });
+        if(fnc == 0) encomendas.data[op].estado = ENCOMENDA_EXPEDIDA;
+        else if(fnc == 1) encomendas.data[op].estado = ENCOMENDA_CANCELADA;
+        else if(fnc == 2) encomendas.data[op].estado = ENCOMENDA_EM_ENTREGA;
+        else if(fnc == 3) encomendas.data[op].estado = ENCOMENDA_ENTREGUE;
+    }
 }
 
 void interface_diretor() {

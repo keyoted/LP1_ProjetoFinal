@@ -1,12 +1,13 @@
 #ifndef ENCOMENDA_H
 #define ENCOMENDA_H
 
-#define URGENTE 1
-#define REGULAR 0
+#define ENCOMENDA_URGENTE     1
+#define ENCOMENDA_REGULAR     0
 
-#define EXPEDIDA    0
-#define CANCELADA   1
-#define EM_ENTREGA  2
+#define ENCOMENDA_EXPEDIDA    0
+#define ENCOMENDA_CANCELADA   1
+#define ENCOMENDA_EM_ENTREGA  2
+#define ENCOMENDA_ENTREGUE    3
 
 #include "stdint.h"
 #include "morada.h"
