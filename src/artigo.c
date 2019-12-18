@@ -21,6 +21,7 @@ void freeArtigo(artigo a) {
     free(a.tratamentoEspecial);
 }
 
+// TODO: Corrigir
 uint64_t artigo_precoTipoTransporte (artigo a, uint64_t tabelaPrecos[5]) {
     if(artigo_ePesado(a))               a.tipoDeTransporte = (a.tipoDeTransporte || ARTIGO_PESADO)   && (~ARTIGO_REGULAR);
     if(artigo_eVolumoso(a))             a.tipoDeTransporte = (a.tipoDeTransporte || ARTIGO_VOLUMOSO) && (~ARTIGO_REGULAR);

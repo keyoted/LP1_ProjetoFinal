@@ -17,6 +17,7 @@ void freeEncomenda(encomenda e) {
     freeMorada(e.destino);
 }
 
+// TODO: Corrigir
 uint64_t encomenda_CalcPreco (encomenda e, uint64_t precoKM, float multiplicadorPreco[10][10]) {
     // Σ(tipo_transporte)
     uint64_t soma = 0;
