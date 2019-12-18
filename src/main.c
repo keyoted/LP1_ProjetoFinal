@@ -135,24 +135,119 @@ uint64_t     tabelaPrecoTipoTransporte_cent[5]; // Preço em centimos por cada t
     manipulação de clientes inclusive reativar um cliente removido.
 */
 
+void interface_editar_diretor() {
+    menu_printDiv();
+    menu_printHeader("Editar Diretor");
+
+    freeUtilizador(utilizadores.data[0]);
+    utilizadores.data[0] = newUtilizador();
+    utilizador* diretor = & utilizadores.data[0];
+    diretor->tipo = UTILIZADOR_DIRETOR;
+
+    printf("Introduzir Nome $ ");
+    free(diretor->nome);
+    diretor->nome = menu_readString(stdin);
+
+    char* stmp = NULL;
+    do {
+        printf("Introduzir NIF $ ");
+        if(stmp) free(stmp);
+        stmp = menu_readString(stdin);
+        if (strlen(stmp) != 9) {
+            menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
+        } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {
+            menu_printError("NIF introduzido é inválido.");
+        } else {
+            memcpy(&diretor->NIF, stmp, sizeof(uint8_t)*9);
+            break;
+        }
+    } while (1);
+    menu_printInfo("diretor editado com sucesso!");
+}
+
+void interface_editar_utilizador(size_t index) {
+    //TODO: Implementar
+}
+
 void interface_alterar_tabela_precos(){
     //TODO: Implementar
 }
-     
+
 void interface_alterar_tabela_distancias(){
     //TODO: Implementar
 }
- 
-void interface_alterar_utilizadores(){
-    //TODO: Implementar
+
+void printUtilizador (utilizador u) {
+    printf("%s (%c%c%c%c%c%c%c%c%c)", u.nome, u.NIF[0], u.NIF[1], u.NIF[2], u.NIF[3], u.NIF[4], u.NIF[5], u.NIF[6], u.NIF[7], u.NIF[8]);
 }
-      
+
+int vecPrintUserPredicate (utilizador item, int* userdata) {
+    printf("   %*d   |   ", 8, ++(*userdata));
+    printUtilizador(item);
+    printf("\n");    
+    return 0;
+}
+
+void interface_alterar_utilizadores(){
+    while (1) {
+        menu_printDiv();
+        menu_printHeader("Selecionar Utilizador Para Editar");
+        // Get option ---------------------------------
+        int op = -2;
+        int max = utilizadores.size;
+        while(op == -2) {
+            printf("   Opção      |   Item\n");
+            printf("         -2   |   Reimprimir\n");
+            printf("         -1   |   Sair\n");
+            int i = -1;
+            utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_predicate_t)&vecPrintUserPredicate, (void*)&i);
+            while (!menu_readIntMinMax(-2, max-1, &op));
+            menu_printDiv();
+        }
+        // Option was gotten -------------------------
+        if(op == -1) return;
+        while (1) {
+            menu_printDiv();
+            menu_printHeader("Selecionar operação");
+            printf("Utilizador selecionado:");
+            printUtilizador(utilizadores.data[op]);
+            int fnc = menu_selection(&(strvec){
+            .data = (char*[]){
+                "Ativar utilizador", 
+                "Desativar utilizador",
+                "Editar utilizador"},
+            .size = 3
+            });
+            if(fnc == -1) break;
+            else if(fnc == 0) { 
+                if(op==0) {menu_printError("Diretor está sempre ativo"); break; }
+                utilizadores.data[op].tipo == UTILIZADOR_CLIENTE; 
+                break; 
+            }
+            else if(fnc == 1) { 
+                if(op==0) {menu_printError("Diretor está sempre ativo"); break; }
+                utilizadores.data[op].tipo == UTILIZADOR_DESATIVADO; 
+                break; 
+            }
+            else if(fnc == 2) { 
+                if(op==0) interface_editar_diretor();
+                else interface_editar_utilizador(op); 
+                break; 
+            }
+        }
+        
+    }
+    
+}
+
 void interface_editar_estados_encomendas(){
     //TODO: Implementar
 }
- 
+
 void interface_diretor() {
     while (1) {
+        menu_printDiv();
+        menu_printHeader("Menu de Diretor");
         switch (menu_selection(&(strvec){
             .data = (char*[]){
                 "Alterar tabela de preços", 
@@ -180,7 +275,7 @@ void interface_novoRegisto();
 void funcional_carregarDados();
 
 int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t* compare) {
-    if(element.tipo == DESATIVADO) return 0;
+    if(element.tipo == UTILIZADOR_DESATIVADO) return 0;
     return memcmp(element.NIF, compare, sizeof(uint8_t) * 9) == 0;
 }
 
@@ -265,7 +360,7 @@ void interface_registoUtilizador() {
         }
     } while (1);
 
-    u.tipo = CLIENTE;
+    u.tipo = UTILIZADOR_CLIENTE;
 
     utilizadorvec_push(&utilizadores, u);
 
@@ -295,27 +390,7 @@ void interface_novoRegisto() {
     menu_printHeader("Registar Novo Diretor");
 
     utilizadorvec_push(&utilizadores, newUtilizador());
-    utilizador* diretor = & utilizadores.data[0];
-    diretor->tipo = DIRETOR;
-
-    printf("Introduzir Nome $ ");
-    free(diretor->nome);
-    diretor->nome = menu_readString(stdin);
-
-    char* stmp = NULL;
-    do {
-        printf("Introduzir NIF $ ");
-        if(stmp) free(stmp);
-        stmp = menu_readString(stdin);
-        if (strlen(stmp) != 9) {
-            menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
-        } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {
-            menu_printError("NIF introduzido é inválido.");
-        } else {
-            memcpy(&diretor->NIF, stmp, sizeof(uint8_t)*9);
-            break;
-        }
-    } while (1);
+    interface_editar_diretor();
     menu_printInfo("diretor criado com sucesso!");
 }
 

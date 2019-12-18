@@ -1,9 +1,9 @@
 #ifndef UTILIZADOR_H
 #define UTILIZADOR_H
 
-#define CLIENTE     0
-#define DIRETOR     1
-#define DESATIVADO  2
+#define UTILIZADOR_CLIENTE     0
+#define UTILIZADOR_DIRETOR     1
+#define UTILIZADOR_DESATIVADO  2
 
 #include <stdint.h>
 #include <stdlib.h>
