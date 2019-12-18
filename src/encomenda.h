@@ -24,7 +24,7 @@
 #endif
 
 typedef struct {
-    artigovec artigos;
+    artigovec  artigos;
     morada     origem;
     morada     destino;
     uint8_t    urgencia;
@@ -33,8 +33,8 @@ typedef struct {
     uint8_t    estado;
 } encomenda;
 
-encomenda newEncomenda       ();
-void      freeEncomenda      (encomenda e);
-uint64_t  encomendaCalcPreco (encomenda e);
+encomenda newEncomenda        ();
+void      freeEncomenda       (encomenda e);
+uint64_t  encomenda_CalcPreco (encomenda e, uint64_t precoKM, float multiplicadorPreco[10][10]);
 
 #endif
