@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "utilities.h"
+#include "encomenda.h"
+#include "utilizador.h"
 
 // lê op entre [min, max]
 // retorna 0 em erro, 1 de outro modo
@@ -29,5 +31,7 @@ void  menu_printDiv             ();
 void  menu_printError           (char* err, ...);
 void  menu_printInfo            (char* info, ...);
 void  menu_printHeader          (char* header);
+void  menu_printEncomendaBrief  (encomenda u);
+void  menu_printUtilizador      (utilizador u);
 
 #endif

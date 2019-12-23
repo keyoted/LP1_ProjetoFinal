@@ -16,6 +16,6 @@ artigo newArtigo() {
 }
 
 void freeArtigo(artigo a) {
-    free(a.nome);
+    if(a.nome)               free(a.nome);
     if(a.tratamentoEspecial) free(a.tratamentoEspecial);
 }

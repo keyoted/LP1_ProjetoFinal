@@ -119,13 +119,12 @@
 #undef VEC_DEALOC
 #endif
 
-artigovec     artigos;                           // Artigos da seção atual, que ainda não foram formalizados numa encomenda
-encomendavec  encomendas;                        // Encomendas formalizadas pelo utilizador
-utilizadorvec utilizadores;                      // Utilizadores existentes no registo, index 0 é diretor
-size_t        utilizadorAtual = UTILIZADOR_INVALIDO;      // Index do utilizador atual
-float         multiplicadorPreco[10][10];        // Mapeia [Origem][Destino]
-uint64_t      precoPorKm_cent;                   // Preço por kilometro em centimos
-uint64_t      tabelaPrecoTipoTransporte_cent[6]; // Preço em centimos por cada tipo de transporte {Regular, urgente, volumoso, fragil, pesado, preco_por_km}
+artigovec      artigos;                                 // Artigos da seção atual, que ainda não foram formalizados numa encomenda
+encomendavec   encomendas;                              // Encomendas formalizadas
+utilizadorvec  utilizadores;                            // Utilizadores existentes no registo, index 0 é diretor
+size_t         utilizadorAtual = UTILIZADOR_INVALIDO;   // Index do utilizador atual
+float          mult_CP[10][10];                         // Mapeia [Origem][Destino]
+precos_tt_cent tabelaPrecos;                            // Preço em centimos por cada tipo de transporte
 
 /*
     Gestão de utilizadores -
@@ -236,13 +235,9 @@ void interface_alterar_tabela_distancias(){
     //TODO: Implementar
 }
 
-void printUtilizador (utilizador u) {
-    printf("%s (%c%c%c%c%c%c%c%c%c)", u.nome, u.NIF[0], u.NIF[1], u.NIF[2], u.NIF[3], u.NIF[4], u.NIF[5], u.NIF[6], u.NIF[7], u.NIF[8]);
-}
-
 int vecPrintUserPredicate (utilizador item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
-    printUtilizador(item);
+    menu_printUtilizador(item);
     printf("\n");    
     return 0;
 }
@@ -269,7 +264,7 @@ void interface_alterar_utilizadores(){
         menu_printDiv();
         menu_printHeader("Selecionar operação");
         printf("Utilizador selecionado:");
-        printUtilizador(utilizadores.data[op]);
+        menu_printUtilizador(utilizadores.data[op]);
         int fnc = menu_selection(&(strvec){
         .data = (char*[]){
             "Ativar utilizador", 
@@ -293,23 +288,9 @@ void interface_alterar_utilizadores(){
     }
 }
 
-void printEncomenda(encomenda u) {
-    if(u.tipoTransporte && ENCOMENDA_TIPO_URGENTE) printf("URGENTE ");
-    else printf("REGULAR ");
-
-    switch (u.estado){
-        case ENCOMENDA_EXPEDIDA:    printf("EXPEDIDA"); break;
-        case ENCOMENDA_CANCELADA:   printf("CANCELADA"); break;
-        case ENCOMENDA_EM_ENTREGA:  printf("EM_ENTREGA"); break;
-        case ENCOMENDA_ENTREGUE:    printf("ENTREGUE"); break;
-    }
-
-    printf(" (%c%c%c%c%c%c%c%c%c)\n", u.NIF_cliente[0], u.NIF_cliente[1], u.NIF_cliente[2], u.NIF_cliente[3], u.NIF_cliente[4], u.NIF_cliente[5], u.NIF_cliente[6], u.NIF_cliente[7], u.NIF_cliente[8]);
-}
-
 int vecPrintEncomendaPredicate (encomenda item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
-    printEncomenda(item);
+    menu_printEncomendaBrief(item);
     printf("\n");    
     return 0;
 }
@@ -335,8 +316,8 @@ void interface_editar_estados_encomendas(){
 
         menu_printDiv();
         menu_printHeader("Selecionar operação");
-        printf("Utilizador selecionado:");
-        printEncomenda(encomendas.data[op]);
+        printf("Encomenda selecionada:");
+        menu_printEncomendaBrief(encomendas.data[op]);
         int fnc = menu_selection(&(strvec){
             .data = (char*[]){
                 "Marcar encomenda como expedida",
@@ -346,10 +327,10 @@ void interface_editar_estados_encomendas(){
             },
             .size = 4
         });
-        if(fnc == 0) encomendas.data[op].estado = ENCOMENDA_EXPEDIDA;
-        else if(fnc == 1) encomendas.data[op].estado = ENCOMENDA_CANCELADA;
-        else if(fnc == 2) encomendas.data[op].estado = ENCOMENDA_EM_ENTREGA;
-        else if(fnc == 3) encomendas.data[op].estado = ENCOMENDA_ENTREGUE;
+        if(fnc == 0)      encomenda_ESTADO_EXPEDIDA   ( &(encomendas.data[op]) );
+        else if(fnc == 1) encomenda_ESTADO_CANCELADA  ( &(encomendas.data[op]) );
+        else if(fnc == 2) encomenda_ESTADO_EM_ENTREGA ( &(encomendas.data[op]) );
+        else if(fnc == 3) encomenda_ESTADO_ENTREGUE   ( &(encomendas.data[op]) );
     }
 }
 

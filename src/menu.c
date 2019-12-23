@@ -106,3 +106,21 @@ void  menu_printHeader (char* header) {
     printf("%.66s", header);
     printf(" ***\n");
 };
+
+void menu_printEncomendaBrief(encomenda u) {
+    if(u.tipoEstado & ENCOMENDA_TIPO_URGENTE) printf("URGENTE ");
+    else printf("REGULAR ");
+
+    switch (u.tipoEstado & 0xF0){
+        case ENCOMENDA_ESTADO_EXPEDIDA:    printf("EXPEDIDA"); break;
+        case ENCOMENDA_ESTADO_CANCELADA:   printf("CANCELADA"); break;
+        case ENCOMENDA_ESTADO_EM_ENTREGA:  printf("EM_ENTREGA"); break;
+        case ENCOMENDA_ESTADO_ENTREGUE:    printf("ENTREGUE"); break;
+    }
+
+    printf(" (%c%c%c%c%c%c%c%c%c)\n", u.NIF_cliente[0], u.NIF_cliente[1], u.NIF_cliente[2], u.NIF_cliente[3], u.NIF_cliente[4], u.NIF_cliente[5], u.NIF_cliente[6], u.NIF_cliente[7], u.NIF_cliente[8]);
+}
+
+void menu_printUtilizador (utilizador u) {
+    printf("%s (%c%c%c%c%c%c%c%c%c)", u.nome, u.NIF[0], u.NIF[1], u.NIF[2], u.NIF[3], u.NIF[4], u.NIF[5], u.NIF[6], u.NIF[7], u.NIF[8]);
+}

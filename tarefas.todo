@@ -1,6 +1,6 @@
 # Tarefas
 
-☐ Corrigir função de calcular os preços @started(19-12-18 10:31)
+○ Corrigir função de calcular os preços @started(19-12-18 10:31) @done(19-12-23 05:15) @lasted(4d18h44m51s)
 ○ Função de calcular preço da encomenda @done(19-12-18 04:19)
     ○ Tabela de preços da distância @done(19-12-18 04:19)
     ○ Função que calcule o preço de cada artigo @done(19-12-18 04:19)
@@ -13,8 +13,10 @@
     ☐ Efetuar uma incomenda
         ☐ Inserir artigos
     ☐ Cancelar encomenda
+    ☐ Imprimir recibo
 ○ Menu diretor @started(19-12-18 04:19) @done(19-12-18 04:26) @lasted(7m41s)
     ☐ Alteração da tabela de preços das caracteristicas
     ☐ Alteração da tabela de preços das distâncias
     ○ Editar utilizadores @started(19-12-18 04:29) @done(19-12-18 05:09) @lasted(40m16s)
     ○ Editar estado de encomenda ( EXPEDIDA ) @started(19-12-18 05:11) @done(19-12-18 05:27) @lasted(16m50s)
+    ☐ Imprimir recibo

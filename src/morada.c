@@ -15,3 +15,9 @@ int morada_eCPValido (uint8_t* CP) {
 
     return 1;
 }
+
+morada morada_dup (morada m) {
+    morada mdup = m;
+    mdup.morada = strdup(m.morada);
+    return mdup;
+}
