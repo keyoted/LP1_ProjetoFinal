@@ -108,6 +108,7 @@ encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, float 
     memcpy(e.NIF_cliente, org.NIF, 9);
     e.origem = morada_dup(org.adereco);
     e.precos = precos;
+    e.precos.MULT_CP = mult_CP[e.origem.codigoPostal[0]][e.destino.codigoPostal[0]];
     e.tipoEstado = ENCOMENDA_ESTADO_EM_ENTREGA;
     encomenda_TIPO_VOLUMOSO(&e);
     encomenda_TIPO_FRAGIL(&e);
