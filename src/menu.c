@@ -23,7 +23,7 @@ char* menu_readString (FILE* fp) {
 
     // Trim
     size_t start;
-    size_t end = size - 1;
+    size_t end;
     for (start = 0;    start < size          && isspace(str[start]);  start++);
     for (end = size-2; (end != ~((size_t)0)) && isspace(str[end]);    end--);
     str[end+1] = '\0';
@@ -119,7 +119,7 @@ void menu_printEncomendaBrief(encomenda u) {
     }
 
     printf(" (%c%c%c%c%c%c%c%c%c) ", u.NIF_cliente[0], u.NIF_cliente[1], u.NIF_cliente[2], u.NIF_cliente[3], u.NIF_cliente[4], u.NIF_cliente[5], u.NIF_cliente[6], u.NIF_cliente[7], u.NIF_cliente[8]);
-    printf("%luc\n", encomenda_CalcPreco(&u));
+    printf("%luc", encomenda_CalcPreco(&u));
 }
 
 void menu_printUtilizador (utilizador u) {
@@ -129,9 +129,9 @@ void menu_printUtilizador (utilizador u) {
 void menu_printArtigo (artigo a) {
     // nome gramas mm2 tratamento especial
     if(a.tratamentoEspecial) {
-        printf("%s  -   %lug   %lumm2   * %s", a.nome, a.peso_gramas, a.milimetrosCubicos, a.tratamentoEspecial);
+        printf("%s  -   %lug   %lumm2   * %s", a.nome, a.peso_gramas, a.cmCubicos, a.tratamentoEspecial);
     }
-    else printf("%s  -   %lug   %lumm2   * N/A", a.nome, a.peso_gramas, a.milimetrosCubicos);
+    else printf("%s  -   %lug   %lumm2   * N/A", a.nome, a.peso_gramas, a.cmCubicos);
 }
 
 void menu_printEncomendaDetail (encomenda e) {
@@ -157,9 +157,9 @@ void menu_printEncomendaDetail (encomenda e) {
         printf("* %*lu |", 8, i+1);
         printf(" %*.*s |", 29, 29, e.artigos.data[i].nome);
         printf(" %*lu |", 8, e.artigos.data[i].peso_gramas);
-        printf(" %*lu |", 8, e.artigos.data[i].milimetrosCubicos);
+        printf(" %*lu |", 8, e.artigos.data[i].cmCubicos);
         pt += e.artigos.data[i].peso_gramas;
-        vt += e.artigos.data[i].milimetrosCubicos;
+        vt += e.artigos.data[i].cmCubicos;
         printf(" %*lu |", 8, pt);
         printf(" %*lu |", 8, vt);
         if(!e.artigos.data[i].tratamentoEspecial) printf(" N/A");

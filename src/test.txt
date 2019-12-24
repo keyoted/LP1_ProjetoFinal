@@ -35,6 +35,33 @@ Rua Origem
 2323-232
 20
 1
+# Criar nova encomenda
+2
+# Criar novo artigo
+0
+Art 3
+
+100
+100
+# Criar novo artigo
+1
+Art 3
+
+2000
+2000
+# Criar novo artigo
+2
+Art 4
+
+30000
+30000
+# Formalizar encomenda
+4
+0
+Rua Origem
+2323-232
+20
+1
 # Imprimir encomendas
 5
 # Imprimir recibo de encomenda

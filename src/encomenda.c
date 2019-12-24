@@ -20,12 +20,11 @@ int encomenda_ePesado(uint64_t a) {
 }
 
 int encomenda_eVolumoso(uint64_t a) {
-    return a > (500 * 500 * 500);
+    return a > (50 * 50 * 50);
 }
 
 uint64_t encomenda_CalcPreco (encomenda* e) {
     uint64_t precoFinal;
-
     // Soma dos tipos de transporte
     // ENCOMENDA_TIPO_URGENTE
     if(e->tipoEstado & ENCOMENDA_TIPO_URGENTE) precoFinal = e->precos.URGENTE;
@@ -80,7 +79,7 @@ void encomenda_TIPO_PESADO (encomenda* e) {
 void encomenda_TIPO_VOLUMOSO (encomenda* e) {
     uint64_t volumeAcumulado = 0;
     for (size_t i = 0; i < e->artigos.size; i++) {
-        volumeAcumulado += e->artigos.data[i].milimetrosCubicos;
+        volumeAcumulado += e->artigos.data[i].cmCubicos;
     }
     if(encomenda_eVolumoso(volumeAcumulado)) {
         e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_VOLUMOSO;

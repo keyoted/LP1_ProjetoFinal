@@ -6,9 +6,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <memory.h>
+#include <math.h>
+#ifndef __STDC_IEC_559__
+_Static_assert(0, "Float may not be 32bits");
+#endif
 
 #define UTILIZADOR_INVALIDO ~((size_t)0)
-
 #define  VEC_IMPLEMENTATION
 #include "menu.h"
 
@@ -141,8 +144,26 @@ precos_tt_cent tabelaPrecos;                            // Preço em centimos po
     manipulação de clientes inclusive reativar um cliente removido.
 */
 
+void funcional_consultar_estados_encomendas() {
+    if(utilizadorAtual == 0) {
+        for(size_t i = 0; i < encomendas.size; ++i) {
+            printf("   %*lu   |   ", 8, i);
+            menu_printEncomendaBrief(encomendas.data[i]);
+            printf("\n");
+        }
+    } else {
+        for(size_t i = 0; i < encomendas.size; ++i) {
+            if( memcmp(utilizadores.data[utilizadorAtual].NIF, encomendas.data[i].NIF_cliente, 9) == 0 ) {
+                printf("   %*lu   |   ", 8, i);
+                menu_printEncomendaBrief(encomendas.data[i]);
+                printf("\n");
+            }
+        }
+    }
+}
+
 void interface_imprimir_recibo() {
-    menu_printHeader("Selecionar Encomenda Para Editar");
+    menu_printHeader("Selecionar Encomenda Para Imprimir");
     // Get option ---------------------------------
     int op = -2;
     int max = encomendas.size;
@@ -150,22 +171,7 @@ void interface_imprimir_recibo() {
         printf("   Opção      |   Item\n");
         printf("         -2   |   Reimprimir\n");
         printf("         -1   |   Sair\n");
-        if(utilizadorAtual == 0) {
-            for(size_t i = 0; i < encomendas.size; ++i) {
-                printf("   %*lu   |   ", 8, i);
-                menu_printEncomendaBrief(encomendas.data[i]);
-                printf("\n");
-            }
-        } else {
-            for(size_t i = 0; i < encomendas.size; ++i) {
-                if( memcmp(utilizadores.data[utilizadorAtual].NIF, encomendas.data[i].NIF_cliente, 9) == 0 ) {
-                    printf("   %*lu   |   ", 8, i);
-                    menu_printEncomendaBrief(encomendas.data[i]);
-                    printf("\n");
-                }
-            }
-        }
-
+        funcional_consultar_estados_encomendas();
         while (!menu_readIntMinMax(-2, max-1, &op));
         menu_printDiv();
     }
@@ -412,7 +418,6 @@ void interface_diretor() {
             case  4: interface_imprimir_recibo(); break;
         }
     }
-
 }
 
 void funcional_desativar_perfil(){
@@ -559,20 +564,36 @@ void interface_criar_encomenda() {
             else { a->peso_gramas = tmp; break; }
         }
         while (1) {
-            printf("Introduzir Volume do Artigo (em milimetros cúbicos) (%lu) $ ", a->milimetrosCubicos);
+            printf("Introduzir Volume do Artigo (em centimetros cúbicos) (%lu) $ ", a->cmCubicos);
             menu_readInt(&tmp);
             if(tmp < 0) menu_printError("artigo não pode ter volume negativo");
-            else { a->milimetrosCubicos = tmp; break; }
+            else { a->cmCubicos = tmp; break; }
         }
     }
 }
 
-void interface_consultar_estados_encomendas() {
-    //TODO implementar
+void interface_consultar_tabela_de_precos() {
+    menu_printDiv();
+    menu_printHeader("Tabela de Preços");
+    printf("ORIGEM DESTINO  0           1           2           3           4           5           6           7           8           9\n");
+    for (int origem = 0; origem < 10; ++origem) {
+        printf("  %d  |        ", origem);
+        for (int destino = 0; destino < 10; ++destino) {
+            printf("  %07.4f  |", mult_CP[origem][destino]);
+        }
+        printf("\n");
+    }
+    menu_printHeader("Tabela de Preços Base");
+    printf("Preço regular:  %luc\n", tabelaPrecos.REGULAR );
+    printf("Preço urgente:  %luc\n", tabelaPrecos.URGENTE );
+    printf("Preço volumoso: %luc\n", tabelaPrecos.VOLUMOSO);
+    printf("Preço fragil:   %luc\n", tabelaPrecos.FRAGIL  );
+    printf("Preço pesado:   %luc\n", tabelaPrecos.PESADO  );
+    printf("Preço por Km:   %luc\n", tabelaPrecos.POR_KM  );
 }
 
-void interface_consultar_tabela_de_precos() {
-    //TODO implementar
+void interface_editar_encomendas() {
+    // TODO: implementar
 }
 
 void interface_cliente() {
@@ -587,18 +608,20 @@ void interface_cliente() {
                 "Criar nova encomenda",
                 "Consultar estado de encomendas",
                 "Consultar tabela de preços",
-                "Imprimir recibo de encomenda"
+                "Imprimir recibo de encomenda",
+                "Editar encomendas"
             },
-            .size = 6
+            .size = 7
         };
         switch (menu_selection(&vetorOp)) {
             case -1: return;
             case  0: interface_editar_utilizador(utilizadorAtual);     break;
             case  1: funcional_desativar_perfil(); break;
             case  2: interface_criar_encomenda();      break;
-            case  3: interface_consultar_estados_encomendas(); break;
+            case  3: menu_printDiv(); menu_printHeader("Encomendas"); funcional_consultar_estados_encomendas(); break;
             case  4: interface_consultar_tabela_de_precos(); break;
             case  5: interface_imprimir_recibo(); break;
+            case  6: interface_editar_encomendas(); break;
         }
     }
 }
