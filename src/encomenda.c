@@ -41,7 +41,7 @@ uint64_t encomenda_CalcPreco (encomenda* e) {
 }
 
 void encomenda_TIPO_URGENTE (encomenda* e) {
-    e->tipoEstado = e->tipoEstado | (~ENCOMENDA_ESTADO_ENTREGUE);
+    e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_URGENTE;
 }
 
 void encomenda_TIPO_FRAGIL (encomenda* e) {

@@ -10,7 +10,7 @@
 #define ENCOMENDA_ESTADO_ENTREGUE    ( (uint8_t)  64)
 #define ENCOMENDA_ESTADO_CANCELADA   ( (uint8_t) 128)
 
-#include "stdint.h"
+#include <stdint.h>
 #include "morada.h"
 #include "artigo.h"
 #include "utilizador.h"

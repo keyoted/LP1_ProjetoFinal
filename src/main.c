@@ -136,6 +136,76 @@ precos_tt_cent tabelaPrecos;                            // Preço em centimos po
     manipulação de clientes inclusive reativar um cliente removido.
 */
 
+void interface_imprimir_recibo() {
+    menu_printHeader("Selecionar Encomenda Para Editar");
+    // Get option ---------------------------------
+    int op = -2;
+    int max = encomendas.size;
+    while(op == -2) {
+        printf("   Opção      |   Item\n");
+        printf("         -2   |   Reimprimir\n");
+        printf("         -1   |   Sair\n");
+        // TODO: Fix????? Not printing anything for client?
+        if(utilizadorAtual == 0) {
+            for(size_t i = 0; i < 0; ++i) {
+                menu_printEncomendaBrief(encomendas.data[i]);
+            }
+        } else {
+            for(size_t i = 0; i < 0; ++i) {
+                if( memcmp(utilizadores.data[utilizadorAtual].NIF, encomendas.data[i].NIF_cliente, 9) == 0 ) {
+                    menu_printEncomendaBrief(encomendas.data[i]);
+                }
+            }
+        }
+        
+        while (!menu_readIntMinMax(-2, max-1, &op));
+        menu_printDiv();
+    }
+    // Option was gotten -------------------------
+    if(op == -1) return;
+    if((utilizadorAtual != 0) && (memcmp(utilizadores.data[utilizadorAtual].NIF, encomendas.data[op].NIF_cliente, 9) != 0) ) {
+        menu_printError("não tem premissões para imprimir este recibo!");
+        return;
+    }
+    menu_printEncomendaDetail(encomendas.data[op]);
+}
+
+morada interface_editar_morada(morada* morg) {
+    morada m;
+    if(morg!=NULL) m = *morg;
+    else           m = newMorada();
+
+    if(morg) printf("Introduzir Morada (%s) $ ", m.morada);
+    else     printf("Introduzir Morada $ ");
+
+    if(m.morada) free(m.morada);
+    m.morada = menu_readString(stdin);
+
+    char* stmp = NULL;
+    do {
+        if(morg!=NULL) printf("Introduzir Código Postal (XXXX-XXX) (%c%c%c%c-%c%c%c) $ ", m.codigoPostal[0], m.codigoPostal[1], m.codigoPostal[2], m.codigoPostal[3], m.codigoPostal[4], m.codigoPostal[5], m.codigoPostal[6]);
+        else           printf("Introduzir Código Postal (XXXX-XXX) $ ");
+        
+        if(stmp) free(stmp);
+        stmp = menu_readString(stdin);
+        
+        if (strlen(stmp) != 8) {
+            menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
+        } else {
+            m.codigoPostal[0] = stmp[0];
+            m.codigoPostal[1] = stmp[1];
+            m.codigoPostal[2] = stmp[2];
+            m.codigoPostal[3] = stmp[3];
+            m.codigoPostal[4] = stmp[5];
+            m.codigoPostal[5] = stmp[6];
+            m.codigoPostal[6] = stmp[7];
+            if (!morada_eCPValido(m.codigoPostal)) {
+                menu_printError("Código Postal introduzido é inválido.");
+            } else break;
+        }
+    } while (1);
+}
+
 int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t* compare) {
     if(element.tipo == UTILIZADOR_DESATIVADO) return 0;
     return memcmp(element.NIF, compare, sizeof(uint8_t) * 9) == 0;
@@ -180,32 +250,9 @@ void interface_editar_utilizador(size_t index) {
     free(u.nome);
     u.nome = menu_readString(stdin);
 
+    u.adereco = interface_editar_morada(&(u.adereco));
+
     char* stmp = NULL;
-
-    printf("Introduzir Morada (%s) $ ", u.adereco.morada);
-    if(stmp) free(stmp);
-    u.adereco.morada = menu_readString(stdin);
-
-    do {
-        printf("Introduzir Código Postal (XXXX-XXX) (%c%c%c%c-%c%c%c) $ ", u.adereco.codigoPostal[0], u.adereco.codigoPostal[1], u.adereco.codigoPostal[2], u.adereco.codigoPostal[3], u.adereco.codigoPostal[4], u.adereco.codigoPostal[5], u.adereco.codigoPostal[6]);
-        if(stmp) free(stmp);
-        stmp = menu_readString(stdin);
-        if (strlen(stmp) != 8) {
-            menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
-        } else {
-            u.adereco.codigoPostal[0] = stmp[0];
-            u.adereco.codigoPostal[1] = stmp[1];
-            u.adereco.codigoPostal[2] = stmp[2];
-            u.adereco.codigoPostal[3] = stmp[3];
-            u.adereco.codigoPostal[4] = stmp[5];
-            u.adereco.codigoPostal[5] = stmp[6];
-            u.adereco.codigoPostal[6] = stmp[7];
-            if (!morada_eCPValido(u.adereco.codigoPostal)) {
-                menu_printError("Código Postal introduzido é inválido.");
-            } else break;
-        }
-    } while (1);
-
     do {
         printf("Introduzir numero do cartao de cidadão (%c%c%c%c%c%c%c%c%c%c%c%c) $ ", u.CC[0], u.CC[1], u.CC[2], u.CC[3], u.CC[4], u.CC[5], u.CC[6], u.CC[7], u.CC[8], u.CC[9], u.CC[10], u.CC[11]);
         if(stmp) free(stmp);
@@ -343,15 +390,17 @@ void interface_diretor() {
                 "Alterar tabela de preços", 
                 "Alterar tabela de distancias",
                 "Alterar estado dos utilizadores",
-                "Alterar estados das encomendas"
+                "Alterar estados das encomendas",
+                "Imprimir recibo de encomenda"
             },
-            .size = 4
+            .size = 5
         })) {
             case -1: return;
             case  0: interface_alterar_tabela_precos();     break;
             case  1: interface_alterar_tabela_distancias(); break;
             case  2: interface_alterar_utilizadores();      break;
             case  3: interface_editar_estados_encomendas(); break;
+            case  4: interface_imprimir_recibo(); break;
         }
     }
     
@@ -363,15 +412,161 @@ void funcional_desativar_perfil(){
     menu_printInfo("utilizador desativado com sucesso!!");
 }
 
-void interface_criar_encomenda(){
-    
+void interface_formalizar_encomenda() {
+    menu_printDiv();
+    menu_printHeader("Formalizar Encomenda");
+    if(artigos.size == 0) {
+        menu_printError("encomendas sem artigos são impossiveis");
+        return;
+    }
+
+    menu_printInfo("utilizar a sua morada como morada de entrega?");
+    morada dest;
+    switch (menu_selection(&(strvec){
+        .data = (char*[]){
+            "Utilizar a minha morada como morada de entrega",
+            "Definir outra morada como morada de entrega"
+        },
+        .size = 2
+    })) {
+        case -1: return;
+        case  0: dest = morada_dup(utilizadores.data[utilizadorAtual].adereco); break;
+        case  1: dest = interface_editar_morada(NULL); break;
+    }
+
+    menu_printInfo("introduzir morada de origem.");
+    morada org = interface_editar_morada(NULL);
+
+    int dist;
+    while (1) {
+        printf("Introduzir Distancia (em Km) $ ");
+        menu_readInt(&dist);
+        if(dist < 0) menu_printError("distancia negativa não é possivél.");
+        else break;
+    }
+
+    encomenda e = newEncomenda();
+    morada tmp = utilizadores.data[utilizadorAtual].adereco;
+    utilizadores.data[utilizadorAtual].adereco = dest;
+    encomendavec_push(&encomendas, encomenda_formalizar(artigos, tabelaPrecos, mult_CP, utilizadores.data[utilizadorAtual], org, (uint64_t)dist));
+    utilizadores.data[utilizadorAtual].adereco = tmp;
+
+    while (1) {
+        menu_printInfo("definir encomenda como frágil ou urgente?");
+        switch (menu_selection(&(strvec){
+            .data = (char*[]){
+                "Definir encomenda como urgente",
+                "Definir encomenda como frágil",
+                "Continuar"
+            },
+            .size = 3
+        })) {
+            case -1: goto END_OF_LOOP;
+            case  0: encomendas.data[encomendas.size-1].tipoEstado |= ENCOMENDA_TIPO_URGENTE; break;
+            case  1: encomendas.data[encomendas.size-1].tipoEstado |= ENCOMENDA_TIPO_FRAGIL ; break;
+            case  2: goto END_OF_LOOP;
+        }
+    }
+    END_OF_LOOP:
+    artigos = artigovec_new();
+    menu_printInfo("encomenda formalizada com sucesso!");
 }
 
-void interface_consultar_estados_encomendas(){
+int vecPrintArtigoPredicate (artigo item, int* userdata) {
+    printf("   %*d   |   ", 8, ++(*userdata));
+    menu_printArtigo(item);
+    printf("\n");    
+    return 0;
+}
+
+void interface_criar_encomenda() {
+    menu_printDiv();
+    menu_printHeader("Criar Nova Encomenda");
+    if(artigos.size != 0) {
+        menu_printInfo("encomenda por formalizar encontrada, o que deseja fazer?");
+        switch ( menu_selection(&(strvec){
+            .size = 2,
+            .data = (char*[]) {
+                "Descartar encomenda anterior",
+                "Continuar encomenda anterior"
+            }
+        }) ) {
+            case -1: return;
+            case  0: {
+                artigovec_free(&artigos);
+                artigos = artigovec_new();
+                break;
+            }
+            case  1: break;
+        }
+    }
+
+    while (1) {
+        menu_printInfo("numero de artigos atuais: %lu", artigos.size);
+        menu_printHeader("Selecionar Artigo Para Editar");
+        // Get option ---------------------------------
+        int op = -2;
+        int max = artigos.size;
+        while(op == -2) {
+            printf("   Opção      |   Item\n");
+            printf("         -2   |   Reimprimir\n");
+            printf("         -1   |   Sair\n");
+            int i = -1;
+            artigovec_iterateFW(&artigos, (artigovec_predicate_t)&vecPrintArtigoPredicate, (void*)&i);
+            printf("   %*d   |   Criar Novo Artigo\n", 8, ++i);
+            printf("   %*d   |   Formalizar Encomenda\n", 8, ++i);
+            while (!menu_readIntMinMax(-2, max+1, &op));
+            menu_printDiv();
+        }
+        // Option was gotten -------------------------
+        if(op == -1) return;
+        if(op == max+1) {
+            interface_formalizar_encomenda();
+            return;
+        }
+        if(op == max) {
+            artigovec_push(&artigos, newArtigo());
+        }
+
+        artigo* a = &(artigos.data[op]);
+
+        printf("Introduzir Nome do Artigo (%s) $ ", a->nome);
+        free(a->nome);
+        a->nome = menu_readString(stdin);
+
+        if(a->tratamentoEspecial) {
+            printf("Introduzir Tratamento especial para o artigo Artigo (%s) $ ", a->tratamentoEspecial);
+            free(a->tratamentoEspecial);
+        }
+        else printf("Introduzir Tratamento especial para o artigo Artigo $ ");
+        a->tratamentoEspecial = menu_readString(stdin);
+        if( *(a->tratamentoEspecial) == '\0') {
+            // Sem tratamento especial
+            free(a->tratamentoEspecial);
+            a->tratamentoEspecial = NULL;
+        }
+
+        int tmp;
+        while (1) {
+            printf("Introduzir Peso do Artigo (em gramas) (%lu) $ ", a->peso_gramas);
+            menu_readInt(&tmp);
+            if(tmp < 0) menu_printError("artigo não pode ter peso negativo");
+            else { a->peso_gramas = tmp; break; }
+        }
+        while (1) {
+            printf("Introduzir Volume do Artigo (em milimetros cúbicos) (%lu) $ ", a->milimetrosCubicos);
+            menu_readInt(&tmp);
+            if(tmp < 0) menu_printError("artigo não pode ter volume negativo");
+            else { a->milimetrosCubicos = tmp; break; }
+        }
+    }
+}
+
+void interface_consultar_estados_encomendas() {
     //TODO implementar
 }
 
-void interface_consultar_tabela_de_precos(){
+void interface_consultar_tabela_de_precos() {
     //TODO implementar
 }
 
@@ -386,9 +581,10 @@ void interface_cliente() {
                 "Remover perfil",
                 "Criar nova encomenda",
                 "Consultar estado de encomendas",
-                "Consultar tabela de preços"
+                "Consultar tabela de preços",
+                "Imprimir recibo de encomenda"
             },
-            .size = 5
+            .size = 6
         };
         switch (menu_selection(&vetorOp)) {
             case -1: return;
@@ -397,6 +593,7 @@ void interface_cliente() {
             case  2: interface_criar_encomenda();      break;
             case  3: interface_consultar_estados_encomendas(); break;
             case  4: interface_consultar_tabela_de_precos(); break;
+            case  5: interface_imprimir_recibo(); break;
         }
     }
 }
@@ -522,7 +719,12 @@ void interface_novoRegisto() {
 void interface_login() {
     char* stmp = NULL;
     while (1) {
-        if (utilizadorAtual != ~(size_t)0) utilizadorAtual = ~(size_t)0;
+        utilizadorAtual = UTILIZADOR_INVALIDO;
+        if(artigos.size != 0) {
+            menu_printInfo("encomenda por formalizar foi eleminada");
+            artigovec_free(&artigos);
+            artigos = artigovec_new();
+        }
         menu_printDiv();
         menu_printHeader("Efetuar Login ?");
         switch (menu_selection(&(strvec){
