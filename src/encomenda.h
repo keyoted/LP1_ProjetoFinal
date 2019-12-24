@@ -51,7 +51,7 @@ int       encomenda_ePesado    (uint64_t a);
 int       encomenda_eVolumoso  (uint64_t a);
 encomenda newEncomenda         ();
 void      freeEncomenda        (encomenda e);
-encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, float mult_CP[10][10], utilizador org, morada dest, uint64_t dist);
+encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, float mult_CP[10][10], utilizador dest, morada org, uint64_t dist);
 uint64_t  encomenda_CalcPreco  (encomenda* e);
 
 void encomenda_TIPO_URGENTE      (encomenda* e);

@@ -1,3 +1,8 @@
+// TODO: apagar, apenas util para debug
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+
 #include <stdint.h>
 #include <string.h>
 #include <memory.h>
@@ -145,19 +150,22 @@ void interface_imprimir_recibo() {
         printf("   Opção      |   Item\n");
         printf("         -2   |   Reimprimir\n");
         printf("         -1   |   Sair\n");
-        // TODO: Fix????? Not printing anything for client?
         if(utilizadorAtual == 0) {
-            for(size_t i = 0; i < 0; ++i) {
+            for(size_t i = 0; i < encomendas.size; ++i) {
+                printf("   %*lu   |   ", 8, i);
                 menu_printEncomendaBrief(encomendas.data[i]);
+                printf("\n");
             }
         } else {
-            for(size_t i = 0; i < 0; ++i) {
+            for(size_t i = 0; i < encomendas.size; ++i) {
                 if( memcmp(utilizadores.data[utilizadorAtual].NIF, encomendas.data[i].NIF_cliente, 9) == 0 ) {
+                    printf("   %*lu   |   ", 8, i);
                     menu_printEncomendaBrief(encomendas.data[i]);
+                    printf("\n");
                 }
             }
         }
-        
+
         while (!menu_readIntMinMax(-2, max-1, &op));
         menu_printDiv();
     }
@@ -170,25 +178,25 @@ void interface_imprimir_recibo() {
     menu_printEncomendaDetail(encomendas.data[op]);
 }
 
-morada interface_editar_morada(morada* morg) {
+morada interface_editar_morada(morada* const morg) {
     morada m;
-    if(morg!=NULL) m = *morg;
-    else           m = newMorada();
+    if( morg==NULL ) m = newMorada();
+    else             m = (*morg);
 
-    if(morg) printf("Introduzir Morada (%s) $ ", m.morada);
-    else     printf("Introduzir Morada $ ");
+    if( morg == NULL) printf("Introduzir Morada $ ");
+    else              printf("Introduzir Morada (%s) $ ", m.morada);
 
     if(m.morada) free(m.morada);
     m.morada = menu_readString(stdin);
 
     char* stmp = NULL;
     do {
-        if(morg!=NULL) printf("Introduzir Código Postal (XXXX-XXX) (%c%c%c%c-%c%c%c) $ ", m.codigoPostal[0], m.codigoPostal[1], m.codigoPostal[2], m.codigoPostal[3], m.codigoPostal[4], m.codigoPostal[5], m.codigoPostal[6]);
-        else           printf("Introduzir Código Postal (XXXX-XXX) $ ");
-        
+        if( morg == NULL ) printf("Introduzir Código Postal (XXXX-XXX) $ ");
+        else               printf("Introduzir Código Postal (XXXX-XXX) (%c%c%c%c-%c%c%c) $ ", m.codigoPostal[0], m.codigoPostal[1], m.codigoPostal[2], m.codigoPostal[3], m.codigoPostal[4], m.codigoPostal[5], m.codigoPostal[6]);
+
         if(stmp) free(stmp);
         stmp = menu_readString(stdin);
-        
+
         if (strlen(stmp) != 8) {
             menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
         } else {
@@ -204,6 +212,8 @@ morada interface_editar_morada(morada* morg) {
             } else break;
         }
     } while (1);
+
+    return m;
 }
 
 int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t* compare) {
@@ -285,7 +295,7 @@ void interface_alterar_tabela_distancias(){
 int vecPrintUserPredicate (utilizador item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
     menu_printUtilizador(item);
-    printf("\n");    
+    printf("\n");
     return 0;
 }
 
@@ -314,31 +324,30 @@ void interface_alterar_utilizadores(){
         menu_printUtilizador(utilizadores.data[op]);
         int fnc = menu_selection(&(strvec){
         .data = (char*[]){
-            "Ativar utilizador", 
+            "Ativar utilizador",
             "Desativar utilizador",
             "Editar utilizador"},
         .size = 3
         });
-        if(fnc == 0) { 
+        if(fnc == 0) {
             if(op==0) {menu_printError("Diretor está sempre ativo"); break; }
-            utilizadores.data[op].tipo == UTILIZADOR_CLIENTE; 
+            utilizadores.data[op].tipo == UTILIZADOR_CLIENTE;
         }
-        else if(fnc == 1) { 
+        else if(fnc == 1) {
             if(op==0) {menu_printError("Diretor está sempre ativo"); break; }
-            utilizadores.data[op].tipo == UTILIZADOR_DESATIVADO; 
+            utilizadores.data[op].tipo == UTILIZADOR_DESATIVADO;
         }
-        else if(fnc == 2) { 
+        else if(fnc == 2) {
             if(op==0) interface_editar_diretor();
-            else interface_editar_utilizador(op); 
+            else interface_editar_utilizador(op);
         }
-        
     }
 }
 
 int vecPrintEncomendaPredicate (encomenda item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
     menu_printEncomendaBrief(item);
-    printf("\n");    
+    printf("\n");
     return 0;
 }
 
@@ -387,7 +396,7 @@ void interface_diretor() {
         menu_printHeader("Menu de Diretor");
         switch (menu_selection(&(strvec){
             .data = (char*[]){
-                "Alterar tabela de preços", 
+                "Alterar tabela de preços",
                 "Alterar tabela de distancias",
                 "Alterar estado dos utilizadores",
                 "Alterar estados das encomendas",
@@ -403,7 +412,7 @@ void interface_diretor() {
             case  4: interface_imprimir_recibo(); break;
         }
     }
-    
+
 }
 
 void funcional_desativar_perfil(){
@@ -444,38 +453,34 @@ void interface_formalizar_encomenda() {
         if(dist < 0) menu_printError("distancia negativa não é possivél.");
         else break;
     }
-
-    encomenda e = newEncomenda();
     morada tmp = utilizadores.data[utilizadorAtual].adereco;
     utilizadores.data[utilizadorAtual].adereco = dest;
-    encomendavec_push(&encomendas, encomenda_formalizar(artigos, tabelaPrecos, mult_CP, utilizadores.data[utilizadorAtual], org, (uint64_t)dist));
+    encomenda e = encomenda_formalizar(artigos, tabelaPrecos, mult_CP, utilizadores.data[utilizadorAtual], org, (uint64_t)dist);
     utilizadores.data[utilizadorAtual].adereco = tmp;
-
     while (1) {
-        menu_printInfo("definir encomenda como frágil ou urgente?");
+        menu_printInfo("definir encomenda como urgente?");
         switch (menu_selection(&(strvec){
             .data = (char*[]){
                 "Definir encomenda como urgente",
-                "Definir encomenda como frágil",
                 "Continuar"
             },
-            .size = 3
+            .size = 2
         })) {
             case -1: goto END_OF_LOOP;
-            case  0: encomendas.data[encomendas.size-1].tipoEstado |= ENCOMENDA_TIPO_URGENTE; break;
-            case  1: encomendas.data[encomendas.size-1].tipoEstado |= ENCOMENDA_TIPO_FRAGIL ; break;
-            case  2: goto END_OF_LOOP;
+            case  0: encomenda_TIPO_URGENTE(&e); break;
+            case  1: goto END_OF_LOOP;
         }
     }
     END_OF_LOOP:
     artigos = artigovec_new();
+    encomendavec_push(&encomendas, e);
     menu_printInfo("encomenda formalizada com sucesso!");
 }
 
 int vecPrintArtigoPredicate (artigo item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
     menu_printArtigo(item);
-    printf("\n");    
+    printf("\n");
     return 0;
 }
 
@@ -577,7 +582,7 @@ void interface_cliente() {
         menu_printHeader("Menu de Cliente");
         strvec vetorOp = (strvec){
             .data = (char*[]){
-                "Editar perfil", 
+                "Editar perfil",
                 "Remover perfil",
                 "Criar nova encomenda",
                 "Consultar estado de encomendas",
@@ -830,6 +835,9 @@ void interface_inicio() {
 }
 
 int main() {
+    // TODO: apagar, apenas util para debug
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     artigos      = artigovec_new();
     encomendas   = encomendavec_new();
     utilizadores = utilizadorvec_new();

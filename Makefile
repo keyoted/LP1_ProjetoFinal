@@ -11,3 +11,6 @@ build:
 clean:
 	rm -rf bin/*
 	rm -rf build/CMakeFiles
+
+run:
+	bin/main.x86

@@ -1,0 +1,41 @@
+# ( (cat src/test.txt | grep -v "(^#.*)") && cat ) | bin/main.x86
+1
+0
+# Criar diretor
+Diretor
+987654321
+# Criar Utilizador
+Cliente
+123456789
+Rua Cliente
+1234-123
+123456789012
+# Login como Cliente
+0
+0
+123456789
+# Criar nova encomenda
+2
+# Criar novo artigo
+0
+Art 1
+
+10
+10
+# Criar novo artigo
+1
+Art 2
+
+20
+20
+# Formalizar encomenda
+3
+0
+Rua Origem
+2323-232
+20
+1
+# Imprimir encomendas
+5
+# Imprimir recibo de encomenda
+0
