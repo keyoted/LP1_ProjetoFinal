@@ -390,23 +390,26 @@ void interface_editar_estados_encomendas(){
         // Option was gotten -------------------------
         if(op == -1) return;
 
+        encomenda* e = &(encomendas.data[op]);
         menu_printDiv();
-        menu_printHeader("Selecionar operação");
-        printf("Encomenda selecionada:");
-        menu_printEncomendaBrief(encomendas.data[op]);
-        int fnc = menu_selection(&(strvec){
-            .data = (char*[]){
-                "Marcar encomenda como expedida",
-                "Marcar encomenda como cancelada",
-                "Marcar encomenda como em entrega"
-                "Marcar encomenda como entregue"
-            },
-            .size = 4
-        });
-        if(fnc == 0)      encomenda_ESTADO_EXPEDIDA   ( &(encomendas.data[op]) );
-        else if(fnc == 1) encomenda_ESTADO_CANCELADA  ( &(encomendas.data[op]) );
-        else if(fnc == 2) encomenda_ESTADO_EM_ENTREGA ( &(encomendas.data[op]) );
-        else if(fnc == 3) encomenda_ESTADO_ENTREGUE   ( &(encomendas.data[op]) );
+        while (1) {
+            menu_printHeader("Selecionar operação");
+            switch (menu_selection(&(strvec){
+                .data = (char*[]){
+                    "Marcar encomenda como expedida",
+                    "Marcar encomenda como cancelada",
+                    "Marcar encomenda como em entrega",
+                    "Marcar encomenda como entregue"
+                },
+                .size = 4
+            })) {
+                case -1: return;
+                case  0: encomenda_ESTADO_EXPEDIDA(e);   break;
+                case  1: encomenda_ESTADO_CANCELADA(e);  break;
+                case  2: encomenda_ESTADO_EM_ENTREGA(e); break;
+                case  3: encomenda_ESTADO_ENTREGUE(e);   break;
+            }
+        }
     }
 }
 

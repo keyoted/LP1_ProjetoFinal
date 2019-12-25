@@ -111,46 +111,45 @@ void encomenda_TIPO_VOLUMOSO (encomenda* e) {
     }
 }
 
+int encomenda_generic_estado(encomenda* e, uint8_t paraMudar, uint8_t toggle) {
+     if( (e->tipoEstado & 0xF0) == paraMudar) {
+        // Se já estiver no estado para mudar, fazer toggle
+        e->tipoEstado = (e->tipoEstado & 0x0F) | toggle;
+        return 1;
+    } else {
+        e->tipoEstado = (e->tipoEstado & 0x0F) | paraMudar;
+        return 0;
+    }
+}
+
 void encomenda_ESTADO_EM_ENTREGA (encomenda* e) {
-    if( (e->tipoEstado & 0xF0) == ENCOMENDA_ESTADO_EM_ENTREGA) {
-        // Se já estiver em entrega
-        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_CANCELADA;
+    if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_EM_ENTREGA, ENCOMENDA_ESTADO_CANCELADA)) {
         menu_printInfo("encomenda definida como CANCELADA");
     } else {
-        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EM_ENTREGA;
         menu_printInfo("encomenda definida como EM ENTREGA");
     }
 }
 
 void encomenda_ESTADO_EXPEDIDA (encomenda* e) {
-    if( (e->tipoEstado & 0xF0) == ENCOMENDA_ESTADO_EM_ENTREGA) {
-        // Se já estiver em EXPEDIDA
-        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EM_ENTREGA;
+    if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_EXPEDIDA, ENCOMENDA_ESTADO_EM_ENTREGA)) {
         menu_printInfo("encomenda definida como EM ENTREGA");
     } else {
-        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EXPEDIDA;
         menu_printInfo("encomenda definida como EXPEDIDA");
     }
 }
 
 void encomenda_ESTADO_ENTREGUE (encomenda* e) {
-    if( (e->tipoEstado & 0xF0) == ENCOMENDA_ESTADO_ENTREGUE) {
-        // Se já estiver em ENTREGUE
-        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EM_ENTREGA;
+    if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_ENTREGUE, ENCOMENDA_ESTADO_EM_ENTREGA)) {
         menu_printInfo("encomenda definida como EM ENTREGA");
     } else {
-        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_ENTREGUE;
         menu_printInfo("encomenda definida como ENTREGUE");
     }
 }
 
 void encomenda_ESTADO_CANCELADA (encomenda* e) {
-    if( (e->tipoEstado & 0xF0) == ENCOMENDA_ESTADO_CANCELADA) {
-        // Se já estiver cancelada
-        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EM_ENTREGA;
+    if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_CANCELADA, ENCOMENDA_ESTADO_EM_ENTREGA)) {
         menu_printInfo("encomenda definida como EM ENTREGA");
     } else {
-        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_CANCELADA;
         menu_printInfo("encomenda definida como CANCELADA");
     }
 }
