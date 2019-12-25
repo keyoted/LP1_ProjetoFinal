@@ -37,7 +37,8 @@ uint64_t encomenda_CalcPreco (encomenda* e) {
     if(e->tipoEstado & ENCOMENDA_TIPO_VOLUMOSO) precoFinal += e->precos.VOLUMOSO;
 
     // Final do cálculo
-    return (precoFinal + e->distancia_km*e->precos.POR_KM) * e->precos.MULT_CP;
+    const float multcp = e->precos.MULT_CP[e->origem.codigoPostal[0]-'0'][e->destino.codigoPostal[0]-'0'];
+    return (precoFinal + e->distancia_km*e->precos.POR_KM) * multcp;
 }
 
 void encomenda_TIPO_URGENTE (encomenda* e) {
@@ -58,6 +59,26 @@ void encomenda_TIPO_FRAGIL (encomenda* e) {
            return;
        }
     }
+    e->tipoEstado = e->tipoEstado & (~ENCOMENDA_TIPO_FRAGIL);
+    menu_printInfo("encomenda definida como RESISTENTE");
+}
+
+void encomenda_TIPO_FRAGIL_togle (encomenda* e) {
+    if(!(e->tipoEstado & ENCOMENDA_TIPO_FRAGIL)) {
+        // Encomenda não é fragil, logo pode ser posta como fragil manualmente
+        e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_FRAGIL;
+        menu_printInfo("encomenda definida como FRAGIL");
+        return;
+    }
+
+    for (size_t i = 0; i < e->artigos.size; i++) {
+       if(e->artigos.data[i].tratamentoEspecial) {
+           // Encomenda é obigatoriamente fragil
+           menu_printInfo("encomenda obrigatoriamente definida como FRAGIL");
+           return;
+       }
+    }
+    // Encomenda pode ser defenida como resistente
     e->tipoEstado = e->tipoEstado & (~ENCOMENDA_TIPO_FRAGIL);
     menu_printInfo("encomenda definida como RESISTENTE");
 }
@@ -91,46 +112,60 @@ void encomenda_TIPO_VOLUMOSO (encomenda* e) {
 }
 
 void encomenda_ESTADO_EM_ENTREGA (encomenda* e) {
-    // Apagar flags de estado
-    e->tipoEstado = e->tipoEstado & (ENCOMENDA_TIPO_URGENTE | ENCOMENDA_TIPO_FRAGIL | ENCOMENDA_TIPO_PESADO | ENCOMENDA_TIPO_VOLUMOSO);
-    // Acionar flag apropriada
-    e->tipoEstado = e->tipoEstado | ENCOMENDA_ESTADO_EM_ENTREGA;
-    menu_printInfo("encomenda definida como EM ENTREGA");
+    if( (e->tipoEstado & 0xF0) == ENCOMENDA_ESTADO_EM_ENTREGA) {
+        // Se já estiver em entrega
+        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_CANCELADA;
+        menu_printInfo("encomenda definida como CANCELADA");
+    } else {
+        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EM_ENTREGA;
+        menu_printInfo("encomenda definida como EM ENTREGA");
+    }
 }
 
 void encomenda_ESTADO_EXPEDIDA (encomenda* e) {
-    // Apagar flags de estado
-    e->tipoEstado = e->tipoEstado & (ENCOMENDA_TIPO_URGENTE | ENCOMENDA_TIPO_FRAGIL | ENCOMENDA_TIPO_PESADO | ENCOMENDA_TIPO_VOLUMOSO);
-    // Acionar flag apropriada
-    e->tipoEstado = e->tipoEstado | ENCOMENDA_ESTADO_EXPEDIDA;
-    menu_printInfo("encomenda definida como EXPEDIDA");
+    if( (e->tipoEstado & 0xF0) == ENCOMENDA_ESTADO_EM_ENTREGA) {
+        // Se já estiver em EXPEDIDA
+        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EM_ENTREGA;
+        menu_printInfo("encomenda definida como EM ENTREGA");
+    } else {
+        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EXPEDIDA;
+        menu_printInfo("encomenda definida como EXPEDIDA");
+    }
 }
 
 void encomenda_ESTADO_ENTREGUE (encomenda* e) {
-    // Apagar flags de estado
-    e->tipoEstado = e->tipoEstado & (ENCOMENDA_TIPO_URGENTE | ENCOMENDA_TIPO_FRAGIL | ENCOMENDA_TIPO_PESADO | ENCOMENDA_TIPO_VOLUMOSO);
-    // Acionar flag apropriada
-    e->tipoEstado = e->tipoEstado | ENCOMENDA_ESTADO_ENTREGUE;
-    menu_printInfo("encomenda definida como ENTREGUE");
+    if( (e->tipoEstado & 0xF0) == ENCOMENDA_ESTADO_ENTREGUE) {
+        // Se já estiver em ENTREGUE
+        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EM_ENTREGA;
+        menu_printInfo("encomenda definida como EM ENTREGA");
+    } else {
+        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_ENTREGUE;
+        menu_printInfo("encomenda definida como ENTREGUE");
+    }
 }
 
 void encomenda_ESTADO_CANCELADA (encomenda* e) {
-    // Apagar flags de estado
-    e->tipoEstado = e->tipoEstado & (ENCOMENDA_TIPO_URGENTE | ENCOMENDA_TIPO_FRAGIL | ENCOMENDA_TIPO_PESADO | ENCOMENDA_TIPO_VOLUMOSO);
-    // Acionar flag apropriada
-    e->tipoEstado = e->tipoEstado | ENCOMENDA_ESTADO_CANCELADA;
-    menu_printInfo("encomenda definida como CANCELADA");
+    if( (e->tipoEstado & 0xF0) == ENCOMENDA_ESTADO_CANCELADA) {
+        // Se já estiver cancelada
+        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_EM_ENTREGA;
+        menu_printInfo("encomenda definida como EM ENTREGA");
+    } else {
+        e->tipoEstado = (e->tipoEstado & 0x0F) | ENCOMENDA_ESTADO_CANCELADA;
+        menu_printInfo("encomenda definida como CANCELADA");
+    }
 }
 
-encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, float mult_CP[10][10], utilizador dest, morada org, uint64_t dist) {
+encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint8_t NIF[9], morada org, morada dest, uint64_t dist) {
     encomenda e;
     e.artigos = artigos;
-    e.destino = dest.adereco;
+    e.destino = dest;
     e.distancia_km = dist;
-    memcpy(e.NIF_cliente, dest.NIF, 9);
+    memcpy(e.NIF_cliente, NIF, 9);
     e.origem = org;
     e.precos = precos;
-    e.precos.MULT_CP = mult_CP[e.origem.codigoPostal[0]-'0'][e.destino.codigoPostal[0]-'0'];
+    for (int i = 0; i < 10; i++) {
+        memcpy(&(e.precos.MULT_CP[i]), &(precos.MULT_CP[i]), 10);
+    }
     e.tipoEstado = ENCOMENDA_ESTADO_EM_ENTREGA;
     encomenda_TIPO_VOLUMOSO(&e);
     encomenda_TIPO_FRAGIL(&e);

@@ -127,11 +127,11 @@ void menu_printUtilizador (utilizador u) {
 }
 
 void menu_printArtigo (artigo a) {
-    // nome gramas mm2 tratamento especial
+    // nome gramas cm2 tratamento especial
     if(a.tratamentoEspecial) {
-        printf("%s  -   %lug   %lumm2   * %s", a.nome, a.peso_gramas, a.cmCubicos, a.tratamentoEspecial);
+        printf("%s  -   %lug   %lucm2   * %s", a.nome, a.peso_gramas, a.cmCubicos, a.tratamentoEspecial);
     }
-    else printf("%s  -   %lug   %lumm2   * N/A", a.nome, a.peso_gramas, a.cmCubicos);
+    else printf("%s  -   %lug   %lucm2   * N/A", a.nome, a.peso_gramas, a.cmCubicos);
 }
 
 void menu_printEncomendaDetail (encomenda e) {
@@ -203,7 +203,8 @@ void menu_printEncomendaDetail (encomenda e) {
     printf("*** Preçco base: %luc\n", tpt);
     printf("*** Distancia: %luKm\n", e.distancia_km);
     printf("*** Preço Por Km: %luc\n", e.precos.POR_KM);
-    printf("*** Multiplicador de Código Postal: %f\n", e.precos.MULT_CP);
+    const float multcp = e.precos.MULT_CP[e.origem.codigoPostal[0]-'0'][e.destino.codigoPostal[0]-'0'];
+    printf("*** Multiplicador de Código Postal: %f\n", multcp);
     printf("*** Preço Final em Cêntimos: %luc\n", encomenda_CalcPreco(&e));
     menu_printDiv();
 }

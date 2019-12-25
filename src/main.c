@@ -131,7 +131,6 @@ artigovec      artigos;                                 // Artigos da seção at
 encomendavec   encomendas;                              // Encomendas formalizadas
 utilizadorvec  utilizadores;                            // Utilizadores existentes no registo, index 0 é diretor
 size_t         utilizadorAtual = UTILIZADOR_INVALIDO;   // Index do utilizador atual
-float          mult_CP[10][10];                         // Mapeia [Origem][Destino]
 precos_tt_cent tabelaPrecos;                            // Preço em centimos por cada tipo de transporte
 
 /*
@@ -426,13 +425,10 @@ void funcional_desativar_perfil(){
     menu_printInfo("utilizador desativado com sucesso!!");
 }
 
-void interface_formalizar_encomenda() {
+// Artigos size is assumed to be diffrent than 0
+encomenda interface_formalizar_encomenda(artigovec* artigos) {
     menu_printDiv();
     menu_printHeader("Formalizar Encomenda");
-    if(artigos.size == 0) {
-        menu_printError("encomendas sem artigos são impossiveis");
-        return;
-    }
 
     menu_printInfo("utilizar a sua morada como morada de entrega?");
     morada dest;
@@ -443,7 +439,7 @@ void interface_formalizar_encomenda() {
         },
         .size = 2
     })) {
-        case -1: return;
+        case -1: return newEncomenda();
         case  0: dest = morada_dup(utilizadores.data[utilizadorAtual].adereco); break;
         case  1: dest = interface_editar_morada(NULL); break;
     }
@@ -458,28 +454,27 @@ void interface_formalizar_encomenda() {
         if(dist < 0) menu_printError("distancia negativa não é possivél.");
         else break;
     }
-    morada tmp = utilizadores.data[utilizadorAtual].adereco;
-    utilizadores.data[utilizadorAtual].adereco = dest;
-    encomenda e = encomenda_formalizar(artigos, tabelaPrecos, mult_CP, utilizadores.data[utilizadorAtual], org, (uint64_t)dist);
-    utilizadores.data[utilizadorAtual].adereco = tmp;
+    encomenda e = encomenda_formalizar(*artigos, tabelaPrecos, utilizadores.data[utilizadorAtual].NIF, org, dest, dist);
     while (1) {
-        menu_printInfo("definir encomenda como urgente?");
+        menu_printInfo("definir encomenda como urgente e/ou fragil?");
         switch (menu_selection(&(strvec){
             .data = (char*[]){
                 "Definir encomenda como urgente",
+                "Definir encomenda como fragil",
                 "Continuar"
             },
-            .size = 2
+            .size = 3
         })) {
             case -1: goto END_OF_LOOP;
-            case  0: encomenda_TIPO_URGENTE(&e); break;
-            case  1: goto END_OF_LOOP;
+            case  0: encomenda_TIPO_URGENTE(&e);      break;
+            case  1: encomenda_TIPO_FRAGIL_togle(&e); break;
+            case  2: goto END_OF_LOOP;
         }
     }
     END_OF_LOOP:
-    artigos = artigovec_new();
-    encomendavec_push(&encomendas, e);
+    *artigos = artigovec_new();
     menu_printInfo("encomenda formalizada com sucesso!");
+    return e;
 }
 
 int vecPrintArtigoPredicate (artigo item, int* userdata) {
@@ -487,6 +482,81 @@ int vecPrintArtigoPredicate (artigo item, int* userdata) {
     menu_printArtigo(item);
     printf("\n");
     return 0;
+}
+
+int funcional_editar_artigo (artigo* a, int isDeletable) {
+    if(isDeletable) {
+        switch (menu_selection(&(strvec){
+            .data = (char*[]){
+                "Apagar artigo",
+                "Editar Artigo",
+            },
+            .size = 2
+        })) {
+            case -1: return 1;
+            case  0: freeArtigo(*a); return 0;
+            case  1: break;
+        }
+    }
+
+    printf("Introduzir Nome do Artigo (%s) $ ", a->nome);
+    free(a->nome);
+    a->nome = menu_readString(stdin);
+
+    if(a->tratamentoEspecial) {
+        printf("Introduzir Tratamento especial para o artigo Artigo (%s) $ ", a->tratamentoEspecial);
+        free(a->tratamentoEspecial);
+    }
+    else printf("Introduzir Tratamento especial para o artigo Artigo $ ");
+    a->tratamentoEspecial = menu_readString(stdin);
+    if( *(a->tratamentoEspecial) == '\0') {
+        // Sem tratamento especial
+        free(a->tratamentoEspecial);
+        a->tratamentoEspecial = NULL;
+    }
+
+    int tmp;
+    while (1) {
+        printf("Introduzir Peso do Artigo (em gramas) (%lu) $ ", a->peso_gramas);
+        menu_readInt(&tmp);
+        if(tmp < 0) menu_printError("artigo não pode ter peso negativo");
+        else { a->peso_gramas = tmp; break; }
+    }
+    while (1) {
+        printf("Introduzir Volume do Artigo (em centimetros cúbicos) (%lu) $ ", a->cmCubicos);
+        menu_readInt(&tmp);
+        if(tmp < 0) menu_printError("artigo não pode ter volume negativo");
+        else { a->cmCubicos = tmp; break; }
+    }
+    return 1;
+}
+
+void funcional_editar_artigos(artigovec* ar) {
+    while (1) {
+        menu_printInfo("numero de artigos atuais: %lu", ar->size);
+        menu_printHeader("Selecionar Artigo Para Editar");
+        // Get option ---------------------------------
+        int op = -2;
+        int max = ar->size;
+        while(op == -2) {
+            printf("   Opção      |   Item\n");
+            printf("         -2   |   Reimprimir\n");
+            printf("         -1   |   Sair\n");
+            int i = -1;
+            artigovec_iterateFW(ar, (artigovec_predicate_t)&vecPrintArtigoPredicate, (void*)&i);
+            printf("   %*d   |   Criar Novo Artigo\n", 8, ++i);
+            while (!menu_readIntMinMax(-2, max+1, &op));
+            menu_printDiv();
+        }
+        // Option was gotten -------------------------
+        if(op == -1) return;
+        if(op == max) {
+            artigovec_push(ar, newArtigo());
+        }
+        if(!funcional_editar_artigo(&(ar->data[op]), (op != max))) {
+            artigovec_moveBelow(ar, op);
+        }
+    }
 }
 
 void interface_criar_encomenda() {
@@ -510,66 +580,15 @@ void interface_criar_encomenda() {
             case  1: break;
         }
     }
-
-    while (1) {
-        menu_printInfo("numero de artigos atuais: %lu", artigos.size);
-        menu_printHeader("Selecionar Artigo Para Editar");
-        // Get option ---------------------------------
-        int op = -2;
-        int max = artigos.size;
-        while(op == -2) {
-            printf("   Opção      |   Item\n");
-            printf("         -2   |   Reimprimir\n");
-            printf("         -1   |   Sair\n");
-            int i = -1;
-            artigovec_iterateFW(&artigos, (artigovec_predicate_t)&vecPrintArtigoPredicate, (void*)&i);
-            printf("   %*d   |   Criar Novo Artigo\n", 8, ++i);
-            printf("   %*d   |   Formalizar Encomenda\n", 8, ++i);
-            while (!menu_readIntMinMax(-2, max+1, &op));
-            menu_printDiv();
-        }
-        // Option was gotten -------------------------
-        if(op == -1) return;
-        if(op == max+1) {
-            interface_formalizar_encomenda();
-            return;
-        }
-        if(op == max) {
-            artigovec_push(&artigos, newArtigo());
-        }
-
-        artigo* a = &(artigos.data[op]);
-
-        printf("Introduzir Nome do Artigo (%s) $ ", a->nome);
-        free(a->nome);
-        a->nome = menu_readString(stdin);
-
-        if(a->tratamentoEspecial) {
-            printf("Introduzir Tratamento especial para o artigo Artigo (%s) $ ", a->tratamentoEspecial);
-            free(a->tratamentoEspecial);
-        }
-        else printf("Introduzir Tratamento especial para o artigo Artigo $ ");
-        a->tratamentoEspecial = menu_readString(stdin);
-        if( *(a->tratamentoEspecial) == '\0') {
-            // Sem tratamento especial
-            free(a->tratamentoEspecial);
-            a->tratamentoEspecial = NULL;
-        }
-
-        int tmp;
-        while (1) {
-            printf("Introduzir Peso do Artigo (em gramas) (%lu) $ ", a->peso_gramas);
-            menu_readInt(&tmp);
-            if(tmp < 0) menu_printError("artigo não pode ter peso negativo");
-            else { a->peso_gramas = tmp; break; }
-        }
-        while (1) {
-            printf("Introduzir Volume do Artigo (em centimetros cúbicos) (%lu) $ ", a->cmCubicos);
-            menu_readInt(&tmp);
-            if(tmp < 0) menu_printError("artigo não pode ter volume negativo");
-            else { a->cmCubicos = tmp; break; }
-        }
+    funcional_editar_artigos(&artigos);
+    menu_printInfo("a formalizar encomenda");
+    if(artigos.size == 0) {
+        menu_printError("impossivel formalizar encomenda sem artigos");
+        return;
     }
+    encomenda e = interface_formalizar_encomenda(&artigos);
+    encomendavec_push(&encomendas, e);
+    menu_printInfo("encomenda adicionada com sucesso!");
 }
 
 void interface_consultar_tabela_de_precos() {
@@ -579,7 +598,7 @@ void interface_consultar_tabela_de_precos() {
     for (int origem = 0; origem < 10; ++origem) {
         printf("  %d  |        ", origem);
         for (int destino = 0; destino < 10; ++destino) {
-            printf("  %07.4f  |", mult_CP[origem][destino]);
+            printf("  %07.4f  |", tabelaPrecos.MULT_CP[origem][destino]);
         }
         printf("\n");
     }
@@ -593,7 +612,78 @@ void interface_consultar_tabela_de_precos() {
 }
 
 void interface_editar_encomendas() {
-    // TODO: implementar
+    menu_printDiv();
+    menu_printHeader("Selecione Encomenda Para Editar");
+    // Get option ---------------------------------
+    int op = -2;
+    int max = encomendas.size;
+    while(op == -2) {
+        printf("   Opção      |   Item\n");
+        printf("         -2   |   Reimprimir\n");
+        printf("         -1   |   Sair\n");
+        funcional_consultar_estados_encomendas();
+        while (!menu_readIntMinMax(-2, max-1, &op));
+        menu_printDiv();
+    }
+    // Option was gotten -------------------------
+    if(op == -1) return;
+    encomenda* e = &(encomendas.data[op]);
+    menu_printEncomendaDetail(*e);
+    if (e->tipoEstado & ENCOMENDA_ESTADO_EM_ENTREGA) {
+        // Encomenda está por entregar
+        while (1) {
+            menu_printHeader("Encomenda Por Entregar");
+            switch (menu_selection(& (strvec) {
+                .data = (char*[]){
+                    "Editar artigos da encomenda",
+                    "Cancelar encomenda",
+                    "Definir encomenda como urgente",
+                    "Definir encomenda como fragil"
+                },
+                .size = 4
+            })) {
+                case -1: return;
+                case  0: {
+                    funcional_editar_artigos(&(e->artigos));
+                    menu_printInfo("a formalizar encomenda");
+                    e->tipoEstado = ENCOMENDA_ESTADO_EM_ENTREGA;
+                    if(e->artigos.size == 0) {
+                        menu_printError("impossivel formalizar encomenda sem artigos, a cancelar encomenda");
+                        encomenda_ESTADO_CANCELADA(e);
+                    }
+                    encomenda_TIPO_VOLUMOSO(e);
+                    encomenda_TIPO_FRAGIL(e);
+                    encomenda_TIPO_PESADO(e);
+                    return;
+                }
+                case  1: encomenda_ESTADO_CANCELADA(e); return;
+                case  2: encomenda_TIPO_URGENTE(e); break;
+                case  3: encomenda_TIPO_FRAGIL_togle(e); break;
+            }
+        }
+    } else if (e->tipoEstado & ENCOMENDA_ESTADO_CANCELADA) {
+        menu_printHeader("Encomenda Cancelada");
+        switch (menu_selection(& (strvec) {
+            .data = (char*[]){
+                "Reativar encomenda"
+            },
+            .size = 1
+        })) {
+            case -1: return;
+            case  0: {
+                if(e->artigos.size == 0) {
+                    menu_printError("impossivel reativar encomenda sem artigos");
+                } else {
+                    encomenda_ESTADO_CANCELADA(e);
+                }
+                return;
+            }
+        }
+    } else if (e->tipoEstado & ENCOMENDA_ESTADO_ENTREGUE) {
+        menu_printError("a encomenda foi entregue, não pode ser editada");
+    } else if (e->tipoEstado & ENCOMENDA_ESTADO_EXPEDIDA) {
+        menu_printError("a encomenda foi expedida, não pode ser editada");
+    }
 }
 
 void interface_cliente() {

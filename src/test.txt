@@ -1,4 +1,4 @@
-# ( (cat src/test.txt | grep -v "(^#.*)") && cat ) | bin/main.x86
+# ( (cat src/test.txt | grep -vE "(^#.*)") && cat ) | bin/main.x86
 1
 0
 # Criar diretor
@@ -14,55 +14,69 @@ Rua Cliente
 0
 0
 123456789
+#
+#
+#
+#
+#
 # Criar nova encomenda
 2
-# Criar novo artigo
+## Criar novo artigo
 0
 Art 1
 
 10
 10
-# Criar novo artigo
+## Criar novo artigo
 1
 Art 2
 
 20
 20
-# Formalizar encomenda
-3
+## Formalizar encomenda
+-1
+## Morada default
 0
-Rua Origem
-2323-232
-20
-1
+## Morada de origem
+Rua origem 1
+6565-565
+30
+## Definir como urgente
+0
+2
+#
+#
+#
+#
+#
 # Criar nova encomenda
 2
-# Criar novo artigo
+## Criar novo artigo
 0
-Art 3
-
-100
-100
-# Criar novo artigo
+Art 1.2
+Não deixar cair
+1000
+1000
+## Criar novo artigo
 1
-Art 3
-
-2000
-2000
-# Criar novo artigo
+Art 2.2
+Frágil
+20000
+20000
+## Formalizar encomenda
+-1
+## Morada default
+0
+## Morada de origem
+Rua origem 1
+6565-565
+30
+## Finalizar
 2
-Art 4
-
-30000
-30000
-# Formalizar encomenda
-4
-0
-Rua Origem
-2323-232
-20
-1
-# Imprimir encomendas
-5
-# Imprimir recibo de encomenda
-0
+#
+#
+#
+#
+#
+#
+#
