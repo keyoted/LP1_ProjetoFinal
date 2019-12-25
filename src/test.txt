@@ -1,4 +1,4 @@
-# ( (cat src/test.txt | grep -vE "(^#.*)") && cat ) | bin/main.x86
+# ((cat src/test.txt | grep -vE "(^#.*)") && cat) | bin/main.x86
 1
 0
 # Criar diretor
@@ -79,4 +79,7 @@ Rua origem 1
 #
 #
 #
-#
+# Sair
+-1
+-1
+-1

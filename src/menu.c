@@ -5,6 +5,20 @@ void cleanInputBuffer () {
     while ((ch = getchar()) != '\n' && ch != EOF);
 }
 
+char* subStringTrimWhiteSpace(char *str) {
+  // At the beguining
+  while(isspace(*str)) str++;
+  if(*str == 0)  // All spaces?
+    return str;
+
+  // At the end
+  char* end = &str[strlen(str) - 1];
+  while(end > str && isspace(*end)) end--;
+  end[1] = '\0';
+
+  return str;
+}
+
 char* menu_readString (FILE* fp) {
     size_t alocated = 20;
     size_t size = 0;
@@ -21,20 +35,9 @@ char* menu_readString (FILE* fp) {
     }
     str[size++] = '\0';
 
-    // Trim
-    size_t start;
-    size_t end;
-    for (start = 0;    start < size          && isspace(str[start]);  start++);
-    for (end = size-2; (end != ~((size_t)0)) && isspace(str[end]);    end--);
-    str[end+1] = '\0';
-    end+=2;
-
-    char* tmp = malloc(sizeof(char)*(end-start));
-    if(tmp) {
-        memcpy(tmp, &str[start], sizeof(char)*(end-start));
-        return tmp;
-    }
-    else return str;
+    char* trimed = strdup(subStringTrimWhiteSpace(str));
+    free(str);
+    return trimed;
 }
 
 int menu_read_Float32 (_Float32* const value) {
