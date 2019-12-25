@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <memory.h>
+#include <inttypes.h>
 
 /**
  * @file    vector.h
@@ -96,11 +97,11 @@
 /**
  * @brief           Struct com o nome VEC_NAME que contém o tipo de dados
  *                  VEC_TYPE e informação sobre o numero de objetos guardado,
- *                  pode guardar [0, ~((size_t)0)[ elemntos.
+ *                  pode guardar [0, ~((uint64_t)0)[ elemntos.
  */
 typedef struct {
-    size_t alocated;    ///< Tamanho alocado de objetos.
-    size_t size;        ///< Tamanho de objetos que foi populado.
+    uint64_t alocated;    ///< Tamanho alocado de objetos.
+    uint64_t size;        ///< Tamanho de objetos que foi populado.
     VEC_TYPE* data;     ///< Começa em data[0] e acaba em data[size-1].
 } VEC_NAME;
 typedef int(*VEC_FUN(_predicate_t))(VEC_TYPE, void*);
@@ -188,7 +189,7 @@ int VEC_FUN(_push)(VEC_NAME* const v, VEC_TYPE const newObj) {
  * @param i         Index do objeto que será escrito por cima.
  * @warning         O objecto no index 'i' não é dealocado por esta função
  */
-void VEC_FUN(_moveBelow)(VEC_NAME* const v, const size_t i) {
+void VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i) {
     memmove(&(v->data[i]), &(v->data[i+1]), (v->size-i-1)*sizeof(VEC_TYPE));
     --(v->size);
 }
@@ -207,7 +208,7 @@ void VEC_FUN(_moveBelow)(VEC_NAME* const v, const size_t i) {
  * @warning         Após chamar esta função, o objeto no index i pode não ser
  *                  válido.
  */
-int VEC_FUN(_moveAbove)(VEC_NAME* const v, const size_t i) {
+int VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i) {
     if(!VEC_FUN(_addCell)(v)) return 0;
     memmove(&(v->data[i+1]), &(v->data[i]), (v->size-i)*sizeof(VEC_TYPE));
     ++(v->size);
@@ -226,7 +227,7 @@ int VEC_FUN(_moveAbove)(VEC_NAME* const v, const size_t i) {
  * @returns         1 se conseguiu inserir o objeto.
  */
 int VEC_FUN(_pushAt)
-    (VEC_NAME* const v, VEC_TYPE const newObj, const size_t position) {
+    (VEC_NAME* const v, VEC_TYPE const newObj, const uint64_t position) {
     if(!VEC_FUN(_moveAbove)(v, position)) return 0;
     v->data[position] = newObj;
     return 1;
@@ -257,7 +258,7 @@ VEC_TYPE VEC_FUN(_pop)(VEC_NAME* const v) {
  * @warning         O objeto com o index 'position' é removido do vetor e não é
  *                  dealocado, terá que ser dealocado posteriormente.
  */
-VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const size_t position) {
+VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const uint64_t position) {
     VEC_TYPE toReturn = v->data[position];
     VEC_FUN(_moveBelow)(v, position);
     return toReturn;
@@ -271,7 +272,7 @@ VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const size_t position) {
  * @note            'v' em si não é dealocado.
  */
 void VEC_FUN(_free)(VEC_NAME* const v) {
-    for (size_t i = 0; i < v->size; i++) {
+    for (uint64_t i = 0; i < v->size; i++) {
         VEC_DEALOC(v->data[i]);
     }
     if(v->alocated != 0) free(v->data);
@@ -287,7 +288,7 @@ void VEC_FUN(_free)(VEC_NAME* const v) {
  * @param v         Pointeiro para o vetor sob o qual operar.
  * @param position  Index do elemento a remover.
  */
-void VEC_FUN(_removeAt)(VEC_NAME* const v, size_t position) {
+void VEC_FUN(_removeAt)(VEC_NAME* const v, uint64_t position) {
     VEC_DEALOC(v->data[position]);
     VEC_FUN(_moveBelow)(v, position);
 }
@@ -329,12 +330,12 @@ int VEC_FUN(_adjust)(VEC_NAME* const v) {
  * @returns         ~0 caso a todos os elementos foram iterados sem que
  *                  'predicate' tenha retornado 0.
  */
-size_t VEC_FUN(_iterateFW)
+uint64_t VEC_FUN(_iterateFW)
 (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
-    for (size_t i = 0; i < v->size; i++) {
+    for (uint64_t i = 0; i < v->size; i++) {
         if( predicate(v->data[i], userData) ) return i;
     }
-    return ~((size_t)0);
+    return ~((uint64_t)0);
 }
 
 /**
@@ -355,12 +356,12 @@ size_t VEC_FUN(_iterateFW)
  * @returns         ~0 caso a todos os elementos foram iterados sem que
  *                  'predicate' tenha retornado 0.
  */
-size_t VEC_FUN(_iterateBW)
+uint64_t VEC_FUN(_iterateBW)
 (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
-    for (size_t i = v->size-1; i != ~((size_t)0); i--) {
+    for (uint64_t i = v->size-1; i != ~((uint64_t)0); i--) {
         if( predicate(v->data[i], userData) ) return i;
     }
-    return ~((size_t)0);
+    return ~((uint64_t)0);
 }
 
 /**
@@ -377,7 +378,7 @@ size_t VEC_FUN(_iterateBW)
  * @warning         No final de chamar esta função o valor de células de memória
  *                  alocadas pode ser maior do que 'space'.
  */
-int VEC_FUN(_reserve)(VEC_NAME* const v, size_t space) {
+int VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space) {
     if(v->alocated >= space) return 2;
     void* newData = realloc(v->data, sizeof(VEC_TYPE)*(space));
     if(newData == NULL) return 0;
@@ -401,17 +402,17 @@ void VEC_FUN(_DEALOC)(VEC_TYPE* const X) {
 int VEC_FUN(_addCell) (VEC_NAME* const v);
 VEC_NAME VEC_FUN(_new)();
 int VEC_FUN(_push)(VEC_NAME* const v, VEC_TYPE const newObj);
-void VEC_FUN(_moveBelow)(VEC_NAME* const v, const size_t i);
-int VEC_FUN(_moveAbove)(VEC_NAME* const v, const size_t i);
+void VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i);
+int VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i);
 VEC_TYPE VEC_FUN(_pop)(VEC_NAME* const v);
-VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const size_t position);
+VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const uint64_t position);
 void VEC_FUN(_free)(VEC_NAME* const v);
-void VEC_FUN(_removeAt)(VEC_NAME* const v, size_t position);
+void VEC_FUN(_removeAt)(VEC_NAME* const v, uint64_t position);
 int VEC_FUN(_adjust)(VEC_NAME* const v);
-int VEC_FUN(_reserve)(VEC_NAME* const v, size_t space);
+int VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space);
 void VEC_FUN(_DEALOC)(VEC_TYPE const X);
-size_t VEC_FUN(_iterateFW)
+uint64_t VEC_FUN(_iterateFW)
                 (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
-size_t VEC_FUN(_iterateBW)
+uint64_t VEC_FUN(_iterateBW)
                 (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
 #endif

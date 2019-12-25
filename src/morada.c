@@ -23,3 +23,15 @@ morada morada_dup (morada m) {
     mdup.morada = strdup(m.morada);
     return mdup;
 }
+
+/*
+    - morada endereco
+        - str morada
+        * uint8_t codigoPostal[7]
+*/
+int save_morada (FILE* f, morada* data) {
+    int written = 0;
+    written += save_str(f, data->morada);
+    written += fwrite(data->codigoPostal, sizeof(uint8_t), 7, f);
+    return written == 8;
+}

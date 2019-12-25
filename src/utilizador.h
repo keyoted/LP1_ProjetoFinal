@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "morada.h"
 #include "utilities.h"
 
@@ -22,5 +23,6 @@ int        utilizador_eCCValido  (uint8_t* cc);
 int        utilizador_eNIFValido (uint8_t* NIF);
 utilizador newUtilizador         ();
 void       freeUtilizador        (utilizador* u);
+int        save_utilizador       (FILE* f, utilizador* data);
 
 #endif

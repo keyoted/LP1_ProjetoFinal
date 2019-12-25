@@ -11,7 +11,8 @@ typedef struct {
     uint64_t cmCubicos;           // Volume do artigo em centimetros cubicos
 } artigo;
 
-artigo   newArtigo                  ();
-void     freeArtigo                 (artigo* a);
+artigo   newArtigo     ();
+void     freeArtigo    (artigo* a);
+int      save_artigo   (FILE* f, artigo* data);
 
 #endif

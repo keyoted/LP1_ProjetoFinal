@@ -14,5 +14,6 @@ morada newMorada        ();
 void   freeMorada       (morada* m);
 int    morada_eCPValido (uint8_t* CP);
 morada morada_dup       (morada m);
+int    save_morada      (FILE* f, morada* data);
 
 #endif

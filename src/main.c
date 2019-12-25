@@ -1,8 +1,9 @@
 // TODO: apagar, apenas util para debug
-#include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include <errno.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <memory.h>
@@ -932,6 +933,37 @@ void interface_login() {
 
 void funcional_guardarDados() {
     // TODO: Implement
+    FILE* f = fopen("data.bin", "wb");
+    if(!f) {
+        menu_printError("impossivel abrir ficheiro :%d", errno);
+        return;
+    }
+    if(!save_precos(f, &tabelaPrecos)) {
+        menu_printError("impossivel guardar tabela de preços :%d", errno);
+        return;
+    }
+    if(!fwrite(&(utilizadores.size), sizeof(uint64_t), 1, f)) {
+        menu_printError("impossivel guardar tamanho de utilizadores :%d", errno);
+        return;
+    }
+    for(uint64_t i = 0; i < utilizadores.size; ++i) {
+        if(!save_utilizador(f, &(utilizadores.data[i]))) {
+            menu_printError("impossivel guardar utilizador [%lu] :%d", i, errno);
+            return;
+        }
+    }
+    if(!fwrite(&(encomendas.size), sizeof(uint64_t), 1, f)) {
+        menu_printError("impossivel guardar tamanho de encomendas :%d", errno);
+        return;
+    }
+    for(uint64_t i = 0; i < encomendas.size; ++i) {
+        if(!save_encomenda(f, &(encomendas.data[i]))) {
+            menu_printError("impossivel guardar encomenda [%lu] :%d", i, errno);
+            return;
+        }
+    }
+    menu_printInfo("Dados guardados com sucesso!");
+    fclose(f);
 }
 
 void funcional_carregarDados() {

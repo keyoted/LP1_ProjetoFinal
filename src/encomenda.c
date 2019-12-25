@@ -171,3 +171,56 @@ encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint8_
     encomenda_TIPO_PESADO(&e);
     return e;
 }
+
+/*
+    - precos_tt_cent tabela_de_precos
+        * uint64_t REGULAR
+        * uint64_t URGENTE
+        * uint64_t VOLUMOSO
+        * uint64_t FRAGIL
+        * uint64_t PESADO
+        * uint64_t POR_KM
+        - _Float32[100] MULT_CP
+            * _Float32 (32b) de [0][0], [0][1] .. [0][9], [1][0] .. [9][9]
+*/
+int save_precos (FILE* f, precos_tt_cent* data) {
+    size_t written = 0;
+    written += fwrite(&(data->REGULAR ), sizeof(uint64_t), 1, f);
+    written += fwrite(&(data->URGENTE ), sizeof(uint64_t), 1, f);
+    written += fwrite(&(data->VOLUMOSO), sizeof(uint64_t), 1, f);
+    written += fwrite(&(data->FRAGIL  ), sizeof(uint64_t), 1, f);
+    written += fwrite(&(data->PESADO  ), sizeof(uint64_t), 1, f);
+    written += fwrite(&(data->POR_KM  ), sizeof(uint64_t), 1, f);
+    for(int org = 0; org < 10; ++org) {
+        written += fwrite(data->MULT_CP[org], sizeof(_Float32), 10, f);
+    }
+    return written == 106;
+}
+
+/*
+    - encomenda encomendas
+        - artigovec      artigos
+            * uint64_t  tamanho_de_artigovec
+            - artigo artigos[amanho_de_artigovec]
+        - morada         origem
+        - morada         destino
+        * uint64_t       distancia_km
+        * uint8_t        tipoEstado
+        - precos_tt_cent precos
+        * uint8_t        NIF_cliente[9]
+*/
+int save_encomenda (FILE* f, encomenda* data) {
+    size_t written = 0;
+    written += fwrite(&(data->artigos.size), sizeof(uint64_t), 1, f);
+    for(uint64_t i = 0; i < data->artigos.size; ++i) {
+        written += save_artigo(f, &(data->artigos.data[i]));
+    }
+    written += save_morada(f, &(data->origem));
+    written += save_morada(f, &(data->destino));
+    written += fwrite(&(data->distancia_km), sizeof(uint64_t), 1, f);
+    written += fwrite(&(data->tipoEstado), sizeof(uint8_t), 1, f);
+    written += save_precos(f, &(data->precos));
+    written += fwrite(data->NIF_cliente, sizeof(uint8_t), 9, f);
+    return written == (1 + data->artigos.size + 5 + 9);
+}
+

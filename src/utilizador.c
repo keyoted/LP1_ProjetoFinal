@@ -40,3 +40,21 @@ void freeUtilizador(utilizador* u) {
     if(u->nome) freeN(u->nome);
     freeMorada(&(u->endereco));
 }
+
+/*
+    - utilizador utilizadores
+        - str nome
+        * uint8_t NIF[9]
+        * uint8_t CC[12]
+        - morada endereco
+        * uint8_t tipo
+*/
+int save_utilizador (FILE* f, utilizador* data) {
+    int written = 0;
+    written += save_str(f, data->nome);
+    written += fwrite(&(data->NIF), sizeof(uint8_t), 9, f);
+    written += fwrite(&(data->CC), sizeof(uint8_t), 12, f);
+    written += save_morada(f, &(data->endereco));
+    written += fwrite(&(data->tipo), sizeof(uint8_t), 1, f);
+    return written == (1+9+12+1+1);
+}

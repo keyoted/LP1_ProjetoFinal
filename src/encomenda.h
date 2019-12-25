@@ -11,6 +11,7 @@
 #define ENCOMENDA_ESTADO_CANCELADA   ( (uint8_t) 128 )
 
 #include <stdint.h>
+#include <stdio.h>
 #include "morada.h"
 #include "artigo.h"
 #include "utilizador.h"
@@ -46,6 +47,9 @@ typedef struct {
     precos_tt_cent precos;
     uint8_t        NIF_cliente[9];
 } encomenda;
+
+int       save_precos          (FILE* f, precos_tt_cent* data);
+int       save_encomenda       (FILE* f, encomenda* data);
 
 int       encomenda_ePesado    (uint64_t a);
 int       encomenda_eVolumoso  (uint64_t a);

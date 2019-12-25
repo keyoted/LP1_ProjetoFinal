@@ -4,3 +4,4 @@ bin/*
 src/test.c
 build/*
 !build/CMakeLists.txt
+data.bin

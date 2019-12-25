@@ -5,7 +5,7 @@
     ○ Tabela de preços da distância @done(19-12-18 04:19)
     ○ Função que calcule o preço de cada artigo @done(19-12-18 04:19)
         ○ Tabela preço das caracteristicas @done(19-12-18 04:19)
-☐ Guardar dados em ficheiro
+○ Guardar dados em ficheiro @started(19-12-25 21:17) @done(19-12-25 22:23) @lasted(1h6m53s)
 ☐ Carregar dados de ficheiro
 ○ Menu cliente @done(19-12-18 15:55)
     ○ Editar os seus dados pessoais @done(19-12-18 15:55)
