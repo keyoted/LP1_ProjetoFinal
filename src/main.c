@@ -873,6 +873,55 @@ void interface_login() {
     }
 }
 
+/*
+
+    precos_tt_cent tabelaPrecos;
+    encomendavec   encomendas;
+    utilizadorvec  utilizadores;
+
+    para guardar str (char*)
+        * uint32_t tamanho
+        * char* data[]
+        (SE tamanho == 0, retornar NULL ao ler)
+
+    Estrutura do ficheiro:
+        - precos_tt_cent tabela_de_precos
+            * uint64_t REGULAR
+            * uint64_t URGENTE
+            * uint64_t VOLUMOSO
+            * uint64_t FRAGIL
+            * uint64_t PESADO
+            * uint64_t POR_KM
+            - float[100] MULT_CP
+                * float (32b) de [0][0], [0][1] .. [0][9], [1][0] .. [9][9]
+        * uint64_t tamanho_de_utilizadorvec
+        - utilizador utilizadores[tamanho_de_utilizadorvec]
+                - str nome
+                * uint8_t NIF[9]
+                * uint8_t CC[12]
+                - morada adereco
+                    - str morada
+                    * uint8_t codigoPostal[7]
+                * uint8_t tipo
+        * uint64_t tamanho_de_encomendavec
+        - encomenda encomendas[tamanho_de_encomendavec]
+                - artigovec      artigos
+                    * uint64_t  tamanho_de_artigovec
+                    - artigo artigos[amanho_de_artigovec]
+                            - str    nome
+                            - str    tratamentoEspecial
+                            * uint64_t peso_gramas
+                            * uint64_t cmCubicos
+                - morada         origem
+                - morada         destino
+                * uint64_t       distancia_km
+                * uint8_t        tipoEstado
+                - precos_tt_cent precos
+                * uint8_t        NIF_cliente[9]
+
+
+*/
+
 void funcional_guardarDados() {
     // TODO: Implement
 }
