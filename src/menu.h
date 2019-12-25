@@ -35,7 +35,7 @@ void  menu_printEncomendaBrief  (encomenda u);
 void  menu_printUtilizador      (utilizador u);
 void  menu_printArtigo          (artigo a);
 int   menu_readInt              (int* const value);
-int   menu_readFloat            (float* const value);
+int   menu_read_Float32         (_Float32* const value);
 void  menu_printEncomendaDetail (encomenda e);
 
 #endif

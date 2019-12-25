@@ -33,7 +33,7 @@ typedef struct {
     uint64_t FRAGIL  ;
     uint64_t PESADO  ;
     uint64_t POR_KM  ;
-    float    MULT_CP [10][10]; // Origem Destino
+    _Float32 MULT_CP [10][10]; // Origem Destino
 } precos_tt_cent;
 
 

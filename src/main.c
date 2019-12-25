@@ -7,9 +7,6 @@
 #include <string.h>
 #include <memory.h>
 #include <math.h>
-#ifndef __STDC_IEC_559__
-_Static_assert(0, "Float may not be 32bits");
-#endif
 
 #define UTILIZADOR_INVALIDO ~((size_t)0)
 #define  VEC_IMPLEMENTATION
@@ -277,7 +274,7 @@ void interface_alterar_tabela_distancias(){
 
     int origem;
     int destino;
-    float novoVal;
+    _Float32 novoVal;
     menu_printInfo("selecione linha de origem");
     menu_readIntMinMax(0,9, &origem);
 
@@ -286,7 +283,7 @@ void interface_alterar_tabela_distancias(){
         menu_readIntMinMax(0,9, &destino);
         while (1) {
             printf("Introduza novo valor decimal para { origem:%d, destino:%d } $ ", origem, destino);
-            if (menu_readFloat(&novoVal)) {
+            if (menu_read_Float32(&novoVal)) {
                 if (novoVal < 0) {
                     menu_printError("valor tem que ser maior que 0.");
                 } else{
@@ -299,7 +296,7 @@ void interface_alterar_tabela_distancias(){
         for (destino = 0; destino < 10; ++destino) {
             while (1) {
                 printf("Introduza novo valor decimal para { origem:%d, destino:%d } $ ", origem, destino);
-                if (menu_readFloat(&novoVal)) {
+                if (menu_read_Float32(&novoVal)) {
                     if (novoVal < 0) {
                         menu_printError("valor tem que ser maior que 0.");
                     } else {
@@ -892,8 +889,8 @@ void interface_login() {
             * uint64_t FRAGIL
             * uint64_t PESADO
             * uint64_t POR_KM
-            - float[100] MULT_CP
-                * float (32b) de [0][0], [0][1] .. [0][9], [1][0] .. [9][9]
+            - _Float32[100] MULT_CP
+                * _Float32 (32b) de [0][0], [0][1] .. [0][9], [1][0] .. [9][9]
         * uint64_t tamanho_de_utilizadorvec
         - utilizador utilizadores[tamanho_de_utilizadorvec]
                 - str nome

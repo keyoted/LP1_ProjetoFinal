@@ -37,7 +37,7 @@ uint64_t encomenda_CalcPreco (encomenda* e) {
     if(e->tipoEstado & ENCOMENDA_TIPO_VOLUMOSO) precoFinal += e->precos.VOLUMOSO;
 
     // Final do cálculo
-    const float multcp = e->precos.MULT_CP[e->origem.codigoPostal[0]-'0'][e->destino.codigoPostal[0]-'0'];
+    const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0]-'0'][e->destino.codigoPostal[0]-'0'];
     return (precoFinal + e->distancia_km*e->precos.POR_KM) * multcp;
 }
 

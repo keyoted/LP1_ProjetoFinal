@@ -37,13 +37,15 @@ char* menu_readString (FILE* fp) {
     else return str;
 }
 
-int menu_readFloat (float* const value) {
-    if (scanf("%f", value) != 1) {
+int menu_read_Float32 (_Float32* const value) {
+    float f;
+    if (scanf("%f", &f) != 1) {
         menu_printError("Não foi inserido um número válido.");
         cleanInputBuffer();
         return 0;
     }
     cleanInputBuffer();
+    *value = (_Float32) f;
     return 1;
 }
 
@@ -213,8 +215,8 @@ void menu_printEncomendaDetail (encomenda e) {
     printf("*** Preçco base: %luc\n", tpt);
     printf("*** Distancia: %luKm\n", e.distancia_km);
     printf("*** Preço Por Km: %luc\n", e.precos.POR_KM);
-    const float multcp = e.precos.MULT_CP[e.origem.codigoPostal[0]-'0'][e.destino.codigoPostal[0]-'0'];
-    printf("*** Multiplicador de Código Postal: %f\n", multcp);
+    const _Float32 multcp = e.precos.MULT_CP[e.origem.codigoPostal[0]-'0'][e.destino.codigoPostal[0]-'0'];
+    printf("*** Multiplicador de Código Postal: %f\n", (double)multcp);
     printf("*** Preço Final em Cêntimos: %luc\n", encomenda_CalcPreco(&e));
     menu_printDiv();
 }
