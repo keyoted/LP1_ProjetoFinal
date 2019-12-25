@@ -203,8 +203,64 @@ void interface_editar_utilizador(size_t index) {
     menu_printInfo("utilizador %s (%.9s) editado com sucesso!", u.nome, u.NIF);
 }
 
+void funcional_consultar_tabela_de_precos(int printDist, int printTable) {
+    if (printDist) {
+        menu_printHeader("Tabela de Distancia");
+        printf("ORIGEM DESTINO  0           1           2           3           4           5           6           7           8           9\n");
+        for (int origem = 0; origem < 10; ++origem) {
+            printf("  %d  |        ", origem);
+            for (int destino = 0; destino < 10; ++destino) {
+                printf("  %07.4f  |", tabelaPrecos.MULT_CP[origem][destino]);
+            }
+            printf("\n");
+        }
+    }
+    if (printTable) {
+        menu_printHeader("Tabela de Preços Base");
+        printf("Preço regular:  %luc\n", tabelaPrecos.REGULAR );
+        printf("Preço urgente:  %luc\n", tabelaPrecos.URGENTE );
+        printf("Preço volumoso: %luc\n", tabelaPrecos.VOLUMOSO);
+        printf("Preço fragil:   %luc\n", tabelaPrecos.FRAGIL  );
+        printf("Preço pesado:   %luc\n", tabelaPrecos.PESADO  );
+        printf("Preço por Km:   %luc\n", tabelaPrecos.POR_KM  );
+    }
+}
+
 void interface_alterar_tabela_precos(){
-    //TODO: Implementar
+    interface_consultar_tabela_de_precos(0, 1);
+    menu_printDiv();
+    menu_printHeader("Editar preços");
+    menu_printInfo("selecione o que editar");
+    int edit = menu_selection(&(strvec){
+        .data = (char*[]){
+            "Editar preço regular",
+            "Editar preço urgente",
+            "Editar preço volumoso",
+            "Editar preço fragil",
+            "Editar preço pesado",
+            "Editar preço por Km",
+        },
+        .size = 6
+    });
+    if(edit == -1) return;
+
+    int novoPreco;
+    while (1) {
+        printf("Introduza novo preço (em centimos) $ ");
+        menu_readInt(&novoPreco);
+        if(novoPreco < 0) {
+            menu_printError("Preço não pode ser negativo");
+        } else break;
+    }
+
+    switch (edit) {
+        case 0: tabelaPrecos.REGULAR  = novoPreco; return;
+        case 1: tabelaPrecos.URGENTE  = novoPreco; return;
+        case 2: tabelaPrecos.VOLUMOSO = novoPreco; return;
+        case 3: tabelaPrecos.FRAGIL   = novoPreco; return;
+        case 4: tabelaPrecos.PESADO   = novoPreco; return;
+        case 5: tabelaPrecos.POR_KM   = novoPreco; return;
+    }
 }
 
 void interface_alterar_tabela_distancias(){
@@ -505,26 +561,6 @@ void interface_criar_encomenda() {
     menu_printInfo("encomenda adicionada com sucesso!");
 }
 
-void interface_consultar_tabela_de_precos() {
-    menu_printDiv();
-    menu_printHeader("Tabela de Preços");
-    printf("ORIGEM DESTINO  0           1           2           3           4           5           6           7           8           9\n");
-    for (int origem = 0; origem < 10; ++origem) {
-        printf("  %d  |        ", origem);
-        for (int destino = 0; destino < 10; ++destino) {
-            printf("  %07.4f  |", tabelaPrecos.MULT_CP[origem][destino]);
-        }
-        printf("\n");
-    }
-    menu_printHeader("Tabela de Preços Base");
-    printf("Preço regular:  %luc\n", tabelaPrecos.REGULAR );
-    printf("Preço urgente:  %luc\n", tabelaPrecos.URGENTE );
-    printf("Preço volumoso: %luc\n", tabelaPrecos.VOLUMOSO);
-    printf("Preço fragil:   %luc\n", tabelaPrecos.FRAGIL  );
-    printf("Preço pesado:   %luc\n", tabelaPrecos.PESADO  );
-    printf("Preço por Km:   %luc\n", tabelaPrecos.POR_KM  );
-}
-
 void interface_editar_encomendas() {
     menu_printDiv();
     menu_printHeader("Selecione Encomenda Para Editar");
@@ -623,7 +659,7 @@ void interface_cliente() {
             case  1: funcional_desativar_perfil(); break;
             case  2: interface_criar_encomenda();      break;
             case  3: menu_printDiv(); menu_printHeader("Encomendas"); funcional_consultar_estados_encomendas(); break;
-            case  4: interface_consultar_tabela_de_precos(); break;
+            case  4: funcional_consultar_tabela_de_precos(1, 1); break;
             case  5: interface_imprimir_recibo(); break;
             case  6: interface_editar_encomendas(); break;
         }

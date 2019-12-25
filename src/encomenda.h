@@ -1,14 +1,14 @@
 #ifndef ENCOMENDA_H
 #define ENCOMENDA_H
 
-#define ENCOMENDA_TIPO_URGENTE       ( (uint8_t)   1)
-#define ENCOMENDA_TIPO_FRAGIL        ( (uint8_t)   2)
-#define ENCOMENDA_TIPO_PESADO        ( (uint8_t)   4)
-#define ENCOMENDA_TIPO_VOLUMOSO      ( (uint8_t)   8)
-#define ENCOMENDA_ESTADO_EM_ENTREGA  ( (uint8_t)  16)
-#define ENCOMENDA_ESTADO_EXPEDIDA    ( (uint8_t)  32)
-#define ENCOMENDA_ESTADO_ENTREGUE    ( (uint8_t)  64)
-#define ENCOMENDA_ESTADO_CANCELADA   ( (uint8_t) 128)
+#define ENCOMENDA_TIPO_URGENTE       ( (uint8_t)   1 )
+#define ENCOMENDA_TIPO_FRAGIL        ( (uint8_t)   2 )
+#define ENCOMENDA_TIPO_PESADO        ( (uint8_t)   4 )
+#define ENCOMENDA_TIPO_VOLUMOSO      ( (uint8_t)   8 )
+#define ENCOMENDA_ESTADO_EM_ENTREGA  ( (uint8_t)  16 )
+#define ENCOMENDA_ESTADO_EXPEDIDA    ( (uint8_t)  32 )
+#define ENCOMENDA_ESTADO_ENTREGUE    ( (uint8_t)  64 )
+#define ENCOMENDA_ESTADO_CANCELADA   ( (uint8_t) 128 )
 
 #include <stdint.h>
 #include "morada.h"

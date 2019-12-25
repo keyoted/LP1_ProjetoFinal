@@ -15,7 +15,7 @@
     ○ Cancelar encomenda @started(19-12-25 03:36) @done(19-12-25 03:36) @lasted(18s)
     ○ Imprimir recibo @started(19-12-24 06:55) @done(19-12-24 07:06) @lasted(11m13s)
 ○ Menu diretor @started(19-12-18 04:19) @done(19-12-18 04:26) @lasted(7m41s)
-    ☐ Alteração da tabela de preços das caracteristicas
+    ○ Alteração da tabela de preços das caracteristicas @started(19-12-25 04:46) @done(19-12-25 04:46) @lasted(4s)
     ☐ Alteração da tabela de preços das distâncias
     ○ Editar utilizadores @started(19-12-18 04:29) @done(19-12-18 05:09) @lasted(40m16s)
     ○ Editar estado de encomenda ( EXPEDIDA ) @started(19-12-18 05:11) @done(19-12-18 05:27) @lasted(16m50s)
