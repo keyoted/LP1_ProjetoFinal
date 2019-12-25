@@ -392,8 +392,8 @@ int VEC_FUN(_reserve)(VEC_NAME* const v, size_t space) {
  *                  a inclusão do ficheio vector.h.
  * @param X         O parametro X do macro 'VEC_DEALOC'.
  */
-void VEC_FUN(_DEALOC)(VEC_TYPE const X) {
-    VEC_DEALOC(X);
+void VEC_FUN(_DEALOC)(VEC_TYPE* const X) {
+    VEC_DEALOC(*X);
 }
 #endif
 

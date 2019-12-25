@@ -12,6 +12,6 @@ typedef struct {
 } artigo;
 
 artigo   newArtigo                  ();
-void     freeArtigo                 (artigo a);
+void     freeArtigo                 (artigo* a);
 
 #endif

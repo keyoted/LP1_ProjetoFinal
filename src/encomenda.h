@@ -19,7 +19,7 @@
 #define artigovec_H
 #define VEC_TYPE        artigo
 #define VEC_NAME        artigovec
-#define VEC_DEALOC(X)   freeArtigo(X)
+#define VEC_DEALOC(X)   freeArtigo(&X)
 #include "./vector.h"
 #undef VEC_TYPE
 #undef VEC_NAME
@@ -50,7 +50,7 @@ typedef struct {
 int       encomenda_ePesado    (uint64_t a);
 int       encomenda_eVolumoso  (uint64_t a);
 encomenda newEncomenda         ();
-void      freeEncomenda        (encomenda e);
+void      freeEncomenda        (encomenda* e);
 encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint8_t NIF[9], morada org, morada dest, uint64_t dist);
 uint64_t  encomenda_CalcPreco  (encomenda* e);
 

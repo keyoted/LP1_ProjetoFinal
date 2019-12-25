@@ -29,10 +29,14 @@ int utilizador_eNIFValido (uint8_t* NIF) {
 }
 
 utilizador newUtilizador() {
-    return (utilizador) { .tipo = UTILIZADOR_DESATIVADO, .adereco = newMorada(), .nome = strdup("undef")};
+    return (utilizador) {
+        .tipo = UTILIZADOR_DESATIVADO,
+        .endereco = newMorada(),
+        .nome = strdup("Utilizador")
+    };
 }
 
-void freeUtilizador(utilizador u) {
-    free(u.nome);
-    freeMorada(u.adereco);
+void freeUtilizador(utilizador* u) {
+    if(u->nome) freeN(u->nome);
+    freeMorada(&(u->endereco));
 }

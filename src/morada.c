@@ -1,11 +1,13 @@
 #include "morada.h"
 
 morada newMorada() {
-    return (morada){ .morada = strdup("Rua") };
+    return (morada) {
+        .morada = strdup("Rua")
+    };
 }
 
-void freeMorada(morada m) {
-    if(m.morada) free(m.morada);
+void freeMorada(morada* m) {
+    if(m->morada) freeN(m->morada);
 }
 
 int morada_eCPValido (uint8_t* CP) {

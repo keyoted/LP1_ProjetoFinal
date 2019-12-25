@@ -2,12 +2,12 @@
 
 artigo newArtigo() {
     return (artigo){
-        .nome = strdup("undef"),
+        .nome = strdup("Artigo"),
         .tratamentoEspecial = NULL,
     };
 }
 
-void freeArtigo(artigo a) {
-    if(a.nome)               free(a.nome);
-    if(a.tratamentoEspecial) free(a.tratamentoEspecial);
+void freeArtigo(artigo* a) {
+    if(a->nome)               freeN(a->nome);
+    if(a->tratamentoEspecial) freeN(a->tratamentoEspecial);
 }

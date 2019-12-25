@@ -19,7 +19,7 @@
 #define artigovec_H
 #define VEC_TYPE         artigo
 #define VEC_NAME         artigovec
-#define VEC_DEALOC(X)    freeArtigo(X)
+#define VEC_DEALOC(X)    freeArtigo(&X)
 #include "./vector.h"
 #undef VEC_TYPE
 #undef VEC_NAME
@@ -30,7 +30,7 @@
 #define encomendavec_H
 #define VEC_TYPE         encomenda
 #define VEC_NAME         encomendavec
-#define VEC_DEALOC(X)    freeEncomenda(X)
+#define VEC_DEALOC(X)    freeEncomenda(&X)
 #include "./vector.h"
 #undef VEC_TYPE
 #undef VEC_NAME
@@ -41,7 +41,7 @@
 #define utilizadorvec_H
 #define VEC_TYPE         utilizador
 #define VEC_NAME         utilizadorvec
-#define VEC_DEALOC(X)    freeUtilizador(X)
+#define VEC_DEALOC(X)    freeUtilizador(&X)
 #include "./vector.h"
 #undef VEC_TYPE
 #undef VEC_NAME
@@ -110,7 +110,7 @@ morada interface_editar_morada(morada* const morg) {
         if( morg == NULL ) printf("Introduzir Código Postal (XXXX-XXX) $ ");
         else               printf("Introduzir Código Postal (XXXX-XXX) (%c%c%c%c-%c%c%c) $ ", m.codigoPostal[0], m.codigoPostal[1], m.codigoPostal[2], m.codigoPostal[3], m.codigoPostal[4], m.codigoPostal[5], m.codigoPostal[6]);
 
-        if(stmp) free(stmp);
+        if(stmp) freeN(stmp);
         stmp = menu_readString(stdin);
 
         if (strlen(stmp) != 8) {
@@ -128,6 +128,7 @@ morada interface_editar_morada(morada* const morg) {
             } else break;
         }
     } while (1);
+    free(stmp);
 
     return m;
 }
@@ -141,19 +142,19 @@ void interface_editar_diretor() {
     menu_printDiv();
     menu_printHeader("Editar Diretor");
 
-    freeUtilizador(utilizadores.data[0]);
+    freeUtilizador(&(utilizadores.data[0]));
     utilizadores.data[0] = newUtilizador();
     utilizador* diretor = & utilizadores.data[0];
     diretor->tipo = UTILIZADOR_DIRETOR;
 
     printf("Introduzir Nome $ ");
-    free(diretor->nome);
+    if(diretor->nome) free(diretor->nome);
     diretor->nome = menu_readString(stdin);
 
     char* stmp = NULL;
     do {
         printf("Introduzir NIF $ ");
-        if(stmp) free(stmp);
+        if(stmp) freeN(stmp);
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
@@ -164,6 +165,7 @@ void interface_editar_diretor() {
             break;
         }
     } while (1);
+    free(stmp);
     menu_printInfo("diretor editado com sucesso!");
 }
 
@@ -173,15 +175,15 @@ void interface_editar_utilizador(size_t index) {
     utilizador u = utilizadores.data[utilizadorAtual];
 
     printf("Introduzir Nome (%s) $ ", u.nome);
-    free(u.nome);
+    if(u.nome) free(u.nome);
     u.nome = menu_readString(stdin);
 
-    u.adereco = interface_editar_morada(&(u.adereco));
+    u.endereco = interface_editar_morada(&(u.endereco));
 
     char* stmp = NULL;
     do {
         printf("Introduzir numero do cartao de cidadão (%c%c%c%c%c%c%c%c%c%c%c%c) $ ", u.CC[0], u.CC[1], u.CC[2], u.CC[3], u.CC[4], u.CC[5], u.CC[6], u.CC[7], u.CC[8], u.CC[9], u.CC[10], u.CC[11]);
-        if(stmp) free(stmp);
+        if(stmp) freeN(stmp);
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 12) {
             menu_printError("tem que introduzir 12 characteres, %d introduzidos.", strlen(stmp));
@@ -192,6 +194,7 @@ void interface_editar_utilizador(size_t index) {
             break;
         }
     } while (1);
+    free(stmp);
 
     u.tipo = UTILIZADOR_CLIENTE;
 
@@ -207,7 +210,7 @@ void funcional_consultar_tabela_de_precos(int printDist, int printTable) {
         for (int origem = 0; origem < 10; ++origem) {
             printf("  %d  |        ", origem);
             for (int destino = 0; destino < 10; ++destino) {
-                printf("  %07.4f  |", tabelaPrecos.MULT_CP[origem][destino]);
+                printf("  %07.4f  |", (double)tabelaPrecos.MULT_CP[origem][destino]);
             }
             printf("\n");
         }
@@ -455,7 +458,7 @@ encomenda interface_formalizar_encomenda(artigovec* artigos) {
         .size = 2
     })) {
         case -1: return newEncomenda();
-        case  0: dest = morada_dup(utilizadores.data[utilizadorAtual].adereco); break;
+        case  0: dest = morada_dup(utilizadores.data[utilizadorAtual].endereco); break;
         case  1: dest = interface_editar_morada(NULL); break;
     }
 
@@ -509,7 +512,7 @@ int funcional_editar_artigo (artigo* a, int isDeletable) {
             .size = 2
         })) {
             case -1: return 1;
-            case  0: freeArtigo(*a); return 0;
+            case  0: freeArtigo(a); return 0;
             case  1: break;
         }
     }
@@ -520,28 +523,28 @@ int funcional_editar_artigo (artigo* a, int isDeletable) {
 
     if(a->tratamentoEspecial) {
         printf("Introduzir Tratamento especial para o artigo Artigo (%s) $ ", a->tratamentoEspecial);
-        free(a->tratamentoEspecial);
-    }
-    else printf("Introduzir Tratamento especial para o artigo Artigo $ ");
+        freeN(a->tratamentoEspecial);
+    } else printf("Introduzir Tratamento especial para o artigo Artigo $ ");
     a->tratamentoEspecial = menu_readString(stdin);
     if( *(a->tratamentoEspecial) == '\0') {
         // Sem tratamento especial
-        free(a->tratamentoEspecial);
-        a->tratamentoEspecial = NULL;
+        freeN(a->tratamentoEspecial);
     }
 
     int tmp;
     while (1) {
         printf("Introduzir Peso do Artigo (em gramas) (%lu) $ ", a->peso_gramas);
-        menu_readInt(&tmp);
-        if(tmp < 0) menu_printError("artigo não pode ter peso negativo");
-        else { a->peso_gramas = tmp; break; }
+        if (menu_readInt(&tmp)) {
+            if(tmp < 0) menu_printError("artigo não pode ter peso negativo");
+            else { a->peso_gramas = tmp; break; }
+        }
     }
     while (1) {
         printf("Introduzir Volume do Artigo (em centimetros cúbicos) (%lu) $ ", a->cmCubicos);
-        menu_readInt(&tmp);
-        if(tmp < 0) menu_printError("artigo não pode ter volume negativo");
-        else { a->cmCubicos = tmp; break; }
+        if (menu_readInt(&tmp)) {
+            if(tmp < 0) menu_printError("artigo não pode ter volume negativo");
+            else { a->cmCubicos = tmp; break; }
+        }
     }
     return 1;
 }
@@ -569,7 +572,7 @@ void funcional_editar_artigos(artigovec* ar) {
             artigovec_push(ar, newArtigo());
         }
         if(!funcional_editar_artigo(&(ar->data[op]), (op != max))) {
-            freeArtigo(ar->data[op]);
+            freeArtigo(&(ar->data[op]));
             artigovec_moveBelow(ar, op);
         }
     }
@@ -603,8 +606,13 @@ void interface_criar_encomenda() {
         return;
     }
     encomenda e = interface_formalizar_encomenda(&artigos);
-    encomendavec_push(&encomendas, e);
-    menu_printInfo("encomenda adicionada com sucesso!");
+    if(e.artigos.size == 0) {
+        menu_printInfo("encomenda não formalizada.");
+        freeEncomenda(&e);
+    } else {
+        encomendavec_push(&encomendas, e);
+        menu_printInfo("encomenda adicionada com sucesso!");
+    }
 }
 
 void interface_editar_encomendas() {
@@ -735,13 +743,13 @@ void interface_registoUtilizador() {
     utilizador u = newUtilizador();
 
     printf("Introduzir Nome $ ");
-    free(u.nome);
+    if(u.nome) free(u.nome);
     u.nome = menu_readString(stdin);
 
     char* stmp = NULL;
     do {
         printf("Introduzir NIF $ ");
-        if(stmp) free(stmp);
+        if(stmp) freeN(stmp);
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
@@ -759,24 +767,25 @@ void interface_registoUtilizador() {
     } while (1);
 
     printf("Introduzir Morada $ ");
-    if(stmp) free(stmp);
-    u.adereco.morada = menu_readString(stdin);
+    free(u.endereco.morada);
+    u.endereco.morada = menu_readString(stdin);
 
+    if(stmp) freeN(stmp);
     do {
         printf("Introduzir Código Postal (XXXX-XXX) $ ");
-        if(stmp) free(stmp);
+        if(stmp) freeN(stmp);
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 8) {
             menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
         } else {
-            u.adereco.codigoPostal[0] = stmp[0];
-            u.adereco.codigoPostal[1] = stmp[1];
-            u.adereco.codigoPostal[2] = stmp[2];
-            u.adereco.codigoPostal[3] = stmp[3];
-            u.adereco.codigoPostal[4] = stmp[5];
-            u.adereco.codigoPostal[5] = stmp[6];
-            u.adereco.codigoPostal[6] = stmp[7];
-            if (!morada_eCPValido(u.adereco.codigoPostal)) {
+            u.endereco.codigoPostal[0] = stmp[0];
+            u.endereco.codigoPostal[1] = stmp[1];
+            u.endereco.codigoPostal[2] = stmp[2];
+            u.endereco.codigoPostal[3] = stmp[3];
+            u.endereco.codigoPostal[4] = stmp[5];
+            u.endereco.codigoPostal[5] = stmp[6];
+            u.endereco.codigoPostal[6] = stmp[7];
+            if (!morada_eCPValido(u.endereco.codigoPostal)) {
                 menu_printError("Código Postal introduzido é inválido.");
             } else break;
         }
@@ -784,7 +793,7 @@ void interface_registoUtilizador() {
 
     do {
         printf("Introduzir numero do cartao de cidadão $ ");
-        if(stmp) free(stmp);
+        if(stmp) freeN(stmp);
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 12) {
             menu_printError("tem que introduzir 12 characteres, %d introduzidos.", strlen(stmp));
@@ -795,6 +804,7 @@ void interface_registoUtilizador() {
             break;
         }
     } while (1);
+    free(stmp);
 
     u.tipo = UTILIZADOR_CLIENTE;
 
@@ -845,10 +855,10 @@ void interface_login() {
             .data = (char*[]){"Efetuar login"},
             .size = 1
         })) {
-            case -1: return;
+            case -1: if(stmp) freeN(stmp); return;
         }
         printf("Introduzir NIF $ ");
-        if(stmp) free(stmp);
+        if(stmp) freeN(stmp);
         stmp = menu_readString(stdin);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
@@ -897,7 +907,7 @@ void interface_login() {
                 - str nome
                 * uint8_t NIF[9]
                 * uint8_t CC[12]
-                - morada adereco
+                - morada endereco
                     - str morada
                     * uint8_t codigoPostal[7]
                 * uint8_t tipo

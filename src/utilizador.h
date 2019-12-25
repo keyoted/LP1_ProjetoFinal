@@ -14,13 +14,13 @@ typedef struct {
     char*   nome;
     uint8_t NIF[9];
     uint8_t CC[12];
-    morada  adereco;
+    morada  endereco;
     uint8_t tipo;
 } utilizador;
 
 int        utilizador_eCCValido  (uint8_t* cc);
 int        utilizador_eNIFValido (uint8_t* NIF);
 utilizador newUtilizador         ();
-void       freeUtilizador        (utilizador u);
+void       freeUtilizador        (utilizador* u);
 
 #endif

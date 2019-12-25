@@ -9,10 +9,10 @@ encomenda newEncomenda() {
     };
 }
 
-void freeEncomenda(encomenda e) {
-    artigovec_free(&(e.artigos));
-    freeMorada(e.origem);
-    freeMorada(e.destino);
+void freeEncomenda(encomenda* e) {
+    artigovec_free(&(e->artigos));
+    freeMorada(&(e->origem));
+    freeMorada(&(e->destino));
 }
 
 int encomenda_ePesado(uint64_t a) {
