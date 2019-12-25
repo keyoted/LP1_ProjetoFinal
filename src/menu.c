@@ -37,6 +37,16 @@ char* menu_readString (FILE* fp) {
     else return str;
 }
 
+int menu_readFloat (float* const value) {
+    if (scanf("%f", value) != 1) {
+        menu_printError("Não foi inserido um número válido.");
+        cleanInputBuffer();
+        return 0;
+    }
+    cleanInputBuffer();
+    return 1;
+}
+
 int menu_readInt (int* const value) {
     if (scanf("%d", value) != 1) {
         menu_printError("Não foi inserido um número válido.");

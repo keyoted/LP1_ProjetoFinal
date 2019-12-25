@@ -227,7 +227,7 @@ void funcional_consultar_tabela_de_precos(int printDist, int printTable) {
 }
 
 void interface_alterar_tabela_precos(){
-    interface_consultar_tabela_de_precos(0, 1);
+    funcional_consultar_tabela_de_precos(0, 1);
     menu_printDiv();
     menu_printHeader("Editar preços");
     menu_printInfo("selecione o que editar");
@@ -264,7 +264,52 @@ void interface_alterar_tabela_precos(){
 }
 
 void interface_alterar_tabela_distancias(){
-    //TODO: Implementar
+    funcional_consultar_tabela_de_precos(1, 0);
+    menu_printInfo("selecione modo de edição");
+    int modo = menu_selection(&(strvec){
+        .data = (char*[]){
+            "Editar preço elemento",
+            "Editar preço linha (todos os destinos de uma origem)",
+        },
+        .size = 2
+    });
+    if(modo == -1) return;
+
+    int origem;
+    int destino;
+    float novoVal;
+    menu_printInfo("selecione linha de origem");
+    menu_readIntMinMax(0,9, &origem);
+
+    if(modo == 0) {
+        menu_printInfo("selecione coluna de destino");
+        menu_readIntMinMax(0,9, &destino);
+        while (1) {
+            printf("Introduza novo valor decimal para { origem:%d, destino:%d } $ ", origem, destino);
+            if (menu_readFloat(&novoVal)) {
+                if (novoVal < 0) {
+                    menu_printError("valor tem que ser maior que 0.");
+                } else{
+                    tabelaPrecos.MULT_CP[origem][destino] = novoVal;
+                    break;
+                }
+            }
+        }
+    } else {
+        for (destino = 0; destino < 10; ++destino) {
+            while (1) {
+                printf("Introduza novo valor decimal para { origem:%d, destino:%d } $ ", origem, destino);
+                if (menu_readFloat(&novoVal)) {
+                    if (novoVal < 0) {
+                        menu_printError("valor tem que ser maior que 0.");
+                    } else {
+                        tabelaPrecos.MULT_CP[origem][destino] = novoVal;
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 int vecPrintUserPredicate (utilizador item, int* userdata) {
