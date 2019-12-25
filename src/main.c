@@ -569,6 +569,7 @@ void funcional_editar_artigos(artigovec* ar) {
             artigovec_push(ar, newArtigo());
         }
         if(!funcional_editar_artigo(&(ar->data[op]), (op != max))) {
+            freeArtigo(ar->data[op]);
             artigovec_moveBelow(ar, op);
         }
     }
