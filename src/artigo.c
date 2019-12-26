@@ -27,3 +27,13 @@ int save_artigo (FILE* f, artigo* data) {
     written += fwrite(&(data->cmCubicos), sizeof(uint64_t), 1, f);
     return written == 4;
 }
+
+int load_artigo (FILE* f, artigo* data) {
+    int written = 0;
+    written += load_str(f, &(data->nome));
+    written += load_str(f, &(data->tratamentoEspecial));
+    written += fread(&(data->peso_gramas), sizeof(uint64_t), 1, f);
+    written += fread(&(data->cmCubicos), sizeof(uint64_t), 1, f);
+    return written == 4;
+}
+

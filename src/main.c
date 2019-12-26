@@ -932,7 +932,6 @@ void interface_login() {
 */
 
 void funcional_guardarDados() {
-    // TODO: Implement
     FILE* f = fopen("data.bin", "wb");
     if(!f) {
         menu_printError("impossivel abrir ficheiro :%d", errno);
@@ -967,7 +966,52 @@ void funcional_guardarDados() {
 }
 
 void funcional_carregarDados() {
-    // TODO: Implement
+    artigovec_free     (&artigos);
+    encomendavec_free  (&encomendas);
+    utilizadorvec_free (&utilizadores);
+
+    artigos      = artigovec_new();
+    encomendas   = encomendavec_new();
+    utilizadores = utilizadorvec_new();
+
+    FILE* f = fopen("data.bin", "rb");
+    if(!f) {
+        menu_printError("impossivel abrir ficheiro :%d", errno);
+        return;
+    }
+    if(!load_precos(f, &tabelaPrecos)) {
+        menu_printError("impossivel carregar tabela de preços :%d", errno);
+        return;
+    }
+    uint64_t size_tmp = 0;
+    if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
+        menu_printError("impossivel ler tamanho de utilizadores :%d", errno);
+        return;
+    }
+    utilizadorvec_reserve(&utilizadores, size_tmp);
+    for(uint64_t i = 0; i < size_tmp; ++i) {
+        ++utilizadores.size;
+        if(!load_utilizador(f, &(utilizadores.data[i]))) {
+            menu_printError("impossivel carregar utilizador [%lu] :%d", i, errno);
+            --utilizadores.size;
+            return;
+        }
+    }
+    if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
+        menu_printError("impossivel carregar tamanho de encomendas :%d", errno);
+        return;
+    }
+    encomendavec_reserve(&encomendas, size_tmp);
+    for(uint64_t i = 0; i < size_tmp; ++i) {
+        ++encomendas.size;
+        if(!load_encomenda(f, &(encomendas.data[i]))) {
+            menu_printError("impossivel carregar encomenda [%lu] :%d", i, errno);
+            --encomendas.size;
+            return;
+        }
+    }
+    menu_printInfo("Dados carregados com sucesso!");
+    fclose(f);
 }
 
 void interface_inicio() {

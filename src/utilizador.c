@@ -58,3 +58,13 @@ int save_utilizador (FILE* f, utilizador* data) {
     written += fwrite(&(data->tipo), sizeof(uint8_t), 1, f);
     return written == (1+9+12+1+1);
 }
+
+int load_utilizador (FILE* f, utilizador* data) {
+    int written = 0;
+    written += load_str(f, &(data->nome));
+    written += fread(&(data->NIF), sizeof(uint8_t), 9, f);
+    written += fread(&(data->CC), sizeof(uint8_t), 12, f);
+    written += load_morada(f, &(data->endereco));
+    written += fread(&(data->tipo), sizeof(uint8_t), 1, f);
+    return written == (1+9+12+1+1);
+}

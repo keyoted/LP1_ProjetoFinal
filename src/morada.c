@@ -35,3 +35,10 @@ int save_morada (FILE* f, morada* data) {
     written += fwrite(data->codigoPostal, sizeof(uint8_t), 7, f);
     return written == 8;
 }
+
+int load_morada (FILE* f, morada* data) {
+    int written = 0;
+    written += load_str(f, &(data->morada));
+    written += fread(data->codigoPostal, sizeof(uint8_t), 7, f);
+    return written == 8;
+}

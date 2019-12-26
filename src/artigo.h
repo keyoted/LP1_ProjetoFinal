@@ -14,5 +14,6 @@ typedef struct {
 artigo   newArtigo     ();
 void     freeArtigo    (artigo* a);
 int      save_artigo   (FILE* f, artigo* data);
+int      load_artigo   (FILE* f, artigo* data);
 
 #endif

@@ -49,7 +49,9 @@ typedef struct {
 } encomenda;
 
 int       save_precos          (FILE* f, precos_tt_cent* data);
+int       load_precos          (FILE* f, precos_tt_cent* data);
 int       save_encomenda       (FILE* f, encomenda* data);
+int       load_encomenda       (FILE* f, encomenda* data);
 
 int       encomenda_ePesado    (uint64_t a);
 int       encomenda_eVolumoso  (uint64_t a);

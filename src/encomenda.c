@@ -197,6 +197,20 @@ int save_precos (FILE* f, precos_tt_cent* data) {
     return written == 106;
 }
 
+int load_precos (FILE* f, precos_tt_cent* data) {
+    size_t written = 0;
+    written += fread(&(data->REGULAR ), sizeof(uint64_t), 1, f);
+    written += fread(&(data->URGENTE ), sizeof(uint64_t), 1, f);
+    written += fread(&(data->VOLUMOSO), sizeof(uint64_t), 1, f);
+    written += fread(&(data->FRAGIL  ), sizeof(uint64_t), 1, f);
+    written += fread(&(data->PESADO  ), sizeof(uint64_t), 1, f);
+    written += fread(&(data->POR_KM  ), sizeof(uint64_t), 1, f);
+    for(int org = 0; org < 10; ++org) {
+        written += fread(data->MULT_CP[org], sizeof(_Float32), 10, f);
+    }
+    return written == 106;
+}
+
 /*
     - encomenda encomendas
         - artigovec      artigos
@@ -224,3 +238,21 @@ int save_encomenda (FILE* f, encomenda* data) {
     return written == (1 + data->artigos.size + 5 + 9);
 }
 
+int load_encomenda (FILE* f, encomenda* data) {
+    size_t written = 0;
+    uint64_t size_tmp = 0;
+    written += fread(&(size_tmp), sizeof(uint64_t), 1, f);
+    data->artigos = artigovec_new();
+    artigovec_reserve(&(data->artigos), size_tmp);
+    for(uint64_t i = 0; i < size_tmp; ++i) {
+        written += load_artigo(f, &(data->artigos.data[i]));
+        ++data->artigos.size;
+    }
+    written += load_morada(f, &(data->origem));
+    written += load_morada(f, &(data->destino));
+    written += fread(&(data->distancia_km), sizeof(uint64_t), 1, f);
+    written += fread(&(data->tipoEstado), sizeof(uint8_t), 1, f);
+    written += load_precos(f, &(data->precos));
+    written += fread(data->NIF_cliente, sizeof(uint8_t), 9, f);
+    return written == (1 + size_tmp + 5 + 9);
+}

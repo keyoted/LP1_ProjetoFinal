@@ -24,5 +24,6 @@ int        utilizador_eNIFValido (uint8_t* NIF);
 utilizador newUtilizador         ();
 void       freeUtilizador        (utilizador* u);
 int        save_utilizador       (FILE* f, utilizador* data);
+int        load_utilizador       (FILE* f, utilizador* data);
 
 #endif

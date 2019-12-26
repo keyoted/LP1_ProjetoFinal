@@ -9,6 +9,7 @@
 char* strdup                (const char *s);
 int   vecPrintItemPredicate (char* item, int* userdata);
 int   save_str              (FILE* f, uint8_t* data);
+int   load_str              (FILE* f, char** data);
 #ifndef freeN
 #define freeN(x) { free(x); (x) = NULL; }
 #endif

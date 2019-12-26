@@ -25,9 +25,22 @@ int save_str (FILE* f, uint8_t* data) {
         fwrite(&zero, sizeof(uint32_t), 1, f);
         return 1;
     }
-    int saved = 0;
+    int written = 0;
     uint32_t size = strlen(data);
-    saved += fwrite(&size, sizeof(uint32_t), 1, f);
-    saved += fwrite(data, sizeof(uint8_t), size, f);
-    return saved == (size + 1);
+    written += fwrite(&size, sizeof(uint32_t), 1, f);
+    written += fwrite(data, sizeof(uint8_t), size, f);
+    return written == (size + 1);
+}
+
+int load_str (FILE* f, char** data) {
+    int written = 0;
+    uint32_t size = 0;
+    written += fread(&size, sizeof(uint32_t), 1, f);
+    if(size == 0) {
+        *data = NULL;
+        return 1;
+    }
+    *data = malloc(sizeof(char)*size);
+    written += fread(*data, sizeof(uint8_t), size, f);
+    return written == (size + 1);
 }
