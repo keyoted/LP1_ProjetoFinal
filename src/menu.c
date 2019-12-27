@@ -133,12 +133,23 @@ void menu_printEncomendaBrief(encomenda u) {
         case ENCOMENDA_ESTADO_ENTREGUE:    printf("ENTREGUE"); break;
     }
 
-    printf(" (%c%c%c%c%c%c%c%c%c) ", u.NIF_cliente[0], u.NIF_cliente[1], u.NIF_cliente[2], u.NIF_cliente[3], u.NIF_cliente[4], u.NIF_cliente[5], u.NIF_cliente[6], u.NIF_cliente[7], u.NIF_cliente[8]);
+    printf(" (%.9s) ", u.NIF_cliente);
     printf("%luc", encomenda_CalcPreco(&u));
 }
 
 void menu_printUtilizador (utilizador u) {
-    printf("%s (%c%c%c%c%c%c%c%c%c)", u.nome, u.NIF[0], u.NIF[1], u.NIF[2], u.NIF[3], u.NIF[4], u.NIF[5], u.NIF[6], u.NIF[7], u.NIF[8]);
+    printf("%s (%.9s) ", u.nome, u.NIF);
+    switch (u.tipo) {
+        case UTILIZADOR_CLIENTE:
+            printf("CLIENTE");
+        break;
+        case UTILIZADOR_DESATIVADO:
+            printf("DESATIVADO");
+        break;
+        case UTILIZADOR_DIRETOR:
+            printf("DIRETOR");
+        break;
+    }
 }
 
 void menu_printArtigo (artigo a) {
@@ -153,15 +164,15 @@ void menu_printEncomendaDetail (encomenda e) {
     menu_printDiv();
     menu_printDiv();
     menu_printHeader("Recibo de Encomenda");
-    printf("*** NIF do Cliente: %c%c%c%c%c%c%c%c%c\n", e.NIF_cliente[0], e.NIF_cliente[1], e.NIF_cliente[2], e.NIF_cliente[3], e.NIF_cliente[4], e.NIF_cliente[5], e.NIF_cliente[6], e.NIF_cliente[7], e.NIF_cliente[8]);
+    printf("*** NIF do Cliente: %.9s\n", e.NIF_cliente);
 
     menu_printHeader("Origem");
     printf("*** Morada: %s\n", e.origem.morada);
-    printf("*** Código Postal: %c%c%c%c-%c%c%c\n", e.origem.codigoPostal[0], e.origem.codigoPostal[1], e.origem.codigoPostal[2], e.origem.codigoPostal[3], e.origem.codigoPostal[4], e.origem.codigoPostal[5], e.origem.codigoPostal[6]);
+    printf("*** Código Postal: %.4s-%.3s\n", e.origem.codigoPostal, &(e.origem.codigoPostal[4]));
 
     menu_printHeader("Destino");
     printf("*** Morada: %s\n", e.destino.morada);
-    printf("*** Código Postal: %c%c%c%c-%c%c%c\n", e.destino.codigoPostal[0], e.destino.codigoPostal[1], e.destino.codigoPostal[2], e.destino.codigoPostal[3], e.destino.codigoPostal[4], e.destino.codigoPostal[5], e.destino.codigoPostal[6]);
+    printf("*** Código Postal: %.4s-%.3s\n", e.destino.codigoPostal, &(e.destino.codigoPostal[4]));
 
 
     menu_printHeader("Artigos");
