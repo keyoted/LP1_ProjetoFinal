@@ -1,6 +1,28 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include <stdio.h>
+#include <memory.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <time.h>
+#include "utilities.h"
+#include "encomenda.h"
+#include "utilizador.h"
+#include "encomenda.h"
+
+#ifndef encomendavec_H
+#define encomendavec_H
+#define VEC_TYPE         encomenda
+#define VEC_NAME         encomendavec
+#define VEC_DEALOC(X)    freeEncomenda(&X)
+#include "./vector.h"
+#undef VEC_TYPE
+#undef VEC_NAME
+#undef VEC_DEALOC
+#endif
+
 #ifndef  strvec_H
 #define  strvec_H
 #define  VEC_TYPE             char*
@@ -12,15 +34,6 @@
 #undef   VEC_DEALOC
 #endif
 
-#include <stdio.h>
-#include <memory.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "utilities.h"
-#include "encomenda.h"
-#include "utilizador.h"
-
 // lê op entre [min, max]
 // retorna 0 em erro, 1 de outro modo
 int   menu_readIntMinMax        (int min, int max, int* const op);
@@ -31,11 +44,12 @@ void  menu_printDiv             ();
 void  menu_printError           (char* err, ...);
 void  menu_printInfo            (char* info, ...);
 void  menu_printHeader          (char* header);
-void  menu_printEncomendaBrief  (encomenda u);
+void  menu_printEncomendaBrief  (encomenda* e);
 void  menu_printUtilizador      (utilizador u);
-void  menu_printArtigo          (artigo a);
+void  menu_printArtigo          (artigo* a);
 int   menu_readInt              (int* const value);
 int   menu_read_Float32         (_Float32* const value);
-void  menu_printEncomendaDetail (encomenda e);
+void  menu_printEncomendaDetail (encomenda* e);
+void  menu_printReciboMensal    (uint8_t NIF_USER[9], int mes, int ano, encomendavec* e);
 
 #endif

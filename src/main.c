@@ -8,6 +8,7 @@
 #include <string.h>
 #include <memory.h>
 #include <math.h>
+#include <time.h>
 
 #define UTILIZADOR_INVALIDO ~((size_t)0)
 #define  VEC_IMPLEMENTATION
@@ -55,18 +56,61 @@ utilizadorvec  utilizadores;                            // Utilizadores existent
 size_t         utilizadorAtual = UTILIZADOR_INVALIDO;   // Index do utilizador atual
 precos_tt_cent tabelaPrecos;                            // Preço em centimos por cada tipo de transporte
 
+int vecPrintUserPredicate (utilizador item, int* userdata) {
+    printf("   %*d   |   ", 8, ++(*userdata));
+    menu_printUtilizador(item);
+    printf("\n");
+    return 0;
+}
+
+void funcional_recibo_mensal() {
+    int mes;
+    int ano;
+    printf("Inserir ano do recibo (0 para o atual) $ ");
+    menu_readInt(&ano);
+    printf("Inserir mês do recibo (0 para o atual) $ ");
+    menu_readInt(&mes);
+
+    time_t timeNow = time(NULL);
+    if(ano == 0) {
+        ano = localtime(&timeNow)->tm_year;
+    }else ano -= 1900;
+    if(mes == 0) {
+        mes = localtime(&timeNow)->tm_mon;
+    }else mes -= 1;
+
+    if(utilizadores.data[utilizadorAtual].tipo != UTILIZADOR_DIRETOR) {
+        menu_printReciboMensal(utilizadores.data[utilizadorAtual].NIF, mes, ano, &encomendas);
+    } else {
+        menu_printHeader("Selecionar Utilizador Para Quem Imprimir o Recibo");
+        int op = -2;
+        int max = utilizadores.size-1;
+        while(op == -2) {
+            printf("   Opção      |   Item\n");
+            printf("         -2   |   Reimprimir\n");
+            printf("         -1   |   Sair\n");
+            int i = -1;
+            utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_predicate_t)&vecPrintUserPredicate, (void*)&i);
+            while (!menu_readIntMinMax(-2, max, &op));
+            menu_printDiv();
+        }
+        if(op == -1) return;
+        menu_printReciboMensal(utilizadores.data[op].NIF, mes, ano, &encomendas);
+    }
+}
+
 void funcional_consultar_estados_encomendas() {
     if(utilizadores.data[utilizadorAtual].tipo == UTILIZADOR_DIRETOR) {
         for(size_t i = 0; i < encomendas.size; ++i) {
             printf("   %*lu   |   ", 8, i);
-            menu_printEncomendaBrief(encomendas.data[i]);
+            menu_printEncomendaBrief(&(encomendas.data[i]));
             printf("\n");
         }
     } else {
         for(size_t i = 0; i < encomendas.size; ++i) {
             if( memcmp(utilizadores.data[utilizadorAtual].NIF, encomendas.data[i].NIF_cliente, 9) == 0 ) {
                 printf("   %*lu   |   ", 8, i);
-                menu_printEncomendaBrief(encomendas.data[i]);
+                menu_printEncomendaBrief(&(encomendas.data[i]));
                 printf("\n");
             }
         }
@@ -88,7 +132,7 @@ void interface_imprimir_recibo() {
     if(op == -1) return;
     if((utilizadores.data[utilizadorAtual].tipo != UTILIZADOR_DIRETOR) && (memcmp(utilizadores.data[utilizadorAtual].NIF, encomendas.data[op].NIF_cliente, 9) != 0) ) {
         menu_printError("não tem premissões para imprimir este recibo!");
-    } else menu_printEncomendaDetail(encomendas.data[op]);
+    } else menu_printEncomendaDetail(&(encomendas.data[op]));
 }
 
 morada interface_editar_morada(morada* const morg) {
@@ -309,13 +353,6 @@ void interface_alterar_tabela_distancias(){
     }
 }
 
-int vecPrintUserPredicate (utilizador item, int* userdata) {
-    printf("   %*d   |   ", 8, ++(*userdata));
-    menu_printUtilizador(item);
-    printf("\n");
-    return 0;
-}
-
 void interface_alterar_utilizadores(){
     while (1) {
         menu_printDiv();
@@ -363,11 +400,11 @@ void interface_alterar_utilizadores(){
             case  3:
                 switch (utilizadores.data[utilizadorAtual].tipo) {
                     case UTILIZADOR_CLIENTE:
-                        interface_editar_utilizador(op);
+                        funcional_editar_utilizador(op);
                     break;
                     case UTILIZADOR_DESATIVADO:
                         menu_printInfo("está a editar um utilizador desativado");
-                        interface_editar_utilizador(op);
+                        funcional_editar_utilizador(op);
                     break;
                     case UTILIZADOR_DIRETOR:
                         funcional_editar_diretor(op);
@@ -380,7 +417,7 @@ void interface_alterar_utilizadores(){
 
 int vecPrintEncomendaPredicate (encomenda item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
-    menu_printEncomendaBrief(item);
+    menu_printEncomendaBrief(&(item));
     printf("\n");
     return 0;
 }
@@ -431,20 +468,24 @@ void interface_diretor() {
         menu_printHeader("Menu de Diretor");
         switch (menu_selection(&(strvec){
             .data = (char*[]){
+                "Editar dados de acesso",
                 "Alterar tabela de preços",
                 "Alterar tabela de distancias",
                 "Alterar estado dos utilizadores",
                 "Alterar estados das encomendas",
-                "Imprimir recibo de encomenda"
+                "Imprimir recibo de encomenda",
+                "Imprimir recibo mensal de um utilizador"
             },
-            .size = 5
+            .size = 7
         })) {
             case -1: return;
-            case  0: interface_alterar_tabela_precos();     break;
-            case  1: interface_alterar_tabela_distancias(); break;
-            case  2: interface_alterar_utilizadores();      break;
-            case  3: interface_editar_estados_encomendas(); break;
-            case  4: interface_imprimir_recibo(); break;
+            case  0: funcional_editar_diretor(utilizadorAtual); break;
+            case  1: interface_alterar_tabela_precos();         break;
+            case  2: interface_alterar_tabela_distancias();     break;
+            case  3: interface_alterar_utilizadores();          break;
+            case  4: interface_editar_estados_encomendas();     break;
+            case  5: interface_imprimir_recibo();               break;
+            case  6: funcional_recibo_mensal();                 break;
         }
     }
 }
@@ -509,7 +550,7 @@ int funcional_formalizar_encomenda(artigovec* artigos, encomenda* e) {
 
 int vecPrintArtigoPredicate (artigo item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
-    menu_printArtigo(item);
+    menu_printArtigo(&(item));
     printf("\n");
     return 0;
 }
@@ -579,8 +620,8 @@ void funcional_editar_artigos(artigovec* ar) {
         }
         // Option was gotten -------------------------
         if(op == -1) return;
-        if(op == max-1) rtigovec_push(ar, newArtigo());
-        if(!funcional_editar_artigo(&(ar->data[op]), (op != max))) {
+        if(op == max-1) artigovec_push(ar, newArtigo());
+        if(!funcional_editar_artigo(&(ar->data[op]), (op != max - 1))) {
             freeArtigo(&(ar->data[op]));
             artigovec_moveBelow(ar, op);
             menu_printInfo("Artigo removido");
@@ -639,7 +680,7 @@ void interface_editar_encomendas() {
     }
     if(op == -1) return;
     encomenda* e = &(encomendas.data[op]);
-    menu_printEncomendaDetail(*e);
+    menu_printEncomendaDetail(e);
 
     if (e->tipoEstado & ENCOMENDA_ESTADO_EM_ENTREGA) {
         // Encomenda está por entregar
@@ -710,22 +751,102 @@ void interface_cliente() {
                 "Criar nova encomenda",
                 "Consultar estado de encomendas",
                 "Consultar tabela de preços",
+                "Editar encomendas",
                 "Imprimir recibo de encomenda",
-                "Editar encomendas"
+                "Imprimir recibo de um mês"
             },
             .size = 7
         };
         switch (menu_selection(&vetorOp)) {
             case -1: return;
-            case  0: interface_editar_utilizador(utilizadorAtual);     break;
+            case  0: funcional_editar_utilizador(utilizadorAtual);     break;
             case  1: funcional_desativar_perfil(); break;
             case  2: interface_criar_encomenda();      break;
             case  3: menu_printDiv(); menu_printHeader("Encomendas"); funcional_consultar_estados_encomendas(); break;
             case  4: funcional_consultar_tabela_de_precos(1, 1); break;
-            case  5: interface_imprimir_recibo(); break;
-            case  6: interface_editar_encomendas(); break;
+            case  5: interface_editar_encomendas(); break;
+            case  6: interface_imprimir_recibo(); break;
         }
     }
+}
+
+void interface_novoRegisto() {
+    menu_printDiv();
+    menu_printHeader("Novo Registo");
+    if(utilizadores.size != 0) {
+        menu_printInfo("ainda tem um registo aberto, tem a certeza que quer descartar os dados do registo?");
+        switch (menu_selection(&(strvec){
+            .data = (char*[]){
+                "Descartar registo"
+            },
+            .size = 1
+        })) {
+            case -1: return;
+            case  0: break;
+        }
+    }
+
+    artigovec_free     (&artigos);
+    encomendavec_free  (&encomendas);
+    utilizadorvec_free (&utilizadores);
+    artigos      = artigovec_new();
+    encomendas   = encomendavec_new();
+    utilizadores = utilizadorvec_new();
+
+    menu_printHeader("Registar Novo Diretor");
+
+    utilizadorvec_push(&utilizadores, newUtilizador());
+    funcional_editar_diretor(0);
+    menu_printInfo("diretor criado com sucesso!");
+}
+
+void funcional_carregarDados() {
+    artigovec_free     (&artigos);
+    encomendavec_free  (&encomendas);
+    utilizadorvec_free (&utilizadores);
+
+    artigos      = artigovec_new();
+    encomendas   = encomendavec_new();
+    utilizadores = utilizadorvec_new();
+
+    FILE* f = fopen("data.bin", "rb");
+    if(!f) {
+        menu_printError("impossivel abrir ficheiro :%d", errno);
+        return;
+    }
+    if(!load_precos(f, &tabelaPrecos)) {
+        menu_printError("impossivel carregar tabela de preços :%d", errno);
+        return;
+    }
+    uint64_t size_tmp = 0;
+    if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
+        menu_printError("impossivel ler tamanho de utilizadores :%d", errno);
+        return;
+    }
+    utilizadorvec_reserve(&utilizadores, size_tmp);
+    for(uint64_t i = 0; i < size_tmp; ++i) {
+        ++utilizadores.size;
+        if(!load_utilizador(f, &(utilizadores.data[i]))) {
+            menu_printError("impossivel carregar utilizador [%lu] :%d", i, errno);
+            --utilizadores.size;
+            return;
+        }
+    }
+    if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
+        menu_printError("impossivel carregar tamanho de encomendas :%d", errno);
+        return;
+    }
+    encomendavec_reserve(&encomendas, size_tmp);
+    for(uint64_t i = 0; i < size_tmp; ++i) {
+        ++encomendas.size;
+        if(!load_encomenda(f, &(encomendas.data[i]))) {
+            menu_printError("impossivel carregar encomenda [%lu] :%d", i, errno);
+            --encomendas.size;
+            return;
+        }
+    }
+    menu_printInfo("Dados carregados com sucesso!");
+    fclose(f);
 }
 
 void interface_registoUtilizador() {
@@ -817,33 +938,6 @@ void interface_registoUtilizador() {
     u.tipo = UTILIZADOR_CLIENTE;
     utilizadorvec_push(&utilizadores, u);
     menu_printInfo("utilizador %s (%.9s) adicionado com sucesso!", u.nome, u.NIF);
-}
-
-void interface_novoRegisto() {
-    menu_printDiv();
-    menu_printHeader("Novo Registo");
-    if(utilizadores.size != 0) {
-        menu_printInfo("ainda tem um registo aberto, tem a certeza que quer descartar os dados do registo?");
-        switch (menu_selection(&(strvec){
-            .data = (char*[]){"Descartar registo"},
-            .size = 1
-        })) {
-            case -1: return;
-        }
-    }
-
-    artigovec_free     (&artigos);
-    encomendavec_free  (&encomendas);
-    utilizadorvec_free (&utilizadores);
-    artigos      = artigovec_new();
-    encomendas   = encomendavec_new();
-    utilizadores = utilizadorvec_new();
-
-    menu_printHeader("Registar Novo Diretor");
-
-    utilizadorvec_push(&utilizadores, newUtilizador());
-    interface_editar_diretor();
-    menu_printInfo("diretor criado com sucesso!");
 }
 
 void interface_login() {
@@ -975,55 +1069,6 @@ void funcional_guardarDados() {
         }
     }
     menu_printInfo("Dados guardados com sucesso!");
-    fclose(f);
-}
-
-void funcional_carregarDados() {
-    artigovec_free     (&artigos);
-    encomendavec_free  (&encomendas);
-    utilizadorvec_free (&utilizadores);
-
-    artigos      = artigovec_new();
-    encomendas   = encomendavec_new();
-    utilizadores = utilizadorvec_new();
-
-    FILE* f = fopen("data.bin", "rb");
-    if(!f) {
-        menu_printError("impossivel abrir ficheiro :%d", errno);
-        return;
-    }
-    if(!load_precos(f, &tabelaPrecos)) {
-        menu_printError("impossivel carregar tabela de preços :%d", errno);
-        return;
-    }
-    uint64_t size_tmp = 0;
-    if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel ler tamanho de utilizadores :%d", errno);
-        return;
-    }
-    utilizadorvec_reserve(&utilizadores, size_tmp);
-    for(uint64_t i = 0; i < size_tmp; ++i) {
-        ++utilizadores.size;
-        if(!load_utilizador(f, &(utilizadores.data[i]))) {
-            menu_printError("impossivel carregar utilizador [%lu] :%d", i, errno);
-            --utilizadores.size;
-            return;
-        }
-    }
-    if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel carregar tamanho de encomendas :%d", errno);
-        return;
-    }
-    encomendavec_reserve(&encomendas, size_tmp);
-    for(uint64_t i = 0; i < size_tmp; ++i) {
-        ++encomendas.size;
-        if(!load_encomenda(f, &(encomendas.data[i]))) {
-            menu_printError("impossivel carregar encomenda [%lu] :%d", i, errno);
-            --encomendas.size;
-            return;
-        }
-    }
-    menu_printInfo("Dados carregados com sucesso!");
     fclose(f);
 }
 

@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 #include "morada.h"
 #include "artigo.h"
 #include "utilizador.h"
@@ -46,6 +47,7 @@ typedef struct {
     uint8_t        tipoEstado;
     precos_tt_cent precos;
     uint8_t        NIF_cliente[9];
+    time_t         criacao;
 } encomenda;
 
 int       save_precos          (FILE* f, precos_tt_cent* data);

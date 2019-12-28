@@ -6,6 +6,7 @@ encomenda newEncomenda() {
         .artigos        = artigovec_new(),
         .origem         = newMorada(),
         .destino        = newMorada(),
+        .criacao        = time(NULL)
     };
 }
 
@@ -169,6 +170,7 @@ encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint8_
     encomenda_TIPO_VOLUMOSO(&e);
     encomenda_TIPO_FRAGIL(&e);
     encomenda_TIPO_PESADO(&e);
+    e.criacao = time(NULL);
     return e;
 }
 
@@ -222,6 +224,7 @@ int load_precos (FILE* f, precos_tt_cent* data) {
         * uint8_t        tipoEstado
         - precos_tt_cent precos
         * uint8_t        NIF_cliente[9]
+        * time_t         criacao
 */
 int save_encomenda (FILE* f, encomenda* data) {
     size_t written = 0;
@@ -235,7 +238,8 @@ int save_encomenda (FILE* f, encomenda* data) {
     written += fwrite(&(data->tipoEstado), sizeof(uint8_t), 1, f);
     written += save_precos(f, &(data->precos));
     written += fwrite(data->NIF_cliente, sizeof(uint8_t), 9, f);
-    return written == (1 + data->artigos.size + 5 + 9);
+    written += fwrite(&(data->criacao), sizeof(time_t), 1, f);
+    return written == (1 + data->artigos.size + 5 + 9 + 1);
 }
 
 int load_encomenda (FILE* f, encomenda* data) {
@@ -254,5 +258,6 @@ int load_encomenda (FILE* f, encomenda* data) {
     written += fread(&(data->tipoEstado), sizeof(uint8_t), 1, f);
     written += load_precos(f, &(data->precos));
     written += fread(data->NIF_cliente, sizeof(uint8_t), 9, f);
-    return written == (1 + size_tmp + 5 + 9);
+    written += fread(&(data->criacao), sizeof(time_t), 1, f);
+    return written == (1 + size_tmp + 5 + 9 + 1);
 }
