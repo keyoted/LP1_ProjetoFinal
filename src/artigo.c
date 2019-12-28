@@ -8,8 +8,8 @@ artigo newArtigo() {
 }
 
 void freeArtigo(artigo* a) {
-    if(a->nome)               freeN(a->nome);
-    if(a->tratamentoEspecial) freeN(a->tratamentoEspecial);
+    freeN(a->nome);
+    freeN(a->tratamentoEspecial);
 }
 
 /*

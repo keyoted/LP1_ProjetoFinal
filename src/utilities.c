@@ -1,11 +1,12 @@
 #include "utilities.h"
 
 char* strdup (const char *s) {
-    size_t len = strlen (s);
-    void *new = malloc (len);
-    if (new == NULL)
-        return NULL;
-    return (char *) memcpy (new, s, len);
+    if(!s) return NULL;
+    size_t len = strlen(s)+1;
+    if(len == 1) return NULL;
+    char* new = malloc(len);
+    memcpy(new, s, len);
+    return new;
 }
 
 int vecPrintItemPredicate (char* item, int* userdata) {
@@ -21,11 +22,11 @@ int vecPrintItemPredicate (char* item, int* userdata) {
 */
 int save_str (FILE* f, char* data) {
     if(!data) {
-        const uint32_t zero = 0;
-        fwrite(&zero, sizeof(uint32_t), 1, f);
+        const uint32_t ZERO = 0;
+        fwrite(&ZERO, sizeof(uint32_t), 1, f);
         return 1;
     }
-    int written = 0;
+    uint32_t written = 0;
     uint32_t size = strlen(data);
     written += fwrite(&size, sizeof(uint32_t), 1, f);
     written += fwrite(data, sizeof(uint8_t), size, f);
@@ -33,7 +34,7 @@ int save_str (FILE* f, char* data) {
 }
 
 int load_str (FILE* f, char** data) {
-    int written = 0;
+    uint32_t written = 0;
     uint32_t size = 0;
     written += fread(&size, sizeof(uint32_t), 1, f);
     if(size == 0) {

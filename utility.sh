@@ -8,7 +8,7 @@ ROOT_DIR=$(dirname $(realpath $0))
 if [ $1 = "print" ]; then
     cat ${ROOT_DIR}/src/test.txt | grep -vE "(^#.*)"
 elif [ $1 = "clip" ]; then
-    (cat ${ROOT_DIR}/src/test.txt | grep -vE "(^#.*)") | xclip -sel clip
+    (cat ${ROOT_DIR}/test.txt | grep -vE "(^#.*)") | xclip -sel clip
 elif [ $1 = "run" ]; then
     ${ROOT_DIR}/bin/${EXENAME}
 elif [ $1 = "make" ]; then
@@ -18,7 +18,8 @@ elif [ $1 = "edit" ]; then
 elif [ $1 = "dbg" ]; then
     (((cat ${ROOT_DIR}/src/test.txt | grep -vE "(^#.*)") && cat) | ${ROOT_DIR}/bin/${EXENAME})
 elif [ $1 = "valgrind" ]; then
-    valgrind --leak-check=full ${ROOT_DIR}/bin/${EXENAME}
+    valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --suppressions=${ROOT_DIR}/valgrind.supp ${ROOT_DIR}/bin/${EXENAME}
+    #valgrind -s --gen-suppressions=all --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --suppressions=${ROOT_DIR}/valgrind.supp ${ROOT_DIR}/bin/${EXENAME}
 else
     echo "utility.sh [action] [EXE_NAME (optional)]"
     echo "Actions:"

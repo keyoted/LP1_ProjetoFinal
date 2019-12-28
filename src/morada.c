@@ -7,7 +7,7 @@ morada newMorada() {
 }
 
 void freeMorada(morada* m) {
-    if(m->morada) freeN(m->morada);
+    freeN(m->morada);
 }
 
 int morada_eCPValido (uint8_t* CP) {

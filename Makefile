@@ -1,11 +1,11 @@
-.PHONY: build_debug
 .PHONY: build
+.PHONY: build_release
 .PHONY: clear
 
-build_debug:
+build:
 	cd build; cmake -DCMAKE_BUILD_TYPE=Debug ./; make; echo "DEBUG BUILD"
 
-build:
+build_release:
 	cd build; cmake -DCMAKE_BUILD_TYPE=Release ./; make; echo "RELEASE BUILD"
 
 clean:

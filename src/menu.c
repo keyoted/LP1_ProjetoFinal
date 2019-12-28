@@ -6,17 +6,19 @@ void cleanInputBuffer () {
 }
 
 char* subStringTrimWhiteSpace(char *str) {
-  // At the beguining
-  while(isspace(*str)) str++;
-  if(*str == 0)  // All spaces?
+    if(!str) return NULL;
+
+    // At the beguining
+    while(isspace(*str)) str++;
+    if(*str == 0)  // All spaces?
+        return str;
+
+    // At the end
+    char* end = &str[strlen(str) - 1];
+    while(end > str && isspace(*end)) end--;
+    end[1] = '\0';
+
     return str;
-
-  // At the end
-  char* end = &str[strlen(str) - 1];
-  while(end > str && isspace(*end)) end--;
-  end[1] = '\0';
-
-  return str;
 }
 
 char* menu_readString (FILE* fp) {
@@ -114,6 +116,7 @@ void  menu_printInfo (char* info, ...) {
 }
 
 void  menu_printHeader (char* header) {
+    if(!header) header = "";
     int spacesize = (80 - strlen(header)) - 8;
     if(spacesize < 3) spacesize = 3;
     for (int i = 0; i < spacesize/2; i++) printf(" ");

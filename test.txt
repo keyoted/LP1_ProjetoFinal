@@ -176,7 +176,9 @@ Rua Cliente
 9.9
 # Logout
 -1
+-1
 # Login como Cliente
+0
 0
 123456789
 # Criar nova encomenda
@@ -233,14 +235,14 @@ Rua origem 1
 30
 ## Finalizar
 2
-#
-#
-#
-#
-#
-#
-# Voltar ao inicio
--1
--1
-# Guardar dados
-3
+##
+##
+##
+##
+##
+##
+## Voltar ao inicio
+#-1
+#-1
+## Guardar dados
+#3

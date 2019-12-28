@@ -37,7 +37,7 @@ utilizador newUtilizador() {
 }
 
 void freeUtilizador(utilizador* u) {
-    if(u->nome) freeN(u->nome);
+    freeN(u->nome);
     freeMorada(&(u->endereco));
 }
 
