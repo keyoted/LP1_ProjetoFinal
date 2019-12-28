@@ -18,9 +18,6 @@
 #define VEC_NAME         encomendavec
 #define VEC_DEALOC(X)    freeEncomenda(&X)
 #include "./vector.h"
-#undef VEC_TYPE
-#undef VEC_NAME
-#undef VEC_DEALOC
 #endif
 
 #ifndef  strvec_H
@@ -29,9 +26,6 @@
 #define  VEC_NAME             strvec
 #define  VEC_DEALOC(X)        free(X)
 #include "./vector.h"
-#undef   VEC_TYPE
-#undef   VEC_NAME
-#undef   VEC_DEALOC
 #endif
 
 // lê op entre [min, max]

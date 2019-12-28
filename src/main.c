@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#define  VEC_IMPLEMENTATION
 #include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -11,11 +12,11 @@
 #include <time.h>
 
 #define UTILIZADOR_INVALIDO ~((size_t)0)
-#define  VEC_IMPLEMENTATION
 #include "menu.h"
 #include "artigo.h"
 #include "encomenda.h"
 #include "utilizador.h"
+#include "outrasListagens.h"
 
 #ifndef artigovec_H
 #define artigovec_H
@@ -23,9 +24,6 @@
 #define VEC_NAME         artigovec
 #define VEC_DEALOC(X)    freeArtigo(&X)
 #include "./vector.h"
-#undef VEC_TYPE
-#undef VEC_NAME
-#undef VEC_DEALOC
 #endif
 
 #ifndef encomendavec_H
@@ -34,9 +32,6 @@
 #define VEC_NAME         encomendavec
 #define VEC_DEALOC(X)    freeEncomenda(&X)
 #include "./vector.h"
-#undef VEC_TYPE
-#undef VEC_NAME
-#undef VEC_DEALOC
 #endif
 
 #ifndef utilizadorvec_H
@@ -45,9 +40,6 @@
 #define VEC_NAME         utilizadorvec
 #define VEC_DEALOC(X)    freeUtilizador(&X)
 #include "./vector.h"
-#undef VEC_TYPE
-#undef VEC_NAME
-#undef VEC_DEALOC
 #endif
 
 artigovec      artigos;                                 // Artigos da seção atual, que ainda não foram formalizados numa encomenda
@@ -74,10 +66,10 @@ void funcional_recibo_mensal() {
     time_t timeNow = time(NULL);
     if(ano == 0) {
         ano = localtime(&timeNow)->tm_year;
-    }else ano -= 1900;
+    } else ano -= 1900;
     if(mes == 0) {
         mes = localtime(&timeNow)->tm_mon;
-    }else mes -= 1;
+    } else mes -= 1;
 
     if(utilizadores.data[utilizadorAtual].tipo != UTILIZADOR_DIRETOR) {
         menu_printReciboMensal(utilizadores.data[utilizadorAtual].NIF, mes, ano, &encomendas);
@@ -135,21 +127,18 @@ void interface_imprimir_recibo() {
     } else menu_printEncomendaDetail(&(encomendas.data[op]));
 }
 
-morada interface_editar_morada(morada* const morg) {
-    morada m;
-    if(morg) m = (*morg);
-    else     m = newMorada();
+void interface_editar_morada(morada* const m, int isNew) {
 
-    if(morg) printf("Introduzir Morada (%s) $ ", m.morada);
-    else     printf("Introduzir Morada $ ");
+    if(isNew) printf("Introduzir Morada $ ");
+    else      printf("Introduzir Morada (%s) $ ", m->morada);
 
-    if(m.morada) free(m.morada);
-    m.morada = menu_readString(stdin);
+    if(m->morada) free(m->morada);
+    m->morada = menu_readString(stdin);
 
     char* stmp = NULL;
     do {
-        if( morg == NULL ) printf("Introduzir Código Postal (XXXX-XXX) (%.4s-%.3s) $ ", m.codigoPostal, &(m.codigoPostal[4]));
-        else               printf("Introduzir Código Postal (XXXX-XXX) $ ");
+        if(isNew) printf("Introduzir Código Postal (XXXX-XXX) $ ");
+        else      printf("Introduzir Código Postal (XXXX-XXX) (%.4s-%.3s) $ ", m->codigoPostal, &(m->codigoPostal[4]));
 
         if(stmp) freeN(stmp);
         stmp = menu_readString(stdin);
@@ -157,21 +146,19 @@ morada interface_editar_morada(morada* const morg) {
         if (strlen(stmp) != 8) {
             menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
         } else {
-            m.codigoPostal[0] = stmp[0];
-            m.codigoPostal[1] = stmp[1];
-            m.codigoPostal[2] = stmp[2];
-            m.codigoPostal[3] = stmp[3];
-            m.codigoPostal[4] = stmp[5];
-            m.codigoPostal[5] = stmp[6];
-            m.codigoPostal[6] = stmp[7];
-            if (!morada_eCPValido(m.codigoPostal)) {
+            m->codigoPostal[0] = stmp[0];
+            m->codigoPostal[1] = stmp[1];
+            m->codigoPostal[2] = stmp[2];
+            m->codigoPostal[3] = stmp[3];
+            m->codigoPostal[4] = stmp[5];
+            m->codigoPostal[5] = stmp[6];
+            m->codigoPostal[6] = stmp[7];
+            if (!morada_eCPValido(m->codigoPostal)) {
                 menu_printError("Código Postal introduzido é inválido.");
             } else break;
         }
     } while (1);
     free(stmp);
-
-    return m;
 }
 
 int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t compare[9]) {
@@ -223,7 +210,7 @@ void funcional_editar_utilizador(size_t index) {
     free(u->nome);
     u->nome = menu_readString(stdin);
 
-    u->endereco = interface_editar_morada(&(u->endereco));
+    interface_editar_morada(&(u->endereco), 0);
 
     char* stmp = NULL;
     do {
@@ -387,15 +374,15 @@ void interface_alterar_utilizadores(){
             case  0:
                 if(op==0) {
                     menu_printError("Utilizador 0 é sempre diretor");
-                } else utilizadores.data[op].tipo == UTILIZADOR_CLIENTE;
+                } else utilizadores.data[op].tipo = UTILIZADOR_CLIENTE;
             break;
             case 1:
-                if(utilizadores.data[utilizadorAtual].tipo = UTILIZADOR_DIRETOR) {
+                if(utilizadores.data[utilizadorAtual].tipo == UTILIZADOR_DIRETOR) {
                     menu_printError("Um Diretor está sempre ativo");
-                } else utilizadores.data[op].tipo == UTILIZADOR_DESATIVADO;
+                } else utilizadores.data[op].tipo = UTILIZADOR_DESATIVADO;
             break;
             case  2:
-                utilizadores.data[op].tipo == UTILIZADOR_DIRETOR;
+                utilizadores.data[op].tipo = UTILIZADOR_DIRETOR;
             break;
             case  3:
                 switch (utilizadores.data[utilizadorAtual].tipo) {
@@ -474,9 +461,10 @@ void interface_diretor() {
                 "Alterar estado dos utilizadores",
                 "Alterar estados das encomendas",
                 "Imprimir recibo de encomenda",
-                "Imprimir recibo mensal de um utilizador"
+                "Imprimir recibo mensal de um utilizador",
+                "Outras listagens"
             },
-            .size = 7
+            .size = 8
         })) {
             case -1: return;
             case  0: funcional_editar_diretor(utilizadorAtual); break;
@@ -486,6 +474,7 @@ void interface_diretor() {
             case  4: interface_editar_estados_encomendas();     break;
             case  5: interface_imprimir_recibo();               break;
             case  6: funcional_recibo_mensal();                 break;
+            case  7: interface_outrasListagens();               break;
         }
     }
 }
@@ -512,11 +501,12 @@ int funcional_formalizar_encomenda(artigovec* artigos, encomenda* e) {
     })) {
         case -1: return 0;
         case  0: dest = morada_dup(utilizadores.data[utilizadorAtual].endereco); break;
-        case  1: dest = interface_editar_morada(NULL); break;
+        case  1: interface_editar_morada(&dest, 1); break;
     }
 
     menu_printInfo("introduzir morada de origem.");
-    morada org = interface_editar_morada(NULL);
+    morada org;
+    interface_editar_morada(&org, 1);
 
     int dist;
     while (1) {
@@ -691,9 +681,11 @@ void interface_editar_encomendas() {
                     "Editar artigos da encomenda",
                     "Cancelar encomenda",
                     "Definir encomenda como urgente",
-                    "Definir encomenda como fragil"
+                    "Definir encomenda como fragil",
+                    "Alterar morada de origem",
+                    "Alterar morada de destino"
                 },
-                .size = 4
+                .size = 6
             })) {
                 case -1: return;
                 case  0: {
@@ -709,9 +701,11 @@ void interface_editar_encomendas() {
                     encomenda_TIPO_PESADO(e);
                     return;
                 }
-                case  1: encomenda_ESTADO_CANCELADA(e); return;
-                case  2: encomenda_TIPO_URGENTE(e); break;
-                case  3: encomenda_TIPO_FRAGIL_togle(e); break;
+                case  1: encomenda_ESTADO_CANCELADA(e);             return;
+                case  2: encomenda_TIPO_URGENTE(e);                 break;
+                case  3: encomenda_TIPO_FRAGIL_togle(e);            break;
+                case  4: interface_editar_morada(&(e->origem), 0);  break;
+                case  5: interface_editar_morada(&(e->destino), 0); break;
             }
         }
     } else if (e->tipoEstado & ENCOMENDA_ESTADO_CANCELADA) {

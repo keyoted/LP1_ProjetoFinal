@@ -29,9 +29,6 @@
  * #define  VEC_NAME             strVec
  * #define  VEC_DEALOC(X)        free(X)
  * #include "./vector.h"
- * #undef   VEC_TYPE
- * #undef   VEC_NAME
- * #undef   VEC_DEALOC
  * #endif
  *
  * #ifndef  intVec_H
@@ -40,9 +37,6 @@
  * #define  VEC_NAME             intVec
  * #define  VEC_DEALOC(X)
  * #include "./vector.h"
- * #undef   VEC_TYPE
- * #undef   VEC_NAME
- * #undef   VEC_DEALOC
  * #endif
  * @endcode
  */
@@ -410,9 +404,13 @@ void VEC_FUN(_free)(VEC_NAME* const v);
 void VEC_FUN(_removeAt)(VEC_NAME* const v, uint64_t position);
 int VEC_FUN(_adjust)(VEC_NAME* const v);
 int VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space);
-void VEC_FUN(_DEALOC)(VEC_TYPE const X);
+void VEC_FUN(_DEALOC)(VEC_TYPE* const X);
 uint64_t VEC_FUN(_iterateFW)
                 (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
 uint64_t VEC_FUN(_iterateBW)
                 (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
 #endif
+
+#undef VEC_TYPE
+#undef VEC_NAME
+#undef VEC_DEALOC

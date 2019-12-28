@@ -19,7 +19,7 @@ int vecPrintItemPredicate (char* item, int* userdata) {
         * char* data[]
         (SE tamanho == 0, retornar NULL ao ler)
 */
-int save_str (FILE* f, uint8_t* data) {
+int save_str (FILE* f, char* data) {
     if(!data) {
         const uint32_t zero = 0;
         fwrite(&zero, sizeof(uint32_t), 1, f);
@@ -40,7 +40,7 @@ int load_str (FILE* f, char** data) {
         *data = NULL;
         return 1;
     }
-    *data = malloc(sizeof(char)*size);
+    *data = malloc(size);
     written += fread(*data, sizeof(uint8_t), size, f);
     return written == (size + 1);
 }

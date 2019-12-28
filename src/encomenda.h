@@ -16,6 +16,7 @@
 #include "morada.h"
 #include "artigo.h"
 #include "utilizador.h"
+#include "precos_tt_cent.h"
 
 #ifndef artigovec_H
 #define artigovec_H
@@ -23,21 +24,7 @@
 #define VEC_NAME        artigovec
 #define VEC_DEALOC(X)   freeArtigo(&X)
 #include "./vector.h"
-#undef VEC_TYPE
-#undef VEC_NAME
-#undef VEC_DEALOC
 #endif
-
-typedef struct {
-    uint64_t REGULAR ;
-    uint64_t URGENTE ;
-    uint64_t VOLUMOSO;
-    uint64_t FRAGIL  ;
-    uint64_t PESADO  ;
-    uint64_t POR_KM  ;
-    _Float32 MULT_CP [10][10]; // Origem Destino
-} precos_tt_cent;
-
 
 typedef struct {
     artigovec      artigos;
@@ -50,15 +37,12 @@ typedef struct {
     time_t         criacao;
 } encomenda;
 
-int       save_precos          (FILE* f, precos_tt_cent* data);
-int       load_precos          (FILE* f, precos_tt_cent* data);
 int       save_encomenda       (FILE* f, encomenda* data);
 int       load_encomenda       (FILE* f, encomenda* data);
-
-int       encomenda_ePesado    (uint64_t a);
-int       encomenda_eVolumoso  (uint64_t a);
 encomenda newEncomenda         ();
 void      freeEncomenda        (encomenda* e);
+int       encomenda_ePesado    (uint64_t a);
+int       encomenda_eVolumoso  (uint64_t a);
 encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint8_t NIF[9], morada org, morada dest, uint64_t dist);
 uint64_t  encomenda_CalcPreco  (encomenda* e);
 

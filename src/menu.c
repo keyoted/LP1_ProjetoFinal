@@ -135,7 +135,7 @@ void menu_printEncomendaBrief(encomenda* e) {
 
     printf(" (%.9s) ", e->NIF_cliente);
     struct tm* lt = localtime(&(e->criacao));
-    printf(" %d/%d/%d - ", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday);
+    printf(" %d/%d/%d %d:%d  -  ", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min);
     printf("%luc", encomenda_CalcPreco(e));
 }
 
@@ -169,7 +169,7 @@ void menu_printEncomendaDetail (encomenda* e) {
     printf("*** NIF do Cliente: %.9s\n", e->NIF_cliente);
 
     struct tm* lt = localtime(&(e->criacao));
-    printf("Data de criação: %d/%d/%d", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday);
+    printf("Data de criação: %d/%d/%d %d:%d", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min);
 
     menu_printHeader("Origem");
     printf("*** Morada: %s\n", e->origem.morada);

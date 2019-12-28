@@ -17,7 +17,9 @@ add_executable(main.x86
                ../src/artigo.c
                ../src/encomenda.c
                ../src/utilities.c
-               ../src/utilizador.c)
+               ../src/utilizador.c
+               ../src/outrasListagens.c
+               ../src/precos_tt_cent.c)
 
 add_executable(test.x86
                ../src/test.c
@@ -26,4 +28,6 @@ add_executable(test.x86
                ../src/artigo.c
                ../src/encomenda.c
                ../src/utilities.c
-               ../src/utilizador.c)
+               ../src/utilizador.c
+               ../src/outrasListagens.c
+               ../src/precos_tt_cent.c)
