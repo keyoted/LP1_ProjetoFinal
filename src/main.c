@@ -133,7 +133,8 @@ void interface_editar_morada(morada* const m, int isNew) {
     if(isNew) {
         printf("Introduzir Morada $ ");
         *m = newMorada();
-    } else printf("Introduzir Morada (%s) $ ", m->morada);
+    } else if(m->morada) printf("Introduzir Morada (%s) $ ", m->morada);
+    else printf("Introduzir Morada $ ");
 
     freeCHK(m->morada, menu_readString(stdin));
 
@@ -207,7 +208,7 @@ void funcional_editar_utilizador(size_t index) {
     menu_printHeader("Edição de Utilizador");
     utilizador* u = &(utilizadores.data[index]);
 
-    printf("Introduzir Nome (%s) $ ", u->nome);
+    printstr("Introduzir Nome (%s) $ ", u->nome);
     freeCHK(u->nome, menu_readString(stdin));
 
     interface_editar_morada(&(u->endereco), 0);
@@ -228,7 +229,8 @@ void funcional_editar_utilizador(size_t index) {
     }
     free(stmp);
 
-    menu_printInfo("utilizador %s (%.9s) editado com sucesso!", u->nome, u->NIF);
+    if(u->nome) menu_printInfo("utilizador %s (%.9s) editado com sucesso!", u->nome, u->NIF);
+    else menu_printInfo("utilizador UTILIZADOR (%.9s) editado com sucesso!", u->NIF);
 }
 
 void funcional_consultar_tabela_de_precos(int printDist, int printTable) {
@@ -562,7 +564,7 @@ int funcional_editar_artigo (artigo* a, int isDeletable) {
         }
     }
 
-    printf("Introduzir Nome do Artigo (%s) $ ", a->nome);
+    printstr("Introduzir Nome do Artigo (%s) $ ", a->nome);
     freeCHK(a->nome, menu_readString(stdin));
 
     if(a->tratamentoEspecial) {
@@ -791,11 +793,20 @@ void interface_novoRegisto() {
     menu_printInfo("diretor criado com sucesso!");
 }
 
+void funcional_carregarDados_err(FILE* f) {
+    fclose(f);
+    artigovec_free     (&artigos);
+    encomendavec_free  (&encomendas);
+    utilizadorvec_free (&utilizadores);
+    artigos      = artigovec_new();
+    encomendas   = encomendavec_new();
+    utilizadores = utilizadorvec_new();
+}
+
 void funcional_carregarDados() {
     artigovec_free     (&artigos);
     encomendavec_free  (&encomendas);
     utilizadorvec_free (&utilizadores);
-
     artigos      = artigovec_new();
     encomendas   = encomendavec_new();
     utilizadores = utilizadorvec_new();
@@ -807,11 +818,13 @@ void funcional_carregarDados() {
     }
     if(!load_precos(f, &tabelaPrecos)) {
         menu_printError("impossivel carregar tabela de preços :%d", errno);
+        funcional_carregarDados_err(f);
         return;
     }
     uint64_t size_tmp = 0;
     if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
         menu_printError("impossivel ler tamanho de utilizadores :%d", errno);
+        funcional_carregarDados_err(f);
         return;
     }
     utilizadorvec_reserve(&utilizadores, size_tmp);
@@ -820,11 +833,13 @@ void funcional_carregarDados() {
         if(!load_utilizador(f, &(utilizadores.data[i]))) {
             menu_printError("impossivel carregar utilizador [%lu] :%d", i, errno);
             --utilizadores.size;
+            funcional_carregarDados_err(f);
             return;
         }
     }
     if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
         menu_printError("impossivel carregar tamanho de encomendas :%d", errno);
+        funcional_carregarDados_err(f);
         return;
     }
     encomendavec_reserve(&encomendas, size_tmp);
@@ -833,6 +848,7 @@ void funcional_carregarDados() {
         if(!load_encomenda(f, &(encomendas.data[i]))) {
             menu_printError("impossivel carregar encomenda [%lu] :%d", i, errno);
             --encomendas.size;
+            funcional_carregarDados_err(f);
             return;
         }
     }
@@ -910,7 +926,7 @@ void interface_registoUtilizador() {
     }
 
     while (1) {
-        printf("Introduzir numero do cartao de cidadão $ ");
+        printf("Introduzir numero do cartao de cidadão ");
         freeN(stmp);
         while(!stmp) { printf("$ "); stmp = menu_readString(stdin); }
         if (strlen(stmp) != 12) {
@@ -926,7 +942,8 @@ void interface_registoUtilizador() {
 
     u.tipo = UTILIZADOR_CLIENTE;
     utilizadorvec_push(&utilizadores, u);
-    menu_printInfo("utilizador %s (%.9s) adicionado com sucesso!", u.nome, u.NIF);
+    if(u.nome) menu_printInfo("utilizador %s (%.9s) adicionado com sucesso!", u.nome, u.NIF);
+    menu_printInfo("utilizador INDEFINIDO (%.9s) adicionado com sucesso!", u.NIF);
 }
 
 void interface_login() {
@@ -946,7 +963,7 @@ void interface_login() {
         })) {
             case -1: freeN(stmp); return;
         }
-        printf("Introduzir NIF $ ");
+        printf("Introduzir NIF ");
         freeN(stmp);
         while(!stmp) { printf("$ "); stmp = menu_readString(stdin); }
         if (strlen(stmp) != 9) {
@@ -1035,25 +1052,30 @@ void funcional_guardarDados() {
     }
     if(!save_precos(f, &tabelaPrecos)) {
         menu_printError("impossivel guardar tabela de preços :%d", errno);
+        fclose(f);
         return;
     }
     if(!fwrite(&(utilizadores.size), sizeof(uint64_t), 1, f)) {
         menu_printError("impossivel guardar tamanho de utilizadores :%d", errno);
+        fclose(f);
         return;
     }
     for(uint64_t i = 0; i < utilizadores.size; ++i) {
         if(!save_utilizador(f, &(utilizadores.data[i]))) {
             menu_printError("impossivel guardar utilizador [%lu] :%d", i, errno);
+            fclose(f);
             return;
         }
     }
     if(!fwrite(&(encomendas.size), sizeof(uint64_t), 1, f)) {
         menu_printError("impossivel guardar tamanho de encomendas :%d", errno);
+        fclose(f);
         return;
     }
     for(uint64_t i = 0; i < encomendas.size; ++i) {
         if(!save_encomenda(f, &(encomendas.data[i]))) {
             menu_printError("impossivel guardar encomenda [%lu] :%d", i, errno);
+            fclose(f);
             return;
         }
     }

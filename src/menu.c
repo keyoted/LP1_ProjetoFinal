@@ -143,7 +143,8 @@ void menu_printEncomendaBrief(encomenda* e) {
 }
 
 void menu_printUtilizador (utilizador u) {
-    printf("%s (%.9s) ", u.nome, u.NIF);
+    printstr("%s ", u.nome);
+    printf("(%.9s) ", u.NIF);
     switch (u.tipo) {
         case UTILIZADOR_CLIENTE:
             printf("CLIENTE");
@@ -159,10 +160,9 @@ void menu_printUtilizador (utilizador u) {
 
 void menu_printArtigo (artigo* a) {
     // nome gramas cm2 tratamento especial
-    if(a->tratamentoEspecial) {
-        printf("%s  -   %lug   %lucm2   * %s", a->nome, a->peso_gramas, a->cmCubicos, a->tratamentoEspecial);
-    }
-    else printf("%s  -   %lug   %lucm2   * N/A", a->nome, a->peso_gramas, a->cmCubicos);
+    printstr("%s", a->nome);
+    printf("  -   %lug   %lucm2   * ", a->peso_gramas, a->cmCubicos);
+    printstr("%s", a->tratamentoEspecial);
 }
 
 void menu_printEncomendaDetail (encomenda* e) {
@@ -175,11 +175,11 @@ void menu_printEncomendaDetail (encomenda* e) {
     printf("Data de criação: %d/%d/%d %d:%d", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min);
 
     menu_printHeader("Origem");
-    printf("*** Morada: %s\n", e->origem.morada);
+    printstr("*** Morada: %s\n", e->origem.morada);
     printf("*** Código Postal: %.4s-%.3s\n", e->origem.codigoPostal, &(e->origem.codigoPostal[4]));
 
     menu_printHeader("Destino");
-    printf("*** Morada: %s\n", e->destino.morada);
+    printstr("*** Morada: %s\n", e->destino.morada);
     printf("*** Código Postal: %.4s-%.3s\n", e->destino.codigoPostal, &(e->destino.codigoPostal[4]));
 
 
@@ -189,16 +189,14 @@ void menu_printEncomendaDetail (encomenda* e) {
     printf("*       ID | NOME                          | PESO     | VOLUME   | PESO T.  | VOL. T.  | * TRATAMENTO ESPECIAL\n");
     for(size_t i = 0; i < e->artigos.size; ++i) {
         printf("* %*lu |", 8, i+1);
-        printf(" %*.*s |", 29, 29, e->artigos.data[i].nome);
+        printstr(" %29.29s |", e->artigos.data[i].nome);
         printf(" %*lu |", 8, e->artigos.data[i].peso_gramas);
         printf(" %*lu |", 8, e->artigos.data[i].cmCubicos);
         pt += e->artigos.data[i].peso_gramas;
         vt += e->artigos.data[i].cmCubicos;
         printf(" %*lu |", 8, pt);
         printf(" %*lu |", 8, vt);
-        if(!e->artigos.data[i].tratamentoEspecial) printf(" N/A");
-        else printf(" %s", e->artigos.data[i].tratamentoEspecial);
-        printf("\n");
+        printstr(" %s\n", e->artigos.data[i].tratamentoEspecial);
     }
 
     menu_printHeader("Outras Informações");
@@ -235,9 +233,14 @@ void menu_printEncomendaDetail (encomenda* e) {
     printf("*** Preçco base: %luc\n", tpt);
     printf("*** Distancia: %luKm\n", e->distancia_km);
     printf("*** Preço Por Km: %luc\n", e->precos.POR_KM);
-    const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0]-'0'][e->destino.codigoPostal[0]-'0'];
-    printf("*** Multiplicador de Código Postal: %f\n", (double)multcp);
-    printf("*** Preço Final em Cêntimos: %luc\n", encomenda_CalcPreco(e));
+    if(e->origem.codigoPostal[0] > '9' || e->origem.codigoPostal[0] < '0' || e->destino.codigoPostal[0] > '9' || e->destino.codigoPostal[0] < '0') {
+        printf("*** Multiplicador de Código Postal: ERRO\n");
+        printf("*** Preço Final em Cêntimos: ERRO\n");
+    } else {
+        const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0]-'0'][e->destino.codigoPostal[0]-'0'];
+        printf("*** Multiplicador de Código Postal: %f\n", (double)multcp);
+        printf("*** Preço Final em Cêntimos: %luc\n", encomenda_CalcPreco(e));
+    }
     menu_printDiv();
 }
 

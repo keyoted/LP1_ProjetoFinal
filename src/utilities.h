@@ -12,5 +12,6 @@ int     save_str              (FILE* f, char* data);
 int     load_str              (FILE* f, char** data);
 #define freeCHK(X, Y)         { if(X) free(X); X = Y; }
 #define freeN(X)              { if(X) free(X); X = NULL; }
+#define printstr(X, Y)          if(Y) printf(X, Y); else printf(X, "INDEFINIDO")
 
 #endif

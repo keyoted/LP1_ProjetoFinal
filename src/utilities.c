@@ -10,7 +10,8 @@ char* strdup (const char *s) {
 }
 
 int vecPrintItemPredicate (char* item, int* userdata) {
-    printf("   %*d   |   %s\n", 8, ++(*userdata), item);
+    printf("   %*d   |   ", 8, ++(*userdata));
+    printstr("%s\n", item);
     return 0;
 }
 
