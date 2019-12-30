@@ -155,12 +155,12 @@ void encomenda_ESTADO_CANCELADA (encomenda* e) {
     }
 }
 
-encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint8_t NIF[9], morada org, morada dest, uint64_t dist) {
+encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint64_t ID_cliente, morada org, morada dest, uint64_t dist) {
     encomenda e;
     e.artigos = artigos;
     e.destino = dest;
     e.distancia_km = dist;
-    memcpy(e.NIF_cliente, NIF, 9);
+    e.ID_cliente = ID_cliente;
     e.origem = org;
     e.precos = precos;
     for (int i = 0; i < 10; i++) {
@@ -198,9 +198,9 @@ int save_encomenda (FILE* f, encomenda* data) {
     written += fwrite(&(data->distancia_km), sizeof(uint64_t), 1, f);
     written += fwrite(&(data->tipoEstado), sizeof(uint8_t), 1, f);
     written += save_precos(f, &(data->precos));
-    written += fwrite(data->NIF_cliente, sizeof(uint8_t), 9, f);
+    written += fwrite(&(data->ID_cliente), sizeof(uint64_t), 1, f);
     written += fwrite(&(data->criacao), sizeof(time_t), 1, f);
-    return written == (1 + data->artigos.size + 5 + 9 + 1);
+    return written == (1 + data->artigos.size + 5 + 1 + 1);
 }
 
 int load_encomenda (FILE* f, encomenda* data) {
@@ -218,7 +218,7 @@ int load_encomenda (FILE* f, encomenda* data) {
     written += fread(&(data->distancia_km), sizeof(uint64_t), 1, f);
     written += fread(&(data->tipoEstado), sizeof(uint8_t), 1, f);
     written += load_precos(f, &(data->precos));
-    written += fread(data->NIF_cliente, sizeof(uint8_t), 9, f);
+    written += fread(&(data->ID_cliente), sizeof(uint64_t), 1, f);
     written += fread(&(data->criacao), sizeof(time_t), 1, f);
-    return written == (1 + size_tmp + 5 + 9 + 1);
+    return written == (1 + size_tmp + 5 + 1 + 1);
 }

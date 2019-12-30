@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#define  VEC_IMPLEMENTATION
 #include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -11,13 +10,13 @@
 #include <math.h>
 #include <time.h>
 
+#define  VEC_IMPLEMENTATION
 #define UTILIZADOR_INVALIDO ~((size_t)0)
 #include "utilities.h"
 #include "menu.h"
 #include "artigo.h"
 #include "encomenda.h"
 #include "utilizador.h"
-#include "outrasListagens.h"
 
 #ifndef artigovec_H
 #define artigovec_H
@@ -49,6 +48,8 @@ utilizadorvec  utilizadores;                            // Utilizadores existent
 size_t         utilizadorAtual = UTILIZADOR_INVALIDO;   // Index do utilizador atual
 precos_tt_cent tabelaPrecos;                            // Preço em centimos por cada tipo de transporte
 
+#include "outrasListagens.h"
+
 int vecPrintUserPredicate (utilizador item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
     menu_printUtilizador(item);
@@ -73,7 +74,7 @@ void funcional_recibo_mensal() {
     } else mes -= 1;
 
     if(utilizadores.data[utilizadorAtual].tipo != UTILIZADOR_DIRETOR) {
-        menu_printReciboMensal(utilizadores.data[utilizadorAtual].NIF, mes, ano, &encomendas);
+        menu_printReciboMensal(utilizadorAtual, mes, ano, &encomendas, &utilizadores);
     } else {
         menu_printHeader("Selecionar Utilizador Para Quem Imprimir o Recibo");
         int op = -2;
@@ -88,7 +89,7 @@ void funcional_recibo_mensal() {
             menu_printDiv();
         }
         if(op == -1) return;
-        menu_printReciboMensal(utilizadores.data[op].NIF, mes, ano, &encomendas);
+        menu_printReciboMensal(op, mes, ano, &encomendas, &utilizadores);
     }
 }
 
@@ -96,36 +97,18 @@ void funcional_consultar_estados_encomendas() {
     if(utilizadores.data[utilizadorAtual].tipo == UTILIZADOR_DIRETOR) {
         for(size_t i = 0; i < encomendas.size; ++i) {
             printf("   %*lu   |   ", 8, i);
-            menu_printEncomendaBrief(&(encomendas.data[i]));
+            menu_printEncomendaBrief(&(encomendas.data[i]), &utilizadores);
             printf("\n");
         }
     } else {
         for(size_t i = 0; i < encomendas.size; ++i) {
-            if( memcmp(utilizadores.data[utilizadorAtual].NIF, encomendas.data[i].NIF_cliente, 9) == 0 ) {
+            if(utilizadorAtual == encomendas.data[i].ID_cliente) {
                 printf("   %*lu   |   ", 8, i);
-                menu_printEncomendaBrief(&(encomendas.data[i]));
+                menu_printEncomendaBrief(&(encomendas.data[i]), &utilizadores);
                 printf("\n");
             }
         }
     }
-}
-
-void interface_imprimir_recibo() {
-    menu_printHeader("Selecionar Encomenda Para Imprimir");
-    int op = -2;
-    int max = encomendas.size-1;
-    while(op == -2) {
-        printf("   Opção      |   Item\n");
-        printf("         -2   |   Reimprimir\n");
-        printf("         -1   |   Sair\n");
-        funcional_consultar_estados_encomendas();
-        while (!menu_readIntMinMax(-2, max, &op));
-        menu_printDiv();
-    }
-    if(op == -1) return;
-    if((utilizadores.data[utilizadorAtual].tipo != UTILIZADOR_DIRETOR) && (memcmp(utilizadores.data[utilizadorAtual].NIF, encomendas.data[op].NIF_cliente, 9) != 0) ) {
-        menu_printError("não tem premissões para imprimir este recibo!");
-    } else menu_printEncomendaDetail(&(encomendas.data[op]));
 }
 
 void interface_editar_morada(morada* const m, int isNew) {
@@ -406,7 +389,7 @@ void interface_alterar_utilizadores(){
 
 int vecPrintEncomendaPredicate (encomenda item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
-    menu_printEncomendaBrief(&(item));
+    menu_printEncomendaBrief(&(item), &utilizadores);
     printf("\n");
     return 0;
 }
@@ -475,7 +458,7 @@ void interface_diretor() {
             case  2: interface_alterar_tabela_distancias();     break;
             case  3: interface_alterar_utilizadores();          break;
             case  4: interface_editar_estados_encomendas();     break;
-            case  5: interface_imprimir_recibo();               break;
+            case  5: listagem_imprimir_recibo();                break;
             case  6: funcional_recibo_mensal();                 break;
             case  7: funcional_consultar_tabela_de_precos(1,1); break;
             case  8: interface_outrasListagens();               break;
@@ -519,7 +502,7 @@ int funcional_formalizar_encomenda(artigovec* artigos, encomenda* e) {
         if(dist < 0) menu_printError("distancia negativa não é possivél.");
         else break;
     }
-    *e = encomenda_formalizar(*artigos, tabelaPrecos, utilizadores.data[utilizadorAtual].NIF, org, dest, dist);
+    *e = encomenda_formalizar(*artigos, tabelaPrecos, utilizadorAtual, org, dest, dist);
     *artigos = artigovec_new();
     while (1) {
         menu_printInfo("definir encomenda como urgente e/ou fragil?");
@@ -669,7 +652,7 @@ void interface_editar_encomendas() {
     }
     if(op == -1) return;
     encomenda* e = &(encomendas.data[op]);
-    menu_printEncomendaDetail(e);
+    menu_printEncomendaDetail(e, &utilizadores);
 
     if (e->tipoEstado & ENCOMENDA_ESTADO_EM_ENTREGA) {
         // Encomenda está por entregar
@@ -758,7 +741,7 @@ void interface_cliente() {
             case  3: menu_printDiv(); menu_printHeader("Encomendas"); funcional_consultar_estados_encomendas(); break;
             case  4: funcional_consultar_tabela_de_precos(1, 1); break;
             case  5: interface_editar_encomendas(); break;
-            case  6: interface_imprimir_recibo(); break;
+            case  6: listagem_imprimir_recibo(); break;
         }
     }
 }

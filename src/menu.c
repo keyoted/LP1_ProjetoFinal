@@ -125,7 +125,7 @@ void  menu_printHeader (char* header) {
     printf(" ***\n");
 };
 
-void menu_printEncomendaBrief(encomenda* e) {
+void menu_printEncomendaBrief(encomenda* e, utilizadorvec* uv) {
     if(e->tipoEstado & ENCOMENDA_TIPO_URGENTE) printf("URGENTE ");
     else                                       printf("REGULAR ");
 
@@ -136,7 +136,7 @@ void menu_printEncomendaBrief(encomenda* e) {
         case ENCOMENDA_ESTADO_ENTREGUE:    printf("ENTREGUE  "); break;
     }
 
-    printf(" (%.9s) ", e->NIF_cliente);
+    printf(" (%.9s) ", uv->data[e->ID_cliente].NIF);
     struct tm* lt = localtime(&(e->criacao));
     printf(" %d/%d/%d %d:%d  -  ", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min);
     printf("%luc", encomenda_CalcPreco(e));
@@ -165,11 +165,11 @@ void menu_printArtigo (artigo* a) {
     printstr("%s", a->tratamentoEspecial);
 }
 
-void menu_printEncomendaDetail (encomenda* e) {
+void menu_printEncomendaDetail (encomenda* e, utilizadorvec* uv) {
     menu_printDiv();
     menu_printDiv();
     menu_printHeader("Recibo de Encomenda");
-    printf("*** NIF do Cliente: %.9s\n", e->NIF_cliente);
+    printf("*** NIF do Cliente: %.9s\n", uv->data[e->ID_cliente].NIF);
 
     struct tm* lt = localtime(&(e->criacao));
     printf("Data de criação: %d/%d/%d %d:%d", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min);
@@ -244,20 +244,20 @@ void menu_printEncomendaDetail (encomenda* e) {
     menu_printDiv();
 }
 
-void menu_printReciboMensal (uint8_t NIF_USER[9], int mes, int ano, encomendavec* e) {
+void menu_printReciboMensal (uint64_t ID_U, int mes, int ano, encomendavec* e, utilizadorvec* uv) {
     size_t tot_enc = 0;
     size_t tot_art = 0;
     size_t tot_preco = 0;
 
     menu_printDiv();
-    printf("*** NIF do Cliente: %.9s\n\n", NIF_USER);
+    printf("*** NIF do Cliente: %.9s\n\n", uv->data[ID_U].NIF);
 
     for(size_t i = 0; i < e->size; ++i) {
         struct tm* enctm = localtime(&e->data[i].criacao);
-        if(enctm->tm_year != ano || enctm->tm_mon != mes || memcmp(NIF_USER, e->data[i].NIF_cliente, 9) != 0)
+        if(enctm->tm_year != ano || enctm->tm_mon != mes || ID_U != e->data[i].ID_cliente)
             continue;
         encomenda* atual = &(e->data[i]);
-        menu_printEncomendaBrief(atual);
+        menu_printEncomendaBrief(atual, uv);
         printf("\n");
         size_t art;
         for(art = 0; art < atual->artigos.size; ++art) {

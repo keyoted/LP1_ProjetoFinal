@@ -38,16 +38,19 @@
 #include "./vector.h"
 #endif
 
-extern artigovec      artigos;         // Artigos da seção atual, que ainda não foram formalizados numa encomenda
-extern encomendavec   encomendas;      // Encomendas formalizadas
-utilizadorvec         utilizadores;    // Utilizadores existentes no registo, index 0 é diretor
-extern size_t         utilizadorAtual; // Index do utilizador atual
-extern precos_tt_cent tabelaPrecos;    // Preço em centimos por cada tipo de transporte
+artigovec      artigos;         // Artigos da seção atual, que ainda não foram formalizados numa encomenda
+encomendavec   encomendas;      // Encomendas formalizadas
+utilizadorvec  utilizadores;    // Utilizadores existentes no registo, index 0 é diretor
+size_t         utilizadorAtual; // Index do utilizador atual
+precos_tt_cent tabelaPrecos;    // Preço em centimos por cada tipo de transporte
+void funcional_consultar_estados_encomendas();
+
 
 void listagem_Encomendas_Periodo_de_Tempo   ();
 void listagem_Utilizadores_Mais_Gasto       ();
 void listagem_Encomenda_EmEstado_PorPreco   ();
 void listagem_Artigos_Semana                ();
+void listagem_imprimir_recibo               ();
 void interface_outrasListagens              ();
 
 #endif

@@ -33,7 +33,7 @@ typedef struct {
     uint64_t       distancia_km;
     uint8_t        tipoEstado;
     precos_tt_cent precos;
-    uint8_t        NIF_cliente[9];
+    uint64_t       ID_cliente;
     time_t         criacao;
 } encomenda;
 
@@ -43,7 +43,7 @@ encomenda newEncomenda         ();
 void      freeEncomenda        (encomenda* e);
 int       encomenda_ePesado    (uint64_t a);
 int       encomenda_eVolumoso  (uint64_t a);
-encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint8_t NIF[9], morada org, morada dest, uint64_t dist);
+encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint64_t ID_cliente, morada org, morada dest, uint64_t dist);
 uint64_t  encomenda_CalcPreco  (encomenda* e);
 
 void encomenda_TIPO_URGENTE      (encomenda* e);
