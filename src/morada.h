@@ -4,9 +4,10 @@
 #include <stdint.h>
 #include <ctype.h>
 #include "utilities.h"
+#include "menu.h"
 
 typedef struct {
-    char*   morada;
+    char*   morada;             // (not null)
     uint8_t codigoPostal[7];
 } morada;
 

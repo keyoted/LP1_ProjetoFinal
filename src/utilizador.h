@@ -16,7 +16,7 @@ typedef struct {
     uint8_t NIF[9];
     uint8_t CC[12];
     morada  endereco;
-    uint8_t tipo;
+    uint8_t tipo;           // (not null)
 } utilizador;
 
 int        utilizador_eCCValido  (uint8_t* cc);

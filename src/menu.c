@@ -10,8 +10,8 @@ char* subStringTrimWhiteSpace(char *str) {
 
     // At the beguining
     while(isspace(*str)) str++;
-    if(*str == 0)  // All spaces?
-        return str;
+    if(*str == '\0')  // All spaces?
+        return NULL;
 
     // At the end
     char* end = &str[strlen(str) - 1];
@@ -21,17 +21,23 @@ char* subStringTrimWhiteSpace(char *str) {
     return str;
 }
 
-char* menu_readString (FILE* fp) {
-    size_t alocated = 20;
+// Can return null
+char* menu_readString () {
+    const int STEP = 16;
+    size_t alocated = STEP;
     size_t size = 0;
     char* str = malloc(sizeof(char)*alocated);
 
     int ch;
-    while ( (ch=fgetc(fp)) != EOF && ch != '\n' ) {
+    while ( (ch=fgetc(stdin)) != EOF && ch != '\n' ) {
         str[size++] = ch;
         if(size == alocated) {
-            char* tmp = realloc(str, sizeof(char)*(alocated+=20));
-            if(!tmp) break;
+            char* tmp = realloc(str, alocated+=STEP);
+            if(!tmp) {
+                --size;
+                menu_printError("menu_readString - realocação de memória recusada.");
+                break;
+            }
             str = tmp;
         }
     }
@@ -143,7 +149,7 @@ void menu_printEncomendaBrief(encomenda* e, utilizadorvec* uv) {
 }
 
 void menu_printUtilizador (utilizador u) {
-    printstr("%s ", u.nome);
+    printf("%s ", protectStr(u.nome));
     printf("(%.9s) ", u.NIF);
     switch (u.tipo) {
         case UTILIZADOR_CLIENTE:
@@ -160,9 +166,7 @@ void menu_printUtilizador (utilizador u) {
 
 void menu_printArtigo (artigo* a) {
     // nome gramas cm2 tratamento especial
-    printstr("%s", a->nome);
-    printf("  -   %lug   %lucm2   * ", a->peso_gramas, a->cmCubicos);
-    printstr("%s", a->tratamentoEspecial);
+    printf("%s  -   %lug   %lucm2   * %s", protectStr(a->nome), a->peso_gramas, a->cmCubicos, protectStr(a->tratamentoEspecial));
 }
 
 void menu_printEncomendaDetail (encomenda* e, utilizadorvec* uv) {
@@ -175,11 +179,11 @@ void menu_printEncomendaDetail (encomenda* e, utilizadorvec* uv) {
     printf("Data de criação: %d/%d/%d %d:%d", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min);
 
     menu_printHeader("Origem");
-    printstr("*** Morada: %s\n", e->origem.morada);
+    printf("*** Morada: %s\n", protectStr(e->origem.morada));
     printf("*** Código Postal: %.4s-%.3s\n", e->origem.codigoPostal, &(e->origem.codigoPostal[4]));
 
     menu_printHeader("Destino");
-    printstr("*** Morada: %s\n", e->destino.morada);
+    printf("*** Morada: %s\n", protectStr(e->destino.morada));
     printf("*** Código Postal: %.4s-%.3s\n", e->destino.codigoPostal, &(e->destino.codigoPostal[4]));
 
 
@@ -188,15 +192,15 @@ void menu_printEncomendaDetail (encomenda* e, utilizadorvec* uv) {
     uint64_t vt = 0;
     printf("*       ID | NOME                          | PESO     | VOLUME   | PESO T.  | VOL. T.  | * TRATAMENTO ESPECIAL\n");
     for(size_t i = 0; i < e->artigos.size; ++i) {
-        printf("* %*lu |", 8, i+1);
-        printstr(" %29.29s |", e->artigos.data[i].nome);
-        printf(" %*lu |", 8, e->artigos.data[i].peso_gramas);
-        printf(" %*lu |", 8, e->artigos.data[i].cmCubicos);
         pt += e->artigos.data[i].peso_gramas;
         vt += e->artigos.data[i].cmCubicos;
+        printf("* %*lu |", 8, i+1);
+        printf(" %29.29s |", protectStr(e->artigos.data[i].nome));
+        printf(" %*lu |", 8, e->artigos.data[i].peso_gramas);
+        printf(" %*lu |", 8, e->artigos.data[i].cmCubicos);
         printf(" %*lu |", 8, pt);
         printf(" %*lu |", 8, vt);
-        printstr(" %s\n", e->artigos.data[i].tratamentoEspecial);
+        printf(" %s\n", protectStr(e->artigos.data[i].tratamentoEspecial));
     }
 
     menu_printHeader("Outras Informações");

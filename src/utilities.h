@@ -10,8 +10,34 @@ char*   strdup                (const char *s);
 int     vecPrintItemPredicate (char* item, int* userdata);
 int     save_str              (FILE* f, char* data);
 int     load_str              (FILE* f, char** data);
-#define freeCHK(X, Y)         { if(X) free(X); X = Y; }
-#define freeN(X)              { if(X) free(X); X = NULL; }
-#define printstr(X, Y)          if(Y) printf(X, Y); else printf(X, "INDEFINIDO")
+#define freeN(X)              { if(X) { free(X); X = NULL; } }
+#define protectStr(X)         ((X)?(X):("N/A"))
+
+#define readNotNulStr(X)            \
+    if(X) {                         \
+        free(X);                    \
+        X = NULL;                   \
+    }                               \
+    while (!X) {                    \
+        printf("$ ");               \
+        X = menu_readString();      \
+    }                               \
+
+#define protectVarFcnCall(VAR, FCN, ERRMSG)     \
+    {                                           \
+        VAR = FCN;                              \
+        if(!VAR) {                              \
+            printf(ERRMSG);                     \
+            exit(EXIT_FAILURE);                 \
+        }                                       \
+    }
+
+#define protectFcnCall(FCN, ERRMSG)     \
+    {                                   \
+        if(!FCN) {                      \
+            printf(ERRMSG);             \
+            exit(EXIT_FAILURE);         \
+        }                               \
+    }
 
 #endif

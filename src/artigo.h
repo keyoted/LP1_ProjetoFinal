@@ -3,9 +3,10 @@
 
 #include <stdint.h>
 #include "utilities.h"
+#include "menu.h"
 
 typedef struct {
-    char*    nome;                // Nome do artigo
+    char*    nome;                // Nome do artigo (not null)
     char*    tratamentoEspecial;  // Texto sobre o tratamento especial do artigo
     uint64_t peso_gramas;         // Peso do artigo em gramas
     uint64_t cmCubicos;           // Volume do artigo em centimetros cubicos

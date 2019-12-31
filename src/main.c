@@ -116,18 +116,15 @@ void interface_editar_morada(morada* const m, int isNew) {
     if(isNew) {
         printf("Introduzir Morada $ ");
         *m = newMorada();
-    } else if(m->morada) printf("Introduzir Morada (%s) $ ", m->morada);
-    else printf("Introduzir Morada $ ");
-
-    freeCHK(m->morada, menu_readString(stdin));
+    } else if(m->morada) printf("Introduzir Morada (%s) ", m->morada);
+    else printf("Introduzir Morada ");
+    readNotNulStr(m->morada);
 
     char* stmp = NULL;
     while (1) {
         if(isNew) printf("Introduzir Código Postal (XXXX-XXX) ");
         else      printf("Introduzir Código Postal (XXXX-XXX) (%.4s-%.3s) ", m->codigoPostal, &(m->codigoPostal[4]));
-
-        freeN(stmp);
-        while(!stmp) { printf("$ "); stmp = menu_readString(stdin); }
+        readNotNulStr(stmp);
 
         if (strlen(stmp) != 8) {
             menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
@@ -165,14 +162,13 @@ void funcional_editar_diretor(size_t op) {
     utilizador* diretor = & utilizadores.data[op];
     diretor->tipo = UTILIZADOR_DIRETOR;
 
-    printf("Introduzir Nome $ ");
-    freeCHK(diretor->nome, menu_readString(stdin));
+    printf("Introduzir Nome ");
+    readNotNulStr(diretor->nome);
 
     char* stmp = NULL;
     while (1) {
         printf("Introduzir NIF ");
-        freeN(stmp);
-        while(!stmp) { printf("$ "); stmp = menu_readString(stdin); }
+        readNotNulStr(stmp);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
         } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {
@@ -191,16 +187,15 @@ void funcional_editar_utilizador(size_t index) {
     menu_printHeader("Edição de Utilizador");
     utilizador* u = &(utilizadores.data[index]);
 
-    printstr("Introduzir Nome (%s) $ ", u->nome);
-    freeCHK(u->nome, menu_readString(stdin));
+    printf("Introduzir Nome (%s) ", protectStr(u->nome));
+    readNotNulStr(u->nome);
 
     interface_editar_morada(&(u->endereco), 0);
 
     char* stmp = NULL;
     while (1) {
         printf("Introduzir numero do cartao de cidadão (%.12s) ", u->CC);
-        freeN(stmp);
-        while(!stmp) { printf("$ "); stmp = menu_readString(stdin); }
+        readNotNulStr(stmp);
         if (strlen(stmp) != 12) {
             menu_printError("tem que introduzir 12 characteres, %d introduzidos.", strlen(stmp));
         } else if (!utilizador_eCCValido((uint8_t*)stmp)) {
@@ -547,14 +542,14 @@ int funcional_editar_artigo (artigo* a, int isDeletable) {
         }
     }
 
-    printstr("Introduzir Nome do Artigo (%s) $ ", a->nome);
-    freeCHK(a->nome, menu_readString(stdin));
+    printf("Introduzir Nome do Artigo (%s) ", protectStr(a->nome));
+    readNotNulStr(a->nome);
 
     if(a->tratamentoEspecial) {
-        printf("Introduzir Tratamento especial para o artigo Artigo (%s) $ ", a->tratamentoEspecial);
+        printf("Introduzir Tratamento especial para o artigo Artigo (%s) ", a->tratamentoEspecial);
         freeN(a->tratamentoEspecial);
-    } else printf("Introduzir Tratamento especial para o artigo Artigo $ ");
-    a->tratamentoEspecial = menu_readString(stdin);
+    } else printf("Introduzir Tratamento especial para o artigo Artigo ");
+    readNotNulStr(a->tratamentoEspecial);
 
     int tmp;
     while (1) {
@@ -861,14 +856,13 @@ void interface_registoUtilizador() {
     menu_printHeader("Registar Novo Utilizador");
     utilizador u = newUtilizador();
 
-    printf("Introduzir Nome $ ");
-    freeCHK(u.nome, menu_readString(stdin));
+    printf("Introduzir Nome ");
+    readNotNulStr(u.nome);
 
     char* stmp = NULL;
     while (1) {
         printf("Introduzir NIF ");
-        freeN(stmp);
-        while(!stmp) { printf("$ "); stmp = menu_readString(stdin); }
+        readNotNulStr(stmp);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
         } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {
@@ -885,13 +879,12 @@ void interface_registoUtilizador() {
         }
     }
 
-    printf("Introduzir Morada $ ");
-    freeCHK(u.endereco.morada, menu_readString(stdin));
+    printf("Introduzir Morada ");
+    readNotNulStr(u.endereco.morada);
 
     while (1) {
         printf("Introduzir Código Postal (XXXX-XXX) ");
-        freeN(stmp);
-        while(!stmp) { printf("$ "); stmp = menu_readString(stdin); }
+        readNotNulStr(stmp);
         if (strlen(stmp) != 8) {
             menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
         } else {
@@ -910,8 +903,7 @@ void interface_registoUtilizador() {
 
     while (1) {
         printf("Introduzir numero do cartao de cidadão ");
-        freeN(stmp);
-        while(!stmp) { printf("$ "); stmp = menu_readString(stdin); }
+        readNotNulStr(stmp);
         if (strlen(stmp) != 12) {
             menu_printError("tem que introduzir 12 characteres, %d introduzidos.", strlen(stmp));
         } else if (!utilizador_eCCValido((uint8_t*)stmp)) {
@@ -947,8 +939,7 @@ void interface_login() {
             case -1: freeN(stmp); return;
         }
         printf("Introduzir NIF ");
-        freeN(stmp);
-        while(!stmp) { printf("$ "); stmp = menu_readString(stdin); }
+        readNotNulStr(stmp);
         if (strlen(stmp) != 9) {
             menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
         } else if (!utilizador_eNIFValido((uint8_t*)stmp)) {

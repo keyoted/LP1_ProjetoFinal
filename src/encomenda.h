@@ -27,7 +27,7 @@
 #endif
 
 typedef struct {
-    artigovec      artigos;
+    artigovec      artigos;         // (size != 0)
     morada         origem;
     morada         destino;
     uint64_t       distancia_km;

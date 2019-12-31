@@ -190,6 +190,10 @@ encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint64
 int save_encomenda (FILE* f, encomenda* data) {
     size_t written = 0;
     written += fwrite(&(data->artigos.size), sizeof(uint64_t), 1, f);
+    if (data->artigos.size == 0) {
+        menu_printError("ao gravar encomenda - encomenda sem artigos.");
+        written = 0;
+    }
     for(uint64_t i = 0; i < data->artigos.size; ++i) {
         written += save_artigo(f, &(data->artigos.data[i]));
     }
@@ -207,6 +211,10 @@ int load_encomenda (FILE* f, encomenda* data) {
     size_t written = 0;
     uint64_t size_tmp = 0;
     written += fread(&(size_tmp), sizeof(uint64_t), 1, f);
+    if (size_tmp == 0) {
+        menu_printError("ao carregar encomenda - encomenda sem artigos.");
+        written = 0;
+    }
     data->artigos = artigovec_new();
     artigovec_reserve(&(data->artigos), size_tmp);
     for(uint64_t i = 0; i < size_tmp; ++i) {

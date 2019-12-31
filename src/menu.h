@@ -41,7 +41,7 @@
 int   menu_readIntMinMax        (int min, int max, int* const op);
 // retorna o numero selecionado
 int   menu_selection            (const strvec* itens) ;
-char* menu_readString           (FILE* fp);
+char* menu_readString           ();
 void  menu_printDiv             ();
 void  menu_printError           (char* err, ...);
 void  menu_printInfo            (char* info, ...);

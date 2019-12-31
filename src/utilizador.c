@@ -52,6 +52,11 @@ void freeUtilizador(utilizador* u) {
 int save_utilizador (FILE* f, utilizador* data) {
     int written = 0;
     written += save_str(f, data->nome);
+    if(!data->nome) {
+        menu_printError("ao gravar utilizador - nome inválido.");
+        data->nome = strdup("Inválido");
+        written = 0;
+    }
     written += fwrite(&(data->NIF), sizeof(uint8_t), 9, f);
     written += fwrite(&(data->CC), sizeof(uint8_t), 12, f);
     written += save_morada(f, &(data->endereco));
@@ -62,6 +67,11 @@ int save_utilizador (FILE* f, utilizador* data) {
 int load_utilizador (FILE* f, utilizador* data) {
     int written = 0;
     written += load_str(f, &(data->nome));
+    if(!data->nome) {
+        menu_printError("ao carregar utilizador - nome inválido.");
+        data->nome = strdup("Inválido");
+        written = 0;
+    }
     written += fread(&(data->NIF), sizeof(uint8_t), 9, f);
     written += fread(&(data->CC), sizeof(uint8_t), 12, f);
     written += load_morada(f, &(data->endereco));

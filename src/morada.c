@@ -19,9 +19,11 @@ int morada_eCPValido (uint8_t* CP) {
 }
 
 morada morada_dup (morada m) {
-    morada mdup = m;
-    mdup.morada = strdup(m.morada);
-    return mdup;
+    morada mcp = (morada) {
+        .morada = strdup(m.morada)
+    };
+    memcpy(&(mcp.codigoPostal[0]), &(m.codigoPostal[0]), 9);
+    return mcp;
 }
 
 /*
@@ -32,6 +34,11 @@ morada morada_dup (morada m) {
 int save_morada (FILE* f, morada* data) {
     int written = 0;
     written += save_str(f, data->morada);
+    if(!data->morada) {
+        menu_printError("ao gravar morada - morada inválida.");
+        data->morada = strdup("Inválido");
+        written = 0;
+    }
     written += fwrite(data->codigoPostal, sizeof(uint8_t), 7, f);
     return written == 8;
 }
@@ -39,6 +46,11 @@ int save_morada (FILE* f, morada* data) {
 int load_morada (FILE* f, morada* data) {
     int written = 0;
     written += load_str(f, &(data->morada));
+    if(!data->morada) {
+        menu_printError("ao carregar morada - morada inválida.");
+        data->morada = strdup("Inválido");
+        written = 0;
+    }
     written += fread(data->codigoPostal, sizeof(uint8_t), 7, f);
     return written == 8;
 }

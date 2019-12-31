@@ -2,7 +2,7 @@
 
 char* strdup (const char *s) {
     if(!s) return NULL;
-    size_t len = strlen(s)+1;
+    size_t len = strlen(s)+1; // Make room for '\0'
     if(len == 1) return NULL;
     char* new = malloc(len);
     memcpy(new, s, len);
@@ -10,8 +10,7 @@ char* strdup (const char *s) {
 }
 
 int vecPrintItemPredicate (char* item, int* userdata) {
-    printf("   %*d   |   ", 8, ++(*userdata));
-    printstr("%s\n", item);
+    printf("   %*d   |   %s\n", 8, ++(*userdata), protectStr(item));
     return 0;
 }
 
