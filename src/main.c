@@ -587,7 +587,8 @@ void funcional_editar_artigos(artigovec* ar) {
         }
         // Option was gotten -------------------------
         if(op == -1) return;
-        if(op == max-1) artigovec_push(ar, newArtigo());
+        if(op == max-1)
+            protectFcnCall(artigovec_push(ar, newArtigo()), "funcional_editar_artigos - artigovec_push falhou.");
         if(!funcional_editar_artigo(&(ar->data[op]), (op != max - 1))) {
             freeArtigo(&(ar->data[op]));
             artigovec_moveBelow(ar, op);
@@ -627,7 +628,7 @@ void interface_criar_encomenda() {
     if(!funcional_formalizar_encomenda(&artigos, &e)) {
         menu_printInfo("encomenda não formalizada.");
     } else {
-        encomendavec_push(&encomendas, e);
+        protectFcnCall(encomendavec_push(&encomendas, e), "interface_criar_encomenda - encomendavec_push falhou.");
         menu_printInfo("encomenda adicionada com sucesso!");
     }
 }
@@ -766,7 +767,7 @@ void interface_novoRegisto() {
 
     menu_printHeader("Registar Novo Diretor");
 
-    utilizadorvec_push(&utilizadores, newUtilizador());
+    protectFcnCall(utilizadorvec_push(&utilizadores, newUtilizador()), "interface_novoRegisto - utilizadorvec_push falhou.");
     funcional_editar_diretor(0);
     menu_printInfo("diretor criado com sucesso!");
 }
@@ -805,7 +806,7 @@ void funcional_carregarDados() {
         funcional_carregarDados_err(f);
         return;
     }
-    utilizadorvec_reserve(&utilizadores, size_tmp);
+    protectFcnCall(utilizadorvec_reserve(&utilizadores, size_tmp), "funcional_carregarDados - utilizadorvec_reserve falhou.");
     for(uint64_t i = 0; i < size_tmp; ++i) {
         ++utilizadores.size;
         if(!load_utilizador(f, &(utilizadores.data[i]))) {
@@ -820,7 +821,7 @@ void funcional_carregarDados() {
         funcional_carregarDados_err(f);
         return;
     }
-    encomendavec_reserve(&encomendas, size_tmp);
+    protectFcnCall(encomendavec_reserve(&encomendas, size_tmp), "funcional_carregarDados - encomendavec_reserve falhou.");
     for(uint64_t i = 0; i < size_tmp; ++i) {
         ++encomendas.size;
         if(!load_encomenda(f, &(encomendas.data[i]))) {
@@ -916,7 +917,7 @@ void interface_registoUtilizador() {
     free(stmp);
 
     u.tipo = UTILIZADOR_CLIENTE;
-    utilizadorvec_push(&utilizadores, u);
+    protectFcnCall(utilizadorvec_push(&utilizadores, u), "interface_registoUtilizador - utilizadorvec_push falhou.");
     if(u.nome) menu_printInfo("utilizador %s (%.9s) adicionado com sucesso!", u.nome, u.NIF);
     menu_printInfo("utilizador INDEFINIDO (%.9s) adicionado com sucesso!", u.NIF);
 }

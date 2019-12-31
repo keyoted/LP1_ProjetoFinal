@@ -26,7 +26,8 @@ char* menu_readString () {
     const int STEP = 16;
     size_t alocated = STEP;
     size_t size = 0;
-    char* str = malloc(sizeof(char)*alocated);
+    char* str;
+    protectVarFcnCall(str, malloc(STEP), "menu_readString - alocação de memória recusada.");
 
     int ch;
     while ( (ch=fgetc(stdin)) != EOF && ch != '\n' ) {

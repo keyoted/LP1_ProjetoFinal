@@ -84,10 +84,12 @@ void listagem_Utilizadores_Mais_Gasto() {
     // Criar uma lista com todos os utilizadores
     pidctgvec lista = pidctgvec_new();
     for(size_t u = 0; u < utilizadores.size; ++u) {
-        pidctgvec_push(&lista, (par_idc_tG) {
-            .totalGasto = 0,
-            .ID_utilizador = u
-        } );
+        protectFcnCall(
+            pidctgvec_push(&lista, (par_idc_tG) {
+                .totalGasto = 0,
+                .ID_utilizador = u
+            } ),
+            "listagem_Utilizadores_Mais_Gasto - pidctgvec_push falhou.");
     }
 
     // Calcular o valor das encomendas feitas por utilizador
@@ -194,14 +196,16 @@ void listagem_Encomenda_EmEstado_PorPreco() {
     }
 
     EXIT_LABEL:
-    pidepvec_reserve(&lista, encomendas.size);
+    protectFcnCall(pidepvec_reserve(&lista, encomendas.size), "listagem_Encomenda_EmEstado_PorPreco - pidepvec_reserve falhou.")
 
     for(uint64_t e = 0; e < encomendas.size; ++ e) {
         if(encomendas.data[e].tipoEstado == estadoPesquisa) {
-            pidepvec_push(&lista, (par_ide_p) {
-                .ID_encomenda = e,
-                .preco = encomenda_CalcPreco(&(encomendas.data[e]))
-            });
+            protectFcnCall(
+                pidepvec_push(&lista, (par_ide_p) {
+                    .ID_encomenda = e,
+                    .preco = encomenda_CalcPreco(&(encomendas.data[e]))
+                }),
+                "listagem_Encomenda_EmEstado_PorPreco - pidepvec_push falhou.");
         }
     }
 

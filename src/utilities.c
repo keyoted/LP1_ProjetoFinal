@@ -3,8 +3,9 @@
 char* strdup (const char *s) {
     if(!s) return NULL;
     size_t len = strlen(s)+1; // Make room for '\0'
-    if(len == 1) return NULL;
-    char* new = malloc(len);
+    char* new;
+    protectVarFcnCall(new, malloc(len), "strdup - alocação de memória recusada.");
+
     memcpy(new, s, len);
     return new;
 }
@@ -41,7 +42,7 @@ int load_str (FILE* f, char** data) {
         *data = NULL;
         return 1;
     }
-    *data = malloc(size);
+    protectVarFcnCall(*data, malloc(size), "load_str - alocação de memória recusada.");
     written += fread(*data, sizeof(uint8_t), size, f);
     return written == (size + 1);
 }

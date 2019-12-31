@@ -216,7 +216,7 @@ int load_encomenda (FILE* f, encomenda* data) {
         written = 0;
     }
     data->artigos = artigovec_new();
-    artigovec_reserve(&(data->artigos), size_tmp);
+    protectFcnCall(artigovec_reserve(&(data->artigos), size_tmp), "load_encomenda - artigovec_reserve fallhou.");
     for(uint64_t i = 0; i < size_tmp; ++i) {
         written += load_artigo(f, &(data->artigos.data[i]));
         ++data->artigos.size;
