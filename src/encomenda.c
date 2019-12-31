@@ -40,6 +40,11 @@ uint64_t encomenda_CalcPreco (encomenda* e) {
     if(e->tipoEstado & ENCOMENDA_TIPO_VOLUMOSO) precoFinal += e->precos.VOLUMOSO;
 
     // Final do cálculo
+    if(e->origem.codigoPostal[0] > '9' || e->origem.codigoPostal[0] < '0' || e->destino.codigoPostal[0] > '9' || e->destino.codigoPostal[0] < '0') {
+        printf("\n");
+        menu_printError("ao calcular preço da encomenda - codigo postal defeituoso.");
+        return 0;
+    }
     const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0]-'0'][e->destino.codigoPostal[0]-'0'];
     return (precoFinal + e->distancia_km*e->precos.POR_KM) * multcp;
 }
@@ -47,10 +52,10 @@ uint64_t encomenda_CalcPreco (encomenda* e) {
 void encomenda_TIPO_URGENTE (encomenda* e) {
     if(e->tipoEstado & ENCOMENDA_TIPO_URGENTE) {
         e->tipoEstado = e->tipoEstado & (~ENCOMENDA_TIPO_URGENTE);
-        menu_printInfo("encomenda definida como REGULAR");
+        menu_printInfo("encomenda definida como REGULAR.");
     } else {
         e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_URGENTE;
-        menu_printInfo("encomenda definida como URGENTE");
+        menu_printInfo("encomenda definida como URGENTE.");
     }
 }
 
@@ -58,32 +63,32 @@ void encomenda_TIPO_FRAGIL (encomenda* e) {
     for (size_t i = 0; i < e->artigos.size; i++) {
        if(e->artigos.data[i].tratamentoEspecial) {
            e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_FRAGIL;
-           menu_printInfo("encomenda definida como FRAGIL");
+           menu_printInfo("encomenda definida como FRAGIL.");
            return;
        }
     }
     e->tipoEstado = e->tipoEstado & (~ENCOMENDA_TIPO_FRAGIL);
-    menu_printInfo("encomenda definida como RESISTENTE");
+    menu_printInfo("encomenda definida como RESISTENTE.");
 }
 
 void encomenda_TIPO_FRAGIL_togle (encomenda* e) {
     if(!(e->tipoEstado & ENCOMENDA_TIPO_FRAGIL)) {
         // Encomenda não é fragil, logo pode ser posta como fragil manualmente
         e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_FRAGIL;
-        menu_printInfo("encomenda definida como FRAGIL");
+        menu_printInfo("encomenda definida como FRAGIL.");
         return;
     }
 
     for (size_t i = 0; i < e->artigos.size; i++) {
        if(e->artigos.data[i].tratamentoEspecial) {
            // Encomenda é obigatoriamente fragil
-           menu_printInfo("encomenda obrigatoriamente definida como FRAGIL");
+           menu_printInfo("encomenda obrigatoriamente definida como FRAGIL.");
            return;
        }
     }
     // Encomenda pode ser defenida como resistente
     e->tipoEstado = e->tipoEstado & (~ENCOMENDA_TIPO_FRAGIL);
-    menu_printInfo("encomenda definida como RESISTENTE");
+    menu_printInfo("encomenda definida como RESISTENTE.");
 }
 
 void encomenda_TIPO_PESADO (encomenda* e) {
@@ -93,10 +98,10 @@ void encomenda_TIPO_PESADO (encomenda* e) {
     }
     if(encomenda_ePesado(pesoAcumulado)) {
         e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_PESADO;
-        menu_printInfo("encomenda definida como PESADO");
+        menu_printInfo("encomenda definida como PESADO.");
     } else {
         e->tipoEstado = e->tipoEstado & (~ENCOMENDA_TIPO_PESADO);
-        menu_printInfo("encomenda definida como LEVE");
+        menu_printInfo("encomenda definida como LEVE.");
     }
 }
 
@@ -107,10 +112,10 @@ void encomenda_TIPO_VOLUMOSO (encomenda* e) {
     }
     if(encomenda_eVolumoso(volumeAcumulado)) {
         e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_VOLUMOSO;
-        menu_printInfo("encomenda definida como VOLUMOSO");
+        menu_printInfo("encomenda definida como VOLUMOSO.");
     } else {
         e->tipoEstado = e->tipoEstado & (~ENCOMENDA_TIPO_VOLUMOSO);
-        menu_printInfo("encomenda definida como PEQUENO");
+        menu_printInfo("encomenda definida como PEQUENO.");
     }
 }
 
@@ -127,33 +132,33 @@ int encomenda_generic_estado(encomenda* e, uint8_t paraMudar, uint8_t toggle) {
 
 void encomenda_ESTADO_EM_ENTREGA (encomenda* e) {
     if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_EM_ENTREGA, ENCOMENDA_ESTADO_CANCELADA)) {
-        menu_printInfo("encomenda definida como CANCELADA");
+        menu_printInfo("encomenda definida como CANCELADA.");
     } else {
-        menu_printInfo("encomenda definida como EM ENTREGA");
+        menu_printInfo("encomenda definida como EM ENTREGA.");
     }
 }
 
 void encomenda_ESTADO_EXPEDIDA (encomenda* e) {
     if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_EXPEDIDA, ENCOMENDA_ESTADO_EM_ENTREGA)) {
-        menu_printInfo("encomenda definida como EM ENTREGA");
+        menu_printInfo("encomenda definida como EM ENTREGA.");
     } else {
-        menu_printInfo("encomenda definida como EXPEDIDA");
+        menu_printInfo("encomenda definida como EXPEDIDA.");
     }
 }
 
 void encomenda_ESTADO_ENTREGUE (encomenda* e) {
     if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_ENTREGUE, ENCOMENDA_ESTADO_EM_ENTREGA)) {
-        menu_printInfo("encomenda definida como EM ENTREGA");
+        menu_printInfo("encomenda definida como EM ENTREGA.");
     } else {
-        menu_printInfo("encomenda definida como ENTREGUE");
+        menu_printInfo("encomenda definida como ENTREGUE.");
     }
 }
 
 void encomenda_ESTADO_CANCELADA (encomenda* e) {
     if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_CANCELADA, ENCOMENDA_ESTADO_EM_ENTREGA)) {
-        menu_printInfo("encomenda definida como EM ENTREGA");
+        menu_printInfo("encomenda definida como EM ENTREGA.");
     } else {
-        menu_printInfo("encomenda definida como CANCELADA");
+        menu_printInfo("encomenda definida como CANCELADA.");
     }
 }
 

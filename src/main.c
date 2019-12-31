@@ -1,14 +1,8 @@
-// TODO: apagar, apenas util para debug
-#include <stdlib.h>
+#ifdef DEBUG_BUILD
 #include <sys/stat.h>
+#endif
 
-#include <time.h>
-#include <math.h>
 #include <errno.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <memory.h>
 
 #define  VEC_IMPLEMENTATION
 #define UTILIZADOR_INVALIDO ~((size_t)0)
@@ -239,7 +233,7 @@ void interface_alterar_tabela_precos(){
     funcional_consultar_tabela_de_precos(0, 1);
     menu_printDiv();
     menu_printHeader("Editar preços");
-    menu_printInfo("selecione o que editar");
+    menu_printInfo("selecione o que editar:");
     int edit = menu_selection(&(strvec){
         .data = (char*[]){
             "Editar preço regular",
@@ -258,7 +252,7 @@ void interface_alterar_tabela_precos(){
         printf("Introduza novo preço (em centimos) $ ");
         menu_readInt(&novoPreco);
         if(novoPreco < 0) {
-            menu_printError("Preço não pode ser negativo");
+            menu_printError("Preço não pode ser negativo.");
         } else break;
     }
 
@@ -274,7 +268,7 @@ void interface_alterar_tabela_precos(){
 
 void interface_alterar_tabela_distancias(){
     funcional_consultar_tabela_de_precos(1, 0);
-    menu_printInfo("selecione modo de edição");
+    menu_printInfo("selecione modo de edição:");
     int modo = menu_selection(&(strvec){
         .data = (char*[]){
             "Editar preço de elemento",
@@ -287,11 +281,11 @@ void interface_alterar_tabela_distancias(){
     int origem;
     int destino;
     _Float32 novoVal;
-    menu_printInfo("selecione linha de origem");
+    menu_printInfo("selecione linha de origem:");
     menu_readIntMinMax(0,9, &origem);
 
     if(modo == 0) {
-        menu_printInfo("selecione coluna de destino");
+        menu_printInfo("selecione coluna de destino:");
         menu_readIntMinMax(0,9, &destino);
         while (1) {
             printf("Introduza novo valor decimal para { origem:%d, destino:%d } $ ", origem, destino);
@@ -354,12 +348,12 @@ void interface_alterar_utilizadores(){
             case -1: return;
             case  0:
                 if(op==0) {
-                    menu_printError("Utilizador 0 é sempre diretor");
+                    menu_printError("Utilizador 0 é sempre diretor.");
                 } else utilizadores.data[op].tipo = UTILIZADOR_CLIENTE;
             break;
             case 1:
                 if(utilizadores.data[utilizadorAtual].tipo == UTILIZADOR_DIRETOR) {
-                    menu_printError("Um Diretor está sempre ativo");
+                    menu_printError("Um Diretor está sempre ativo.");
                 } else utilizadores.data[op].tipo = UTILIZADOR_DESATIVADO;
             break;
             case  2:
@@ -371,7 +365,7 @@ void interface_alterar_utilizadores(){
                         funcional_editar_utilizador(op);
                     break;
                     case UTILIZADOR_DESATIVADO:
-                        menu_printInfo("está a editar um utilizador desativado");
+                        menu_printInfo("está a editar um utilizador desativado.");
                         funcional_editar_utilizador(op);
                     break;
                     case UTILIZADOR_DIRETOR:
@@ -410,7 +404,7 @@ void interface_editar_estados_encomendas(){
         encomenda* e = &(encomendas.data[op]);
         menu_printDiv();
         while (1) {
-            menu_printHeader("Selecionar operação");
+            menu_printHeader("Selecionar operação:");
             switch (menu_selection(&(strvec){
                 .data = (char*[]){
                     "Marcar encomenda como expedida",
@@ -556,14 +550,14 @@ int funcional_editar_artigo (artigo* a, int isDeletable) {
     while (1) {
         printf("Introduzir Peso do Artigo (em gramas) (%lu) $ ", a->peso_gramas);
         if (menu_readInt(&tmp)) {
-            if(tmp < 0) menu_printError("artigo não pode ter peso negativo");
+            if(tmp < 0) menu_printError("artigo não pode ter peso negativo.");
             else { a->peso_gramas = tmp; break; }
         }
     }
     while (1) {
         printf("Introduzir Volume do Artigo (em centimetros cúbicos) (%lu) $ ", a->cmCubicos);
         if (menu_readInt(&tmp)) {
-            if(tmp < 0) menu_printError("artigo não pode ter volume negativo");
+            if(tmp < 0) menu_printError("artigo não pode ter volume negativo.");
             else { a->cmCubicos = tmp; break; }
         }
     }
@@ -572,8 +566,8 @@ int funcional_editar_artigo (artigo* a, int isDeletable) {
 
 void funcional_editar_artigos(artigovec* ar) {
     while (1) {
-        menu_printInfo("numero de artigos atuais: %lu", ar->size);
-        menu_printHeader("Selecionar Artigo Para Editar");
+        menu_printInfo("numero de artigos atuais: %lu.", ar->size);
+        menu_printHeader("Selecionar Artigo Para Editar:");
         int op = -2;
         int max = ar->size+1;
         while(op == -2) {
@@ -593,7 +587,7 @@ void funcional_editar_artigos(artigovec* ar) {
         if(!funcional_editar_artigo(&(ar->data[op]), (op != max - 1))) {
             freeArtigo(&(ar->data[op]));
             artigovec_moveBelow(ar, op);
-            menu_printInfo("Artigo removido");
+            menu_printInfo("Artigo removido.");
         }
     }
 }
@@ -619,9 +613,9 @@ void interface_criar_encomenda() {
         }
     }
     funcional_editar_artigos(&artigos);
-    menu_printInfo("a formalizar encomenda");
+    menu_printInfo("a formalizar encomenda...");
     if(artigos.size == 0) {
-        menu_printError("impossivel formalizar encomenda sem artigos");
+        menu_printError("impossivel formalizar encomenda sem artigos!");
         return;
     }
 
@@ -669,10 +663,10 @@ void interface_editar_encomendas() {
                 case -1: return;
                 case  0: {
                     funcional_editar_artigos(&(e->artigos));
-                    menu_printInfo("a formalizar encomenda");
+                    menu_printInfo("a formalizar encomenda...");
                     e->tipoEstado = ENCOMENDA_ESTADO_EM_ENTREGA;
                     if(e->artigos.size == 0) {
-                        menu_printError("impossivel formalizar encomenda sem artigos, a cancelar encomenda");
+                        menu_printError("impossivel formalizar encomenda sem artigos, a cancelar encomenda!");
                         encomenda_ESTADO_CANCELADA(e);
                     }
                     encomenda_TIPO_VOLUMOSO(e);
@@ -698,7 +692,7 @@ void interface_editar_encomendas() {
             case -1: return;
             case  0: {
                 if(e->artigos.size == 0) {
-                    menu_printError("impossivel reativar encomenda sem artigos");
+                    menu_printError("impossivel reativar encomenda sem artigos!");
                 } else {
                     encomenda_ESTADO_CANCELADA(e);
                 }
@@ -706,9 +700,9 @@ void interface_editar_encomendas() {
             }
         }
     } else if (e->tipoEstado & ENCOMENDA_ESTADO_ENTREGUE) {
-        menu_printError("a encomenda foi entregue, não pode ser editada");
+        menu_printError("a encomenda foi entregue, não pode ser editada.");
     } else if (e->tipoEstado & ENCOMENDA_ESTADO_EXPEDIDA) {
-        menu_printError("a encomenda foi expedida, não pode ser editada");
+        menu_printError("a encomenda foi expedida, não pode ser editada.");
     }
 }
 
@@ -793,17 +787,17 @@ void funcional_carregarDados() {
 
     FILE* f = fopen("data.bin", "rb");
     if(!f) {
-        menu_printError("impossivel abrir ficheiro :%d", errno);
+        menu_printError("impossivel abrir ficheiro :%d!", errno);
         return;
     }
     if(!load_precos(f, &tabelaPrecos)) {
-        menu_printError("impossivel carregar tabela de preços :%d", errno);
+        menu_printError("impossivel carregar tabela de preços :%d!", errno);
         funcional_carregarDados_err(f);
         return;
     }
     uint64_t size_tmp = 0;
     if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel ler tamanho de utilizadores :%d", errno);
+        menu_printError("impossivel ler tamanho de utilizadores :%d!", errno);
         funcional_carregarDados_err(f);
         return;
     }
@@ -811,14 +805,14 @@ void funcional_carregarDados() {
     for(uint64_t i = 0; i < size_tmp; ++i) {
         ++utilizadores.size;
         if(!load_utilizador(f, &(utilizadores.data[i]))) {
-            menu_printError("impossivel carregar utilizador [%lu] :%d", i, errno);
+            menu_printError("impossivel carregar utilizador [%lu] :%d!", i, errno);
             --utilizadores.size;
             funcional_carregarDados_err(f);
             return;
         }
     }
     if(!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel carregar tamanho de encomendas :%d", errno);
+        menu_printError("impossivel carregar tamanho de encomendas :%d!", errno);
         funcional_carregarDados_err(f);
         return;
     }
@@ -826,7 +820,7 @@ void funcional_carregarDados() {
     for(uint64_t i = 0; i < size_tmp; ++i) {
         ++encomendas.size;
         if(!load_encomenda(f, &(encomendas.data[i]))) {
-            menu_printError("impossivel carregar encomenda [%lu] :%d", i, errno);
+            menu_printError("impossivel carregar encomenda [%lu] :%d!", i, errno);
             --encomendas.size;
             funcional_carregarDados_err(f);
             return;
@@ -928,7 +922,7 @@ void interface_login() {
     while (1) {
         utilizadorAtual = UTILIZADOR_INVALIDO;
         if(artigos.size != 0) {
-            menu_printInfo("encomenda por formalizar foi eleminada");
+            menu_printInfo("encomenda por formalizar foi eleminada.");
             artigovec_free(&artigos);
             artigos = artigovec_new();
         }
@@ -953,7 +947,7 @@ void interface_login() {
             } else {
                 switch (utilizadores.data[index].tipo) {
                     case UTILIZADOR_DESATIVADO:
-                        menu_printError("o seu prefil está desativado, contacte um diretor para o ativar");
+                        menu_printError("o seu prefil está desativado, contacte um diretor para o ativar...");
                     break;
                     case UTILIZADOR_CLIENTE:
                         menu_printInfo("login efetuado com sucesso.");
@@ -1023,34 +1017,34 @@ void interface_login() {
 void funcional_guardarDados() {
     FILE* f = fopen("data.bin", "wb");
     if(!f) {
-        menu_printError("impossivel abrir ficheiro :%d", errno);
+        menu_printError("impossivel abrir ficheiro :%d!", errno);
         return;
     }
     if(!save_precos(f, &tabelaPrecos)) {
-        menu_printError("impossivel guardar tabela de preços :%d", errno);
+        menu_printError("impossivel guardar tabela de preços :%d!", errno);
         fclose(f);
         return;
     }
     if(!fwrite(&(utilizadores.size), sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel guardar tamanho de utilizadores :%d", errno);
+        menu_printError("impossivel guardar tamanho de utilizadores :%d!", errno);
         fclose(f);
         return;
     }
     for(uint64_t i = 0; i < utilizadores.size; ++i) {
         if(!save_utilizador(f, &(utilizadores.data[i]))) {
-            menu_printError("impossivel guardar utilizador [%lu] :%d", i, errno);
+            menu_printError("impossivel guardar utilizador [%lu] :%d!", i, errno);
             fclose(f);
             return;
         }
     }
     if(!fwrite(&(encomendas.size), sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel guardar tamanho de encomendas :%d", errno);
+        menu_printError("impossivel guardar tamanho de encomendas :%d!", errno);
         fclose(f);
         return;
     }
     for(uint64_t i = 0; i < encomendas.size; ++i) {
         if(!save_encomenda(f, &(encomendas.data[i]))) {
-            menu_printError("impossivel guardar encomenda [%lu] :%d", i, errno);
+            menu_printError("impossivel guardar encomenda [%lu] :%d!", i, errno);
             fclose(f);
             return;
         }
@@ -1078,8 +1072,36 @@ void interface_inicio() {
 }
 
 int main() {
-    // TODO: apagar, apenas util para debug
+    #ifdef DEBUG_BUILD
     setvbuf(stdout, NULL, _IONBF, 0);
+    printf("COMPILADO EM: " __DATE__ " - " __TIME__ "\n");
+    printf("COMPILADOR: "
+        #if defined(_MSC_VER)
+            "VISUAL STUDIO"
+            " \nVERÇÂO DO COMPILADOR: "
+            MACRO_QUOTE(_MSC_VER)
+        #elif defined(__clang__)
+            "CLANG"
+            " \nVERÇÂO DO COMPILADOR: "
+            MACRO_QUOTE(__clang_major__) "." MACRO_QUOTE(__clang_minor__) "." MACRO_QUOTE(__clang_patchlevel__)
+        #elif defined(__MINGW32__)
+            "MINGW"
+            " \nVERÇÂO DO COMPILADOR: "
+            MACRO_QUOTE(__MINGW32_MAJOR_VERSION) "." MACRO_QUOTE(__MINGW32_MINOR_VERSION)
+        #elif defined(__TINYC__)
+            "TINY C"
+        #elif defined(__llvm__)
+            "DESCONHECIDO - LLVM BACKEND"
+        #elif defined(__GNUC__) && !defined(__INTEL_COMPILER)
+            "GNU C COMPILER"
+            " \nVERÇÂO DO COMPILADOR: "
+            MACRO_QUOTE(__GNUC__) "." MACRO_QUOTE(__GNUC_MINOR__)
+        #else
+            "DESCONHECIDO"
+        #endif
+        "\n"
+    );
+    #endif
 
     menu_printDiv();
     menu_printHeader("A Iniciar");

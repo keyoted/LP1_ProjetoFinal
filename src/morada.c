@@ -25,7 +25,7 @@ morada morada_dup (morada m) {
     morada mcp = (morada) {
         .morada = strdup(m.morada)
     };
-    memcpy(&(mcp.codigoPostal[0]), &(m.codigoPostal[0]), 9);
+    memcpy(&(mcp.codigoPostal[0]), &(m.codigoPostal[0]), 7);
     return mcp;
 }
 
