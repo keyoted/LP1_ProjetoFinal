@@ -15,7 +15,7 @@ typedef struct {
     _Float32 MULT_CP [10][10]; // Origem Destino
 } precos_tt_cent;
 
-int save_precos (FILE* f, precos_tt_cent* data);
-int load_precos (FILE* f, precos_tt_cent* data);
+int save_precos (FILE* const f, const precos_tt_cent* const data);
+int load_precos (FILE* const f, precos_tt_cent* const data);
 
 #endif

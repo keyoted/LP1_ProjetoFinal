@@ -1074,6 +1074,7 @@ void interface_inicio() {
 int main() {
     #ifdef DEBUG_BUILD
     setvbuf(stdout, NULL, _IONBF, 0);
+    printf("DEBUG BULD\n");
     printf("COMPILADO EM: " __DATE__ " - " __TIME__ "\n");
     printf("COMPILADOR: "
         #if defined(_MSC_VER)

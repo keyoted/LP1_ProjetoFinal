@@ -1,7 +1,3 @@
-#include <stdlib.h>
-#include <memory.h>
-#include <inttypes.h>
-
 /**
  * @file    vector.h
  * @author  André Botelho (keyoted@gmail.com)
@@ -15,14 +11,12 @@
  *          declaração das funções que dizem respeito ao vetor que está a ser
  *          criado. Por omição da defenição de ambos os macros, VEC_DECLARATION
  *          é definido automaticamente.
- * @version 0.1
+ * @version 1
  * @date    2019-12-04
  *
  * @copyright Copyright (c) 2019
  * @section example_sec Exemplo
  * @code{c}
- *
- *
  * #ifndef  strPVec_H
  * #define  strPvec_H
  * #define  VEC_TYPE             char*
@@ -67,6 +61,10 @@
  *                  VEC_IMPLEMENTATION e VEC_DECLARATION.
  */
 
+#include <stdlib.h>
+#include <memory.h>
+#include <inttypes.h>
+
 #ifndef VEC_TYPE
 #define VEC_TYPE int
 #endif
@@ -94,9 +92,9 @@
  *                  pode guardar [0, ~((uint64_t)0)[ elemntos.
  */
 typedef struct {
-    uint64_t alocated;    ///< Tamanho alocado de objetos.
-    uint64_t size;        ///< Tamanho de objetos que foi populado.
-    VEC_TYPE* data;     ///< Começa em data[0] e acaba em data[size-1].
+    uint64_t  alocated;          ///< Tamanho alocado de objetos.
+    uint64_t  size;              ///< Tamanho de objetos que foi populado.
+    VEC_TYPE* data;              ///< Começa em data[0] e acaba em data[size-1].
 } VEC_NAME;
 typedef int(*VEC_FUN(_predicate_t))(VEC_TYPE, void*);
 

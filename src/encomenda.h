@@ -37,23 +37,23 @@ typedef struct {
     time_t         criacao;
 } encomenda;
 
-int       save_encomenda       (FILE* f, encomenda* data);
-int       load_encomenda       (FILE* f, encomenda* data);
+int       save_encomenda       (FILE* const f, const encomenda* const data);
+int       load_encomenda       (FILE* const f, encomenda* const data);
 encomenda newEncomenda         ();
-void      freeEncomenda        (encomenda* e);
-int       encomenda_ePesado    (uint64_t a);
-int       encomenda_eVolumoso  (uint64_t a);
-encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint64_t ID_cliente, morada org, morada dest, uint64_t dist);
-uint64_t  encomenda_CalcPreco  (encomenda* e);
+void      freeEncomenda        (encomenda* const e);
+int       encomenda_ePesado    (const uint64_t a);
+int       encomenda_eVolumoso  (const uint64_t a);
+encomenda encomenda_formalizar (const artigovec artigos, const precos_tt_cent precos, const uint64_t ID_cliente, const morada org, const morada dest, const uint64_t dist);
+uint64_t  encomenda_CalcPreco  (const encomenda* const e);
 
-void encomenda_TIPO_URGENTE      (encomenda* e);
-void encomenda_TIPO_FRAGIL       (encomenda* e);
-void encomenda_TIPO_FRAGIL_togle (encomenda* e);
-void encomenda_TIPO_PESADO       (encomenda* e);
-void encomenda_TIPO_VOLUMOSO     (encomenda* e);
-void encomenda_ESTADO_EM_ENTREGA (encomenda* e);
-void encomenda_ESTADO_EXPEDIDA   (encomenda* e);
-void encomenda_ESTADO_ENTREGUE   (encomenda* e);
-void encomenda_ESTADO_CANCELADA  (encomenda* e);
+void encomenda_TIPO_URGENTE      (encomenda* const e);
+void encomenda_TIPO_FRAGIL       (encomenda* const e);
+void encomenda_TIPO_FRAGIL_togle (encomenda* const e);
+void encomenda_TIPO_PESADO       (encomenda* const e);
+void encomenda_TIPO_VOLUMOSO     (encomenda* const e);
+void encomenda_ESTADO_EM_ENTREGA (encomenda* const e);
+void encomenda_ESTADO_EXPEDIDA   (encomenda* const e);
+void encomenda_ESTADO_ENTREGUE   (encomenda* const e);
+void encomenda_ESTADO_CANCELADA  (encomenda* const e);
 
 #endif

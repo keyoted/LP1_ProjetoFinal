@@ -6,10 +6,10 @@
 #include <stdint.h>
 #include <string.h>
 
-char*   strdup                (const char *s);
-int     vecPrintItemPredicate (char* item, int* userdata);
-int     save_str              (FILE* f, char* data);
-int     load_str              (FILE* f, char** data);
+char*   strdup                (const char* const s);
+int     vecPrintItemPredicate (char* const item, int* const userdata);
+int     save_str              (FILE* const f, const char* const data);
+int     load_str              (FILE* const f, char** const data);
 #define freeN(X)              { if(X) { free(X); X = NULL; } }
 #define protectStr(X)         ((X)?(X):("N/A"))
 
@@ -27,7 +27,6 @@ int     load_str              (FILE* f, char** data);
     }
 
 #ifdef DEBUG_BUILD
-
     #define protectVarFcnCall(VAR, FCN, ERRMSG)     \
         {                                           \
             VAR = FCN;                              \
@@ -46,9 +45,7 @@ int     load_str              (FILE* f, char** data);
                 exit(EXIT_FAILURE);         \
             }                               \
         }
-
 #else
-
     #define protectVarFcnCall(VAR, FCN, ERRMSG)     \
         {                                           \
             VAR = FCN;                              \
@@ -65,7 +62,6 @@ int     load_str              (FILE* f, char** data);
                 exit(EXIT_FAILURE);         \
             }                               \
         }
-
 #endif
 
 

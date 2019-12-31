@@ -3,7 +3,7 @@
 #include "menu.h"
 #include "utilities.h"
 
-int utilizador_eCCValido (uint8_t* cc) {
+int utilizador_eCCValido (const uint8_t* const cc) {
     int i = 0;
     // Assegurar 9 digitos
     for(; i < 9; ++i)
@@ -11,9 +11,8 @@ int utilizador_eCCValido (uint8_t* cc) {
             return 0;
     // Assegurar 2 digitos alfanuméricos
     for(; i < 11; ++i) {
-        if(isalnum(cc[i])) {
-            cc[i] = (char)toupper(cc[i]);
-        } else return 0;
+        if(!isalnum(cc[i]))
+            return 0;
     }
     // Asegurar ultimo digito
     if(! isdigit(cc[11])) return 0;
@@ -21,7 +20,7 @@ int utilizador_eCCValido (uint8_t* cc) {
     return 1;
 }
 
-int utilizador_eNIFValido (uint8_t* NIF) {
+int utilizador_eNIFValido (const uint8_t* const NIF) {
     int i = 0;
     // Assegurar 9 digitos
     for(; i < 9; ++i)
@@ -39,7 +38,7 @@ utilizador newUtilizador() {
     };
 }
 
-void freeUtilizador(utilizador* u) {
+void freeUtilizador(utilizador* const u) {
     freeN(u->nome);
     freeMorada(&(u->endereco));
 }
@@ -52,12 +51,11 @@ void freeUtilizador(utilizador* u) {
         - morada endereco
         * uint8_t tipo
 */
-int save_utilizador (FILE* f, utilizador* data) {
+int save_utilizador (FILE* const f, const utilizador* const data) {
     int written = 0;
     written += save_str(f, data->nome);
     if(!data->nome) {
         menu_printError("ao gravar utilizador - nome inválido.");
-        data->nome = strdup("Inválido");
         written = 0;
     }
     written += fwrite(&(data->NIF), sizeof(uint8_t), 9, f);
@@ -67,7 +65,7 @@ int save_utilizador (FILE* f, utilizador* data) {
     return written == (1+9+12+1+1);
 }
 
-int load_utilizador (FILE* f, utilizador* data) {
+int load_utilizador (FILE* const f, utilizador* const data) {
     int written = 0;
     written += load_str(f, &(data->nome));
     if(!data->nome) {

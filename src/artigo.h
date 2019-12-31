@@ -13,8 +13,8 @@ typedef struct {
 } artigo;
 
 artigo   newArtigo     ();
-void     freeArtigo    (artigo* a);
-int      save_artigo   (FILE* f, artigo* data);
-int      load_artigo   (FILE* f, artigo* data);
+void     freeArtigo    (artigo* const a);
+int      save_artigo   (FILE* const f, const artigo* const data);
+int      load_artigo   (FILE* const f, artigo* data);
 
 #endif

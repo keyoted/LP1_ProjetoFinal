@@ -10,7 +10,7 @@ artigo newArtigo() {
     };
 }
 
-void freeArtigo(artigo* a) {
+void freeArtigo(artigo* const a) {
     freeN(a->nome);
     freeN(a->tratamentoEspecial);
 }
@@ -22,12 +22,11 @@ void freeArtigo(artigo* a) {
         * uint64_t peso_gramas
         * uint64_t cmCubicos
 */
-int save_artigo (FILE* f, artigo* data) {
+int save_artigo (FILE* const f, const artigo* const data) {
     int written = 0;
     written += save_str(f, data->nome);
     if (!data->nome) {
         menu_printError("ao gravar artigo - nome inválido.");
-        data->nome = strdup("Inválido");
         written = 0;
     }
     written += save_str(f, data->tratamentoEspecial);
@@ -36,7 +35,7 @@ int save_artigo (FILE* f, artigo* data) {
     return written == 4;
 }
 
-int load_artigo (FILE* f, artigo* data) {
+int load_artigo (FILE* const f, artigo* const data) {
     int written = 0;
     written += load_str(f, &(data->nome));
     if(!data->nome) {

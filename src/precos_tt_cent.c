@@ -11,7 +11,7 @@
         - _Float32[100] MULT_CP
             * _Float32 (32b) de [0][0], [0][1] .. [0][9], [1][0] .. [9][9]
 */
-int save_precos (FILE* f, precos_tt_cent* data) {
+int save_precos (FILE* const f, const precos_tt_cent* const data) {
     size_t written = 0;
     written += fwrite(&(data->REGULAR ), sizeof(uint64_t), 1, f);
     written += fwrite(&(data->URGENTE ), sizeof(uint64_t), 1, f);
@@ -25,7 +25,7 @@ int save_precos (FILE* f, precos_tt_cent* data) {
     return written == 106;
 }
 
-int load_precos (FILE* f, precos_tt_cent* data) {
+int load_precos (FILE* const f, precos_tt_cent* const data) {
     size_t written = 0;
     written += fread(&(data->REGULAR ), sizeof(uint64_t), 1, f);
     written += fread(&(data->URGENTE ), sizeof(uint64_t), 1, f);

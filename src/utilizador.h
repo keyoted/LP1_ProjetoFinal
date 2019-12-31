@@ -19,11 +19,11 @@ typedef struct {
     morada  endereco;
 } utilizador;
 
-int        utilizador_eCCValido  (uint8_t* cc);
-int        utilizador_eNIFValido (uint8_t* NIF);
+int        utilizador_eCCValido  (const uint8_t* const cc);
+int        utilizador_eNIFValido (const uint8_t* const NIF);
 utilizador newUtilizador         ();
-void       freeUtilizador        (utilizador* u);
-int        save_utilizador       (FILE* f, utilizador* data);
-int        load_utilizador       (FILE* f, utilizador* data);
+void       freeUtilizador        (utilizador* const u);
+int        save_utilizador       (FILE* const f, const utilizador* const data);
+int        load_utilizador       (FILE* const f, utilizador* const data);
 
 #endif

@@ -1,6 +1,6 @@
 #include "utilities.h"
 
-char* strdup (const char *s) {
+char* strdup (const char* const s) {
     if(!s) return NULL;
     size_t len = strlen(s)+1; // Make room for '\0'
     char* new;
@@ -10,7 +10,7 @@ char* strdup (const char *s) {
     return new;
 }
 
-int vecPrintItemPredicate (char* item, int* userdata) {
+int vecPrintItemPredicate (char* const item, int* const userdata) {
     printf("   %*d   |   %s\n", 8, ++(*userdata), protectStr(item));
     return 0;
 }
@@ -21,7 +21,7 @@ int vecPrintItemPredicate (char* item, int* userdata) {
         * char* data[]
         (SE tamanho == 0, retornar NULL ao ler)
 */
-int save_str (FILE* f, char* data) {
+int save_str (FILE* const f, const char* const data) {
     if(!data) {
         const uint32_t ZERO = 0;
         fwrite(&ZERO, sizeof(uint32_t), 1, f);
@@ -34,7 +34,7 @@ int save_str (FILE* f, char* data) {
     return written == (size + 1);
 }
 
-int load_str (FILE* f, char** data) {
+int load_str (FILE* const f, char** const data) {
     uint32_t written = 0;
     uint32_t size = 0;
     written += fread(&size, sizeof(uint32_t), 1, f);

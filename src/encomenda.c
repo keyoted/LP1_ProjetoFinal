@@ -12,21 +12,21 @@ encomenda newEncomenda() {
     };
 }
 
-void freeEncomenda(encomenda* e) {
+void freeEncomenda(encomenda* const e) {
     artigovec_free(&(e->artigos));
     freeMorada(&(e->origem));
     freeMorada(&(e->destino));
 }
 
-int encomenda_ePesado(uint64_t a) {
+int encomenda_ePesado(const uint64_t a) {
     return a > 20000;
 }
 
-int encomenda_eVolumoso(uint64_t a) {
+int encomenda_eVolumoso(const uint64_t a) {
     return a > (50 * 50 * 50);
 }
 
-uint64_t encomenda_CalcPreco (encomenda* e) {
+uint64_t encomenda_CalcPreco (const encomenda* const e) {
     uint64_t precoFinal;
     // Soma dos tipos de transporte
     // ENCOMENDA_TIPO_URGENTE
@@ -49,7 +49,7 @@ uint64_t encomenda_CalcPreco (encomenda* e) {
     return (precoFinal + e->distancia_km*e->precos.POR_KM) * multcp;
 }
 
-void encomenda_TIPO_URGENTE (encomenda* e) {
+void encomenda_TIPO_URGENTE (encomenda* const e) {
     if(e->tipoEstado & ENCOMENDA_TIPO_URGENTE) {
         e->tipoEstado = e->tipoEstado & (~ENCOMENDA_TIPO_URGENTE);
         menu_printInfo("encomenda definida como REGULAR.");
@@ -59,7 +59,7 @@ void encomenda_TIPO_URGENTE (encomenda* e) {
     }
 }
 
-void encomenda_TIPO_FRAGIL (encomenda* e) {
+void encomenda_TIPO_FRAGIL (encomenda* const e) {
     for (size_t i = 0; i < e->artigos.size; i++) {
        if(e->artigos.data[i].tratamentoEspecial) {
            e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_FRAGIL;
@@ -71,7 +71,7 @@ void encomenda_TIPO_FRAGIL (encomenda* e) {
     menu_printInfo("encomenda definida como RESISTENTE.");
 }
 
-void encomenda_TIPO_FRAGIL_togle (encomenda* e) {
+void encomenda_TIPO_FRAGIL_togle (encomenda* const e) {
     if(!(e->tipoEstado & ENCOMENDA_TIPO_FRAGIL)) {
         // Encomenda não é fragil, logo pode ser posta como fragil manualmente
         e->tipoEstado = e->tipoEstado | ENCOMENDA_TIPO_FRAGIL;
@@ -91,7 +91,7 @@ void encomenda_TIPO_FRAGIL_togle (encomenda* e) {
     menu_printInfo("encomenda definida como RESISTENTE.");
 }
 
-void encomenda_TIPO_PESADO (encomenda* e) {
+void encomenda_TIPO_PESADO (encomenda* const e) {
     uint64_t pesoAcumulado = 0;
     for (size_t i = 0; i < e->artigos.size; i++) {
         pesoAcumulado += e->artigos.data[i].peso_gramas;
@@ -105,7 +105,7 @@ void encomenda_TIPO_PESADO (encomenda* e) {
     }
 }
 
-void encomenda_TIPO_VOLUMOSO (encomenda* e) {
+void encomenda_TIPO_VOLUMOSO (encomenda* const e) {
     uint64_t volumeAcumulado = 0;
     for (size_t i = 0; i < e->artigos.size; i++) {
         volumeAcumulado += e->artigos.data[i].cmCubicos;
@@ -119,7 +119,7 @@ void encomenda_TIPO_VOLUMOSO (encomenda* e) {
     }
 }
 
-int encomenda_generic_estado(encomenda* e, uint8_t paraMudar, uint8_t toggle) {
+int encomenda_generic_estado(encomenda* const e, const uint8_t paraMudar, const uint8_t toggle) {
      if( (e->tipoEstado & 0xF0) == paraMudar) {
         // Se já estiver no estado para mudar, fazer toggle
         e->tipoEstado = (e->tipoEstado & 0x0F) | toggle;
@@ -130,7 +130,7 @@ int encomenda_generic_estado(encomenda* e, uint8_t paraMudar, uint8_t toggle) {
     }
 }
 
-void encomenda_ESTADO_EM_ENTREGA (encomenda* e) {
+void encomenda_ESTADO_EM_ENTREGA (encomenda* const e) {
     if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_EM_ENTREGA, ENCOMENDA_ESTADO_CANCELADA)) {
         menu_printInfo("encomenda definida como CANCELADA.");
     } else {
@@ -138,7 +138,7 @@ void encomenda_ESTADO_EM_ENTREGA (encomenda* e) {
     }
 }
 
-void encomenda_ESTADO_EXPEDIDA (encomenda* e) {
+void encomenda_ESTADO_EXPEDIDA (encomenda* const e) {
     if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_EXPEDIDA, ENCOMENDA_ESTADO_EM_ENTREGA)) {
         menu_printInfo("encomenda definida como EM ENTREGA.");
     } else {
@@ -146,7 +146,7 @@ void encomenda_ESTADO_EXPEDIDA (encomenda* e) {
     }
 }
 
-void encomenda_ESTADO_ENTREGUE (encomenda* e) {
+void encomenda_ESTADO_ENTREGUE (encomenda* const e) {
     if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_ENTREGUE, ENCOMENDA_ESTADO_EM_ENTREGA)) {
         menu_printInfo("encomenda definida como EM ENTREGA.");
     } else {
@@ -154,7 +154,7 @@ void encomenda_ESTADO_ENTREGUE (encomenda* e) {
     }
 }
 
-void encomenda_ESTADO_CANCELADA (encomenda* e) {
+void encomenda_ESTADO_CANCELADA (encomenda* const e) {
     if(encomenda_generic_estado(e, ENCOMENDA_ESTADO_CANCELADA, ENCOMENDA_ESTADO_EM_ENTREGA)) {
         menu_printInfo("encomenda definida como EM ENTREGA.");
     } else {
@@ -162,7 +162,7 @@ void encomenda_ESTADO_CANCELADA (encomenda* e) {
     }
 }
 
-encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint64_t ID_cliente, morada org, morada dest, uint64_t dist) {
+encomenda encomenda_formalizar (const artigovec artigos, const precos_tt_cent precos, const uint64_t ID_cliente, const morada org, const morada dest, const uint64_t dist) {
     encomenda e;
     e.artigos = artigos;
     e.destino = dest;
@@ -194,7 +194,7 @@ encomenda encomenda_formalizar (artigovec artigos, precos_tt_cent precos, uint64
         * uint8_t        NIF_cliente[9]
         * time_t         criacao
 */
-int save_encomenda (FILE* f, encomenda* data) {
+int save_encomenda (FILE* const f, const encomenda* const data) {
     size_t written = 0;
     written += fwrite(&(data->artigos.size), sizeof(uint64_t), 1, f);
     if (data->artigos.size == 0) {
@@ -214,7 +214,7 @@ int save_encomenda (FILE* f, encomenda* data) {
     return written == (1 + data->artigos.size + 5 + 1 + 1);
 }
 
-int load_encomenda (FILE* f, encomenda* data) {
+int load_encomenda (FILE* const f, encomenda* const data) {
     size_t written = 0;
     uint64_t size_tmp = 0;
     written += fread(&(size_tmp), sizeof(uint64_t), 1, f);

@@ -13,10 +13,10 @@ typedef struct {
 } morada;
 
 morada newMorada        ();
-void   freeMorada       (morada* m);
-int    morada_eCPValido (uint8_t* CP);
-morada morada_dup       (morada m);
-int    save_morada      (FILE* f, morada* data);
-int    load_morada      (FILE* f, morada* data);
+void   freeMorada       (morada* const m);
+int    morada_eCPValido (const uint8_t* const CP);
+morada morada_dup       (const morada m);
+int    save_morada      (FILE* const f, const morada* const data);
+int    load_morada      (FILE* const f, morada* const data);
 
 #endif
