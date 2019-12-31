@@ -1,18 +1,14 @@
 #ifndef OUTRASLISTAGENS_H
 #define OUTRASLISTAGENS_H
 
-#include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
-#include <memory.h>
-#include <math.h>
-#include <time.h>
 
-#include "menu.h"
 #include "artigo.h"
 #include "encomenda.h"
 #include "utilizador.h"
+#include "precos_tt_cent.h"
 
 #ifndef artigovec_H
 #define artigovec_H

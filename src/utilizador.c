@@ -1,5 +1,8 @@
 #include "utilizador.h"
 
+#include "menu.h"
+#include "utilities.h"
+
 int utilizador_eCCValido (uint8_t* cc) {
     int i = 0;
     // Assegurar 9 digitos

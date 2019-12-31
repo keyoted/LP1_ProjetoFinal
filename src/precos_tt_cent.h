@@ -1,9 +1,9 @@
 #ifndef PRECOS_TT_CENT_h
 #define PRECOS_TT_CENT_h
 
-#include <inttypes.h>
-#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 typedef struct {
     uint64_t REGULAR ;

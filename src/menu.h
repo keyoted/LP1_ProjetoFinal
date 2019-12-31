@@ -1,16 +1,14 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include <stdio.h>
-#include <memory.h>
-#include <stdarg.h>
-#include <stdlib.h>
 #include <ctype.h>
-#include <time.h>
-#include "utilities.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdarg.h>
+
 #include "encomenda.h"
 #include "utilizador.h"
-#include "encomenda.h"
 
 #ifndef encomendavec_H
 #define encomendavec_H

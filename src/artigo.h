@@ -1,9 +1,9 @@
 #ifndef ARTIGO_H
 #define ARTIGO_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
-#include "utilities.h"
-#include "menu.h"
 
 typedef struct {
     char*    nome;                // Nome do artigo (not null)

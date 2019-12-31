@@ -2,20 +2,21 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include <time.h>
+#include <math.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <memory.h>
-#include <math.h>
-#include <time.h>
 
 #define  VEC_IMPLEMENTATION
 #define UTILIZADOR_INVALIDO ~((size_t)0)
-#include "utilities.h"
 #include "menu.h"
+#include "morada.h"
 #include "artigo.h"
 #include "encomenda.h"
+#include "utilities.h"
 #include "utilizador.h"
 
 #ifndef artigovec_H

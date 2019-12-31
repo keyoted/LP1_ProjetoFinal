@@ -1,5 +1,7 @@
 #include "encomenda.h"
+
 #include "menu.h"
+#include "utilities.h"
 
 encomenda newEncomenda() {
     return (encomenda) {

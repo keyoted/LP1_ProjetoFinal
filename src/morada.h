@@ -1,10 +1,11 @@
 #ifndef MORADA_H
 #define MORADA_H
 
-#include <stdint.h>
 #include <ctype.h>
-#include "utilities.h"
-#include "menu.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <memory.h>
 
 typedef struct {
     char*   morada;             // (not null)

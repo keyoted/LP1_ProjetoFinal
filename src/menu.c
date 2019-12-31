@@ -1,5 +1,7 @@
 #include "menu.h"
 
+#include "utilities.h"
+
 void cleanInputBuffer () {
     char ch;
     while ((ch = getchar()) != '\n' && ch != EOF);

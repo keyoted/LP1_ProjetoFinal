@@ -1,5 +1,8 @@
 #include "artigo.h"
 
+#include "menu.h"
+#include "utilities.h"
+
 artigo newArtigo() {
     return (artigo){
         .nome = strdup("Artigo"),

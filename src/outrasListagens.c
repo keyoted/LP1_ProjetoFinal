@@ -1,5 +1,8 @@
 #include "outrasListagens.h"
 
+#include "menu.h"
+#include "utilities.h"
+
 void listagem_Encomendas_Periodo_de_Tempo() {
     menu_printDiv();
     menu_printHeader("Listagem de Encomendas em Espaço de Tempo");

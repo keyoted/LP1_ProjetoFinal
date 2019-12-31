@@ -1,10 +1,10 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
-#include <stdlib.h>
-#include <inttypes.h>
-#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 
 char*   strdup                (const char *s);
 int     vecPrintItemPredicate (char* item, int* userdata);
@@ -21,7 +21,7 @@ int     load_str              (FILE* f, char** data);
     while (!X) {                    \
         printf("$ ");               \
         X = menu_readString();      \
-    }                               \
+    }
 
 #define protectVarFcnCall(VAR, FCN, ERRMSG)     \
     {                                           \

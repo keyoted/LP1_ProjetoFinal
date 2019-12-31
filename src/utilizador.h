@@ -1,22 +1,22 @@
 #ifndef UTILIZADOR_H
 #define UTILIZADOR_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#include "morada.h"
+
 #define UTILIZADOR_CLIENTE     0
 #define UTILIZADOR_DIRETOR     1
 #define UTILIZADOR_DESATIVADO  2
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include "morada.h"
-#include "utilities.h"
-
 typedef struct {
-    char*   nome;
+    char*   nome;           // (not null)
+    uint8_t tipo;
     uint8_t NIF[9];
     uint8_t CC[12];
     morada  endereco;
-    uint8_t tipo;           // (not null)
 } utilizador;
 
 int        utilizador_eCCValido  (uint8_t* cc);

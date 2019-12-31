@@ -1,5 +1,8 @@
 #include "morada.h"
 
+#include "menu.h"
+#include "utilities.h"
+
 morada newMorada() {
     return (morada) {
         .morada = strdup("Rua")
