@@ -16,6 +16,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * Capaz de capturar os preços atuais que a empresa transportadora
+ * fixou. Os preços são fixados em cêntimos.
+ */
 typedef struct {
     uint64_t REGULAR;         ///< Preço base de um artigo regular.
     uint64_t URGENTE;         ///< Preço base de um artigo urgente.

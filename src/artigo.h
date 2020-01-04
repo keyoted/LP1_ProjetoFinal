@@ -15,6 +15,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * Um artigo é um objeto com um nome, peso e volume que pode ou não requerer
+ * tratamento especial.
+ */
 typedef struct {
     char* nome;               ///< Nome do artigo, não pode ser NULL.
     char* tratamentoEspecial; ///< Texto sobre o tratamento especial do artigo,

@@ -29,6 +29,9 @@
 #define UTILIZADOR_DIRETOR 1
 #define UTILIZADOR_DESATIVADO 2
 
+/**
+ * Capaz de gravar todas as informações sobre um utilizador.
+ */
 typedef struct {
     char*   nome;     ///< Nome do cliente.
     uint8_t tipo;     ///< Tipo do cliente.

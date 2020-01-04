@@ -17,8 +17,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * Estrutura que é capaz de gravar a localização de um utilizador.
+ */
 typedef struct {
-    char*   morada;          ///< Morada textual(rua, nº da porta, etc)não NULL.
+    char*   morada;          ///< Morada textual (rua, nº da porta, etc), não NULL.
     uint8_t codigoPostal[7]; ///< Código postal, (números em ASCII).
 } morada;
 

@@ -63,19 +63,22 @@
 #define ENCOMENDA_ESTADO_ENTREGUE ((uint8_t) 64)
 #define ENCOMENDA_ESTADO_CANCELADA ((uint8_t) 128)
 
+/**
+ * A encomenda percorre uma certa distância e tem diversos estados como
+ * ENCOMENDA_ESTADO_EM_ENTREGA ou tipos como ENCOMENDA_TIPO_URGENTE.
+ * Adicionalmente a encomenda armazena a tabela de preços ativa quando esta foi
+ * criada, a data de criação e o ID do cliente que criou a encomenda.
+ */
 typedef struct {
-    artigovec artigos;           ///< Artigos que fazem parte da encomenda.
-    morada    origem;            ///< Origem da encomenda.
-    morada    destino;           ///< Destino da encomenda.
-    uint8_t   tipoEstado;        ///< Os quatro bits de baixo são flags e
-                                 ///< indicam o tipo da encomenda, os quatro de
-                                 ///< cima são o estado e apenas um dos bits
-                                 ///< deverá de estar ativo.
+    artigovec artigos;  ///< Artigos que fazem parte da encomenda.
+    morada    origem;   ///< Origem da encomenda.
+    morada    destino;  ///< Destino da encomenda.
+    uint8_t tipoEstado; ///< Os quatro bits de baixo são flags e indicam o tipo da encomenda, os quatro de cima são o
+                        ///< estado e apenas um dos bits deverá de estar ativo.
     uint64_t       distancia_km; ///< Distancia(em km) da origem até ao destino.
-    precos_tt_cent precos;       ///< Tabela de preços na altura em que a
-                                 ///< encomenda foi formalizada.
-    time_t   criacao;            ///< Data da criação da encomenda.
-    uint64_t ID_cliente;         ///< ID do cliente que formalizou a encomenda.
+    precos_tt_cent precos;       ///< Tabela de preços na altura em que a encomenda foi formalizada.
+    time_t         criacao;      ///< Data da criação da encomenda.
+    uint64_t       ID_cliente;   ///< ID do cliente que formalizou a encomenda.
 } encomenda;
 
 encomenda newEncomenda();
