@@ -1,4 +1,4 @@
-doc/Compiled/*
+doc/compiled/*
 bin/*
 .vscode
 src/test.c
