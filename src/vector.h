@@ -61,20 +61,20 @@
  *                  VEC_IMPLEMENTATION e VEC_DECLARATION.
  */
 
-#include <stdlib.h>
-#include <memory.h>
 #include <inttypes.h>
+#include <memory.h>
+#include <stdlib.h>
 
 #ifndef VEC_TYPE
-#define VEC_TYPE int
+#    define VEC_TYPE int
 #endif
 
 #ifndef VEC_NAME
-#define VEC_NAME vector
+#    define VEC_NAME vector
 #endif
 
 #ifndef VEC_DEALOC
-#define VEC_DEALOC(x)
+#    define VEC_DEALOC(x)
 #endif
 
 #define PASTER(X, Y) X##Y
@@ -83,20 +83,21 @@
 
 #if defined(VEC_IMPLEMENTATION) || defined(VEC_DECLARATION)
 #else
-#define VEC_DECLARATION
+#    define VEC_DECLARATION
 #endif
 
 /**
+ * @struct          VEC_NAME
  * @brief           Struct com o nome VEC_NAME que contém o tipo de dados
- *                  VEC_TYPE e informação sobre o numero de objetos guardado,
+ *                  VEC_TYPE e informação sobre o numero de objetos guardados,
  *                  pode guardar [0, ~((uint64_t)0)[ elemntos.
  */
 typedef struct {
-    uint64_t  alocated;          ///< Tamanho alocado de objetos.
-    uint64_t  size;              ///< Tamanho de objetos que foi populado.
-    VEC_TYPE* data;              ///< Começa em data[0] e acaba em data[size-1].
+    uint64_t  alocated; ///< Tamanho alocado de objetos.
+    uint64_t  size;     ///< Tamanho de objetos que foi populado.
+    VEC_TYPE* data;     ///< Começa em data[0] e acaba em data[size-1].
 } VEC_NAME;
-typedef int(*VEC_FUN(_predicate_t))(VEC_TYPE, void*);
+typedef int (*VEC_FUN(_predicate_t))(VEC_TYPE, void*);
 
 #ifdef VEC_IMPLEMENTATION
 /**
@@ -107,21 +108,21 @@ typedef int(*VEC_FUN(_predicate_t))(VEC_TYPE, void*);
  * @returns         1 se alocou memória.
  * @returns         2 se não necessitou de alocar memoria.
  */
-int VEC_FUN(_addCell) (VEC_NAME* const v) {
-    if(v->alocated == 0) {
+int VEC_FUN(_addCell)(VEC_NAME* const v) {
+    if (v->alocated == 0) {
         // Vetor vazio
         v->data = malloc(sizeof(VEC_TYPE) * 8);
-        if(v->data == NULL) return 0;
+        if (v->data == NULL) return 0;
         v->alocated = 8;
         return 1;
-    } else if(v->size == v->alocated) {
+    } else if (v->size == v->alocated) {
         // O vetor está cheio e necessita de ser redimensionado
-        void* newData = realloc(v->data, sizeof(VEC_TYPE)*(v->alocated*2));
-        if(newData == NULL) {
+        void* newData = realloc(v->data, sizeof(VEC_TYPE) * (v->alocated * 2));
+        if (newData == NULL) {
             // Foi impossivel realocar memoria sufuciente
             // Tentar realocar apenas mais um espaço
-            newData = realloc(v->data, sizeof(VEC_TYPE)*(v->alocated+1));
-            if(newData == NULL) {
+            newData = realloc(v->data, sizeof(VEC_TYPE) * (v->alocated + 1));
+            if (newData == NULL) {
                 // Impossivel alocar mais memoria
                 return 0;
             } else {
@@ -136,7 +137,7 @@ int VEC_FUN(_addCell) (VEC_NAME* const v) {
             v->data = newData;
             return 1;
         }
-    }else {
+    } else {
         // Vetor ainda tem espaço livre
         return 2;
     }
@@ -148,13 +149,7 @@ int VEC_FUN(_addCell) (VEC_NAME* const v) {
  *                  alocadas.
  * @return          Um vetor vazio.
  */
-VEC_NAME VEC_FUN(_new)() {
-    return (VEC_NAME) {
-        .size = 0,
-        .alocated = 0,
-        .data = NULL
-    };
-}
+VEC_NAME VEC_FUN(_new)() { return (VEC_NAME) {.size = 0, .alocated = 0, .data = NULL}; }
 
 /**
  * @brief           Adiciona um objeto no final do vetor.
@@ -164,7 +159,7 @@ VEC_NAME VEC_FUN(_new)() {
  * @returns         1 se conseguiu inserir o objeto.
  */
 int VEC_FUN(_push)(VEC_NAME* const v, VEC_TYPE const newObj) {
-    if(!VEC_FUN(_addCell)(v)) return 0;
+    if (!VEC_FUN(_addCell)(v)) return 0;
     // Aqui está garantido que temos pelo menos mais um espaço alocado no vetor
     v->data[v->size] = newObj;
     ++(v->size);
@@ -182,7 +177,7 @@ int VEC_FUN(_push)(VEC_NAME* const v, VEC_TYPE const newObj) {
  * @warning         O objecto no index 'i' não é dealocado por esta função
  */
 void VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i) {
-    memmove(&(v->data[i]), &(v->data[i+1]), (v->size-i-1)*sizeof(VEC_TYPE));
+    memmove(&(v->data[i]), &(v->data[i + 1]), (v->size - i - 1) * sizeof(VEC_TYPE));
     --(v->size);
 }
 
@@ -201,8 +196,8 @@ void VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i) {
  *                  válido.
  */
 int VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i) {
-    if(!VEC_FUN(_addCell)(v)) return 0;
-    memmove(&(v->data[i+1]), &(v->data[i]), (v->size-i)*sizeof(VEC_TYPE));
+    if (!VEC_FUN(_addCell)(v)) return 0;
+    memmove(&(v->data[i + 1]), &(v->data[i]), (v->size - i) * sizeof(VEC_TYPE));
     ++(v->size);
     return 1;
 }
@@ -218,9 +213,8 @@ int VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i) {
  * @returns         0 se não conseguiu inserir o objeto.
  * @returns         1 se conseguiu inserir o objeto.
  */
-int VEC_FUN(_pushAt)
-    (VEC_NAME* const v, VEC_TYPE const newObj, const uint64_t position) {
-    if(!VEC_FUN(_moveAbove)(v, position)) return 0;
+int VEC_FUN(_pushAt)(VEC_NAME* const v, VEC_TYPE const newObj, const uint64_t position) {
+    if (!VEC_FUN(_moveAbove)(v, position)) return 0;
     v->data[position] = newObj;
     return 1;
 }
@@ -235,7 +229,7 @@ int VEC_FUN(_pushAt)
  *                  terá que ser dealocado posteriormente.
  */
 VEC_TYPE VEC_FUN(_pop)(VEC_NAME* const v) {
-    VEC_TYPE toReturn = v->data[v->size-1];
+    VEC_TYPE toReturn = v->data[v->size - 1];
     --(v->size);
     return toReturn;
 }
@@ -264,12 +258,10 @@ VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const uint64_t position) {
  * @note            'v' em si não é dealocado.
  */
 void VEC_FUN(_free)(VEC_NAME* const v) {
-    for (uint64_t i = 0; i < v->size; i++) {
-        VEC_DEALOC(v->data[i]);
-    }
-    if(v->alocated != 0) free(v->data);
-    v->data = NULL;
-    v->size = 0;
+    for (uint64_t i = 0; i < v->size; i++) { VEC_DEALOC(v->data[i]); }
+    if (v->alocated != 0) free(v->data);
+    v->data     = NULL;
+    v->size     = 0;
     v->alocated = 0;
 }
 
@@ -296,10 +288,10 @@ void VEC_FUN(_removeAt)(VEC_NAME* const v, uint64_t position) {
  * @returns         2 se não tiver que redimensionar.
  */
 int VEC_FUN(_adjust)(VEC_NAME* const v) {
-    if(v->size == v->alocated) return 2;
-    VEC_TYPE* newData= realloc(v->data, v->size*sizeof(VEC_TYPE));
-    if(newData == NULL) return 0;
-    v->data = newData;
+    if (v->size == v->alocated) return 2;
+    VEC_TYPE* newData = realloc(v->data, v->size * sizeof(VEC_TYPE));
+    if (newData == NULL) return 0;
+    v->data     = newData;
     v->alocated = v->size;
     return 1;
 }
@@ -322,12 +314,11 @@ int VEC_FUN(_adjust)(VEC_NAME* const v) {
  * @returns         ~0 caso a todos os elementos foram iterados sem que
  *                  'predicate' tenha retornado 0.
  */
-uint64_t VEC_FUN(_iterateFW)
-(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
+uint64_t VEC_FUN(_iterateFW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
     for (uint64_t i = 0; i < v->size; i++) {
-        if( predicate(v->data[i], userData) ) return i;
+        if (predicate(v->data[i], userData)) return i;
     }
-    return ~((uint64_t)0);
+    return ~((uint64_t) 0);
 }
 
 /**
@@ -348,12 +339,11 @@ uint64_t VEC_FUN(_iterateFW)
  * @returns         ~0 caso a todos os elementos foram iterados sem que
  *                  'predicate' tenha retornado 0.
  */
-uint64_t VEC_FUN(_iterateBW)
-(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
-    for (uint64_t i = v->size-1; i != ~((uint64_t)0); i--) {
-        if( predicate(v->data[i], userData) ) return i;
+uint64_t VEC_FUN(_iterateBW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
+    for (uint64_t i = v->size - 1; i != ~((uint64_t) 0); i--) {
+        if (predicate(v->data[i], userData)) return i;
     }
-    return ~((uint64_t)0);
+    return ~((uint64_t) 0);
 }
 
 /**
@@ -371,12 +361,12 @@ uint64_t VEC_FUN(_iterateBW)
  *                  alocadas pode ser maior do que 'space'.
  */
 int VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space) {
-    if(v->alocated >= space) return 2;
-    void* newData = realloc(v->data, sizeof(VEC_TYPE)*(space));
-    if(newData == NULL) return 0;
+    if (v->alocated >= space) return 2;
+    void* newData = realloc(v->data, sizeof(VEC_TYPE) * (space));
+    if (newData == NULL) return 0;
     // Memoria alocada, fazer o update do vetor
     v->alocated = space;
-    v->data = newData;
+    v->data     = newData;
     return 1;
 }
 
@@ -385,28 +375,24 @@ int VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space) {
  *                  a inclusão do ficheio vector.h.
  * @param X         O parametro X do macro 'VEC_DEALOC'.
  */
-void VEC_FUN(_DEALOC)(VEC_TYPE* const X) {
-    VEC_DEALOC(*X);
-}
+void VEC_FUN(_DEALOC)(VEC_TYPE* const X) { VEC_DEALOC(*X); }
 #endif
 
 #ifdef VEC_DECLARATION
-int VEC_FUN(_addCell) (VEC_NAME* const v);
+int      VEC_FUN(_addCell)(VEC_NAME* const v);
 VEC_NAME VEC_FUN(_new)();
-int VEC_FUN(_push)(VEC_NAME* const v, VEC_TYPE const newObj);
-void VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i);
-int VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i);
+int      VEC_FUN(_push)(VEC_NAME* const v, VEC_TYPE const newObj);
+void     VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i);
+int      VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i);
 VEC_TYPE VEC_FUN(_pop)(VEC_NAME* const v);
 VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const uint64_t position);
-void VEC_FUN(_free)(VEC_NAME* const v);
-void VEC_FUN(_removeAt)(VEC_NAME* const v, uint64_t position);
-int VEC_FUN(_adjust)(VEC_NAME* const v);
-int VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space);
-void VEC_FUN(_DEALOC)(VEC_TYPE* const X);
-uint64_t VEC_FUN(_iterateFW)
-                (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
-uint64_t VEC_FUN(_iterateBW)
-                (VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
+void     VEC_FUN(_free)(VEC_NAME* const v);
+void     VEC_FUN(_removeAt)(VEC_NAME* const v, uint64_t position);
+int      VEC_FUN(_adjust)(VEC_NAME* const v);
+int      VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space);
+void     VEC_FUN(_DEALOC)(VEC_TYPE* const X);
+uint64_t VEC_FUN(_iterateFW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
+uint64_t VEC_FUN(_iterateBW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
 #endif
 
 #undef VEC_TYPE

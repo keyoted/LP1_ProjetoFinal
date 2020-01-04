@@ -20,14 +20,3 @@ add_executable(main.x86
                ../src/utilizador.c
                ../src/precos_tt_cent.c
                ../src/outrasListagens.c)
-
-add_executable(test.x86
-               ../src/test.c
-               ../src/menu.c
-               ../src/morada.c
-               ../src/artigo.c
-               ../src/encomenda.c
-               ../src/utilities.c
-               ../src/utilizador.c
-               ../src/precos_tt_cent.c
-               ../src/outrasListagens.c)

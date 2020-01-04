@@ -1,42 +1,70 @@
+/**
+ * @file    menu.c
+ * @author  André Botelho (keyoted@gmail.com)
+ * @brief   API simples para mostrar informação e capturar input do utilizador.
+ * @version 1
+ * @date 2020-01-01
+ *
+ * @copyright Copyright (c) 2020
+ *
+ */
+
 #include "menu.h"
 
 #include "utilities.h"
 
-void cleanInputBuffer () {
+/**
+ * @brief Função auxiliar para limpar o buffer de input.
+ */
+void cleanInputBuffer() {
     char ch;
-    while ((ch = getchar()) != '\n' && ch != EOF);
+    while ((ch = getchar()) != '\n' && ch != EOF)
+        ;
 }
 
-char* subStringTrimWhiteSpace(char *str) {
-    if(!str) return NULL;
+/**
+ * @brief     Remove os espaços extra no início e final da string de input.
+ * @param str String para ser reduzida.
+ * @returns   Um ponteiro para a string reduzida.
+ * @returns   NULL caso a string seja apenas constituida por espaços.
+ * @warning   A string de retorno é uma substring da string de input, caso esta
+ *            seja dealocada, a substring também será dealocada.
+ */
+char* subStringTrimWhiteSpace(char* str) {
+    if (!str) return NULL;
 
     // At the beguining
-    while(isspace(*str)) str++;
-    if(*str == '\0')  // All spaces?
+    while (isspace(*str)) str++;
+    if (*str == '\0') // All spaces?
         return NULL;
 
     // At the end
     char* end = &str[strlen(str) - 1];
-    while(end > str && isspace(*end)) end--;
+    while (end > str && isspace(*end)) end--;
     end[1] = '\0';
 
     return str;
 }
 
-// Can return null
-char* menu_readString () {
-    const int STEP = 16;
-    size_t alocated = STEP;
-    size_t size = 0;
-    char* str;
+/**
+ * @brief   Lê uma string do standard input.
+ * @returns O ponteiro para uma string sem espaços extra no início ou no fim.
+ * @returns NULL caso só tenham sido introduzidos espaços.
+ */
+char* menu_readString() {
+    const int STEP     = 16;
+    size_t    alocated = STEP;
+    size_t    size     = 0;
+    char*     str;
     protectVarFcnCall(str, malloc(STEP), "menu_readString - alocação de memória recusada.");
 
     int ch;
-    while ( (ch=fgetc(stdin)) != EOF && ch != '\n' ) {
+    printf(" $ ");
+    while ((ch = fgetc(stdin)) != EOF && ch != '\n') {
         str[size++] = ch;
-        if(size == alocated) {
-            char* tmp = realloc(str, alocated+=STEP);
-            if(!tmp) {
+        if (size == alocated) {
+            char* tmp = realloc(str, alocated += STEP);
+            if (!tmp) {
                 --size;
                 menu_printError("menu_readString - realocação de memória recusada.");
                 break;
@@ -51,62 +79,98 @@ char* menu_readString () {
     return trimed;
 }
 
-int menu_read_Float32 (_Float32* const value) {
+/**
+ * @brief       Lê uma float do standard input.
+ * @param value Valor para onde será guardado o valor.
+ */
+void menu_read_Float32(_Float32* const value) {
     float f;
-    if (scanf("%f", &f) != 1) {
-        menu_printError("Não foi inserido um número válido.");
-        cleanInputBuffer();
-        return 0;
-    }
-    cleanInputBuffer();
-    *value = (_Float32) f;
-    return 1;
-}
-
-int menu_readInt (int* const value) {
-    if (scanf("%d", value) != 1) {
-        menu_printError("Não foi inserido um número válido.");
-        cleanInputBuffer();
-        return 0;
-    }
-    cleanInputBuffer();
-    return 1;
-}
-
-int menu_readIntMinMax (int min, int max, int* const op) {
-    printf("Insira um numero entre [%d e %d] $ ", min, max);
-    if( menu_readInt(op) ) {
-        if(*op >= min) {
-            if(*op <= max) {
-                return 1;
-            }
-            else menu_printError("[%d] é maior que [%d].", *op, max);
+    while (1) {
+        printf(" $ ");
+        if (scanf("%f", &f) != 1) {
+            menu_printError("Não foi inserido um número válido.");
+            cleanInputBuffer();
+            continue;
         }
-        else menu_printError("[%d] é menor que [%d].", *op, min);
+        cleanInputBuffer();
+        *value = (_Float32) f;
+        return;
     }
-    return 0;
 }
 
-int menu_selection (const strvec* itens) {
-    int op = -2;
+/**
+ * @brief       Lê uma int do standard input.
+ * @param value Valor para onde será guardado o valor.
+ */
+void menu_readInt(int* const value) {
+    while (1) {
+        printf(" $ ");
+        if (scanf("%d", value) != 1) {
+            menu_printError("Não foi inserido um número válido.");
+            cleanInputBuffer();
+            continue;
+        }
+        cleanInputBuffer();
+        return;
+    }
+}
+
+/**
+ * @brief     Lê uma int do standard input entre [min, max]
+ * @param min Valor minimo da int para ser lida.
+ * @param max Valor maximo da int para ser lida.
+ * @param op  Valor para onde será guardado o valor.
+ */
+void menu_readIntMinMax(const int min, const int max, int* const op) {
+    printf("Insira um numero entre [%d e %d]", min, max);
+    while (1) {
+        menu_readInt(op);
+        if (*op >= min) {
+            if (*op <= max) {
+                return;
+            } else
+                menu_printError("[%d] é maior que [%d].", *op, max);
+        } else
+            menu_printError("[%d] é menor que [%d].", *op, min);
+    }
+}
+
+/**
+ * @brief       Imprime um menu deixando o utilizador selecionar uma das opções.
+ * @param itens Vetor se strings que constituem as opções que o utilizador pode
+ *              selecionar.
+ * @returns     Um valor entre [-1, itens.size[ correspondente à opção
+ *              selecionada ou "Sair" para -1
+ */
+int menu_selection(const strvec* const itens) {
+    int op  = -2;
     int max = itens->size;
-    while(op == -2) {
+    while (op == -2) {
         printf("   Opção      |   Item\n");
         printf("         -2   |   Reimprimir\n");
         printf("         -1   |   Sair\n");
-        int i = -1;
-        strvec_iterateFW((strvec*)itens, (strvec_predicate_t)&vecPrintItemPredicate, &i);
-        while (!menu_readIntMinMax(-2, max-1, &op));
+        size_t i = 0;
+        strvec_iterateFW((strvec*) itens, (strvec_predicate_t) &vecPrintItemPredicate, &i);
+        menu_readIntMinMax(-2, max - 1, &op);
         menu_printDiv();
     }
     return op;
 }
 
-void  menu_printDiv () {
-    printf("--------------------------------------------------------------------------------\n");
+/**
+ * @brief Imprime uma divisória.
+ */
+void menu_printDiv() {
+    printf("-------------------------------------------------------------------"
+           "-------------\n");
 }
 
-void  menu_printError (char* err, ...) {
+/**
+ * @brief     Utilizado para imprimir erros.
+ * @param err O formato do erro.
+ * @param ... Argumentos extra.
+ */
+void menu_printError(const char* const err, ...) {
     va_list args;
     printf("*** ERRO: ");
     va_start(args, err);
@@ -115,7 +179,12 @@ void  menu_printError (char* err, ...) {
     printf("\n");
 }
 
-void  menu_printInfo (char* info, ...) {
+/**
+ * @brief      Utilizado para imprimir informação.
+ * @param info O formato da informação.
+ * @param ...  Argumentos extra.
+ */
+void menu_printInfo(const char* const info, ...) {
     va_list args;
     printf("*** INFO: ");
     va_start(args, info);
@@ -124,25 +193,37 @@ void  menu_printInfo (char* info, ...) {
     printf("\n");
 }
 
-void  menu_printHeader (char* header) {
-    if(!header) header = "";
+/**
+ * @brief        Utilizado para imprimir um título.
+ * @param header String para o header.
+ */
+void menu_printHeader(const char* header) {
+    if (!header) header = "";
     int spacesize = (80 - strlen(header)) - 8;
-    if(spacesize < 3) spacesize = 3;
-    for (int i = 0; i < spacesize/2; i++) printf(" ");
+    if (spacesize < 3) spacesize = 3;
+    for (int i = 0; i < spacesize / 2; i++) printf(" ");
     printf("*** ");
     printf("%.66s", header);
     printf(" ***\n");
 };
 
-void menu_printEncomendaBrief(encomenda* e, utilizadorvec* uv) {
-    if(e->tipoEstado & ENCOMENDA_TIPO_URGENTE) printf("URGENTE ");
-    else                                       printf("REGULAR ");
+/**
+ * @brief    Imprime informação breve sobre a encomenda.
+ * @param e  Encomenda a ser impressa.
+ * @param uv Vetor de utilizadores ao qual o ID de utilizador da encomenda faz
+ *           referência.
+ */
+void menu_printEncomendaBrief(const encomenda* const e, const utilizadorvec* const uv) {
+    if (e->tipoEstado & ENCOMENDA_TIPO_URGENTE)
+        printf("URGENTE ");
+    else
+        printf("REGULAR ");
 
-    switch (e->tipoEstado & 0xF0){
-        case ENCOMENDA_ESTADO_EXPEDIDA:    printf("EXPEDIDA  "); break;
-        case ENCOMENDA_ESTADO_CANCELADA:   printf("CANCELADA "); break;
-        case ENCOMENDA_ESTADO_EM_ENTREGA:  printf("EM ENTREGA"); break;
-        case ENCOMENDA_ESTADO_ENTREGUE:    printf("ENTREGUE  "); break;
+    switch (e->tipoEstado & 0xF0) {
+        case ENCOMENDA_ESTADO_EXPEDIDA: printf("EXPEDIDA  "); break;
+        case ENCOMENDA_ESTADO_CANCELADA: printf("CANCELADA "); break;
+        case ENCOMENDA_ESTADO_EM_ENTREGA: printf("EM ENTREGA"); break;
+        case ENCOMENDA_ESTADO_ENTREGUE: printf("ENTREGUE  "); break;
     }
 
     printf(" (%.9s) ", uv->data[e->ID_cliente].NIF);
@@ -151,28 +232,37 @@ void menu_printEncomendaBrief(encomenda* e, utilizadorvec* uv) {
     printf("%luc", encomenda_CalcPreco(e));
 }
 
-void menu_printUtilizador (utilizador u) {
+/**
+ * @brief   Imprime informação sobre o utilizador.
+ * @param u Utilizador para ser impresso.
+ */
+void menu_printUtilizador(const utilizador u) {
     printf("%s ", protectStr(u.nome));
     printf("(%.9s) ", u.NIF);
     switch (u.tipo) {
-        case UTILIZADOR_CLIENTE:
-            printf("CLIENTE");
-        break;
-        case UTILIZADOR_DESATIVADO:
-            printf("DESATIVADO");
-        break;
-        case UTILIZADOR_DIRETOR:
-            printf("DIRETOR");
-        break;
+        case UTILIZADOR_CLIENTE: printf("CLIENTE"); break;
+        case UTILIZADOR_DESATIVADO: printf("DESATIVADO"); break;
+        case UTILIZADOR_DIRETOR: printf("DIRETOR"); break;
     }
 }
 
-void menu_printArtigo (artigo* a) {
+/**
+ * @brief   Imprime informação sobre o artigo.
+ * @param a Artigo para ser impresso.
+ */
+void menu_printArtigo(const artigo* const a) {
     // nome gramas cm2 tratamento especial
-    printf("%s  -   %lug   %lucm2   * %s", protectStr(a->nome), a->peso_gramas, a->cmCubicos, protectStr(a->tratamentoEspecial));
+    printf("%s  -   %lug   %lucm2   * %s", protectStr(a->nome), a->peso_gramas, a->cmCubicos,
+           protectStr(a->tratamentoEspecial));
 }
 
-void menu_printEncomendaDetail (encomenda* e, utilizadorvec* uv) {
+/**
+ * @brief    Imprime informação detalhada sobre a encomenda.
+ * @param e  Encomenda a ser impressa.
+ * @param uv Vetor de utilizadores ao qual o ID de utilizador da encomenda faz
+ *           referência.
+ */
+void menu_printEncomendaDetail(const encomenda* const e, const utilizadorvec* const uv) {
     menu_printDiv();
     menu_printDiv();
     menu_printHeader("Recibo de Encomenda");
@@ -193,11 +283,12 @@ void menu_printEncomendaDetail (encomenda* e, utilizadorvec* uv) {
     menu_printHeader("Artigos");
     uint64_t pt = 0;
     uint64_t vt = 0;
-    printf("*       ID | NOME                          | PESO     | VOLUME   | PESO T.  | VOL. T.  | * TRATAMENTO ESPECIAL\n");
-    for(size_t i = 0; i < e->artigos.size; ++i) {
+    printf("*       ID | NOME                          | PESO     | VOLUME   | "
+           "PESO T.  | VOL. T.  | * TRATAMENTO ESPECIAL\n");
+    for (size_t i = 0; i < e->artigos.size; ++i) {
         pt += e->artigos.data[i].peso_gramas;
         vt += e->artigos.data[i].cmCubicos;
-        printf("* %*lu |", 8, i+1);
+        printf("* %*lu |", 8, i + 1);
         printf(" %29.29s |", protectStr(e->artigos.data[i].nome));
         printf(" %*lu |", 8, e->artigos.data[i].peso_gramas);
         printf(" %*lu |", 8, e->artigos.data[i].cmCubicos);
@@ -208,66 +299,104 @@ void menu_printEncomendaDetail (encomenda* e, utilizadorvec* uv) {
 
     menu_printHeader("Outras Informações");
     printf("*** ESTADO: ");
-    switch (e->tipoEstado & 0xF0){
-        case ENCOMENDA_ESTADO_EXPEDIDA:    printf("EXPEDIDA\n"); break;
-        case ENCOMENDA_ESTADO_CANCELADA:   printf("CANCELADA\n"); break;
-        case ENCOMENDA_ESTADO_EM_ENTREGA:  printf("EM ENTREGA\n"); break;
-        case ENCOMENDA_ESTADO_ENTREGUE:    printf("ENTREGUE\n"); break;
-        default:                           printf("DESCONHECIDO\n");
+    switch (e->tipoEstado & 0xF0) {
+        case ENCOMENDA_ESTADO_EXPEDIDA: printf("EXPEDIDA\n"); break;
+        case ENCOMENDA_ESTADO_CANCELADA: printf("CANCELADA\n"); break;
+        case ENCOMENDA_ESTADO_EM_ENTREGA: printf("EM ENTREGA\n"); break;
+        case ENCOMENDA_ESTADO_ENTREGUE: printf("ENTREGUE\n"); break;
+        default: printf("DESCONHECIDO\n");
     }
 
     printf("*** TIPO:        | ");
-    if(e->tipoEstado & ENCOMENDA_TIPO_URGENTE)  printf("URGENTE    | ");
-    else                                        printf("REGULAR    | ");
-    if(e->tipoEstado & ENCOMENDA_TIPO_FRAGIL)   printf("FRAGIL     | ");
-    else                                        printf("RESISTENTE | ");
-    if(e->tipoEstado & ENCOMENDA_TIPO_PESADO)   printf("PESADO     | ");
-    else                                        printf("LEVE       | ");
-    if(e->tipoEstado & ENCOMENDA_TIPO_VOLUMOSO) printf("VOLUMOSO   |\n");
-    else                                        printf("PEQUENO    |\n");
+    if (e->tipoEstado & ENCOMENDA_TIPO_URGENTE)
+        printf("URGENTE    | ");
+    else
+        printf("REGULAR    | ");
+    if (e->tipoEstado & ENCOMENDA_TIPO_FRAGIL)
+        printf("FRAGIL     | ");
+    else
+        printf("RESISTENTE | ");
+    if (e->tipoEstado & ENCOMENDA_TIPO_PESADO)
+        printf("PESADO     | ");
+    else
+        printf("LEVE       | ");
+    if (e->tipoEstado & ENCOMENDA_TIPO_VOLUMOSO)
+        printf("VOLUMOSO   |\n");
+    else
+        printf("PEQUENO    |\n");
 
     uint64_t tpt = 0;
     printf("*** TIPO PREÇOS: | ");
-    if(e->tipoEstado & ENCOMENDA_TIPO_URGENTE)  {printf(" %*luc | ", 8, e->precos.URGENTE); tpt += e->precos.URGENTE;}
-    else                                        {printf(" %*luc | ", 8, e->precos.REGULAR); tpt += e->precos.REGULAR;}
-    if(e->tipoEstado & ENCOMENDA_TIPO_FRAGIL)   {printf(" %*luc | ", 8, e->precos.FRAGIL);  tpt += e->precos.FRAGIL;}
-    else                                         printf(" %*luc | ", 8, (uint64_t)0);
-    if(e->tipoEstado & ENCOMENDA_TIPO_PESADO)   {printf(" %*luc | ", 8, e->precos.PESADO);  tpt += e->precos.PESADO;}
-    else                                         printf(" %*luc | ", 8, (uint64_t)0);
-    if(e->tipoEstado & ENCOMENDA_TIPO_VOLUMOSO) {printf(" %*luc |\n",8, e->precos.VOLUMOSO); tpt += e->precos.VOLUMOSO;}
-    else                                         printf(" %*luc |\n",8, (uint64_t)0);
+    if (e->tipoEstado & ENCOMENDA_TIPO_URGENTE) {
+        printf(" %*luc | ", 8, e->precos.URGENTE);
+        tpt += e->precos.URGENTE;
+    } else {
+        printf(" %*luc | ", 8, e->precos.REGULAR);
+        tpt += e->precos.REGULAR;
+    }
+    if (e->tipoEstado & ENCOMENDA_TIPO_FRAGIL) {
+        printf(" %*luc | ", 8, e->precos.FRAGIL);
+        tpt += e->precos.FRAGIL;
+    } else
+        printf(" %*luc | ", 8, (uint64_t) 0);
+    if (e->tipoEstado & ENCOMENDA_TIPO_PESADO) {
+        printf(" %*luc | ", 8, e->precos.PESADO);
+        tpt += e->precos.PESADO;
+    } else
+        printf(" %*luc | ", 8, (uint64_t) 0);
+    if (e->tipoEstado & ENCOMENDA_TIPO_VOLUMOSO) {
+        printf(" %*luc |\n", 8, e->precos.VOLUMOSO);
+        tpt += e->precos.VOLUMOSO;
+    } else
+        printf(" %*luc |\n", 8, (uint64_t) 0);
 
     printf("*** Preçco base: %luc\n", tpt);
     printf("*** Distancia: %luKm\n", e->distancia_km);
     printf("*** Preço Por Km: %luc\n", e->precos.POR_KM);
-    if(e->origem.codigoPostal[0] > '9' || e->origem.codigoPostal[0] < '0' || e->destino.codigoPostal[0] > '9' || e->destino.codigoPostal[0] < '0') {
+    if (e->origem.codigoPostal[0] > '9' || e->origem.codigoPostal[0] < '0' || e->destino.codigoPostal[0] > '9' ||
+        e->destino.codigoPostal[0] < '0') {
         printf("*** Multiplicador de Código Postal: ERRO\n");
         printf("*** Preço Final em Cêntimos: ERRO\n");
     } else {
-        const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0]-'0'][e->destino.codigoPostal[0]-'0'];
-        printf("*** Multiplicador de Código Postal: %f\n", (double)multcp);
+        const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0] - '0'][e->destino.codigoPostal[0] - '0'];
+        printf("*** Multiplicador de Código Postal: %f\n", (double) multcp);
         printf("*** Preço Final em Cêntimos: %luc\n", encomenda_CalcPreco(e));
     }
     menu_printDiv();
 }
 
-void menu_printReciboMensal (uint64_t ID_U, int mes, int ano, encomendavec* e, utilizadorvec* uv) {
-    size_t tot_enc = 0;
-    size_t tot_art = 0;
+/**
+ * @brief       Imprime o recibo mensal para um certo utilizador. Apenas são
+ * impressas no recibo encomendas que já foram entregues.
+ *
+ * @param ID_U  ID do utilizador para quem imprimir o recibo.
+ * @param mes   Mês do recibo. [1, 12]
+ * @param ano   Ano do recibo.
+ * @param e     Vetor das encomendas.
+ * @param uv    Vetor dos utilizadores.
+ */
+void menu_printReciboMensal(const uint64_t ID_U, int mes, int ano, const encomendavec* const e,
+                            const utilizadorvec* const uv) {
+    size_t tot_enc   = 0;
+    size_t tot_art   = 0;
     size_t tot_preco = 0;
 
-    menu_printDiv();
-    printf("*** NIF do Cliente: %.9s\n\n", uv->data[ID_U].NIF);
+    ano -= 1900;
+    mes -= 1;
 
-    for(size_t i = 0; i < e->size; ++i) {
+    menu_printDiv();
+    printf("*** Nome: %s\n", protectStr(uv->data[ID_U].nome));
+    printf("*** NIF: %.9s\n\n", uv->data[ID_U].NIF);
+
+    for (size_t i = 0; i < e->size; ++i) {
         struct tm* enctm = localtime(&e->data[i].criacao);
-        if(enctm->tm_year != ano || enctm->tm_mon != mes || ID_U != e->data[i].ID_cliente)
-            continue;
+        if (enctm->tm_year != ano || enctm->tm_mon != mes || ID_U != e->data[i].ID_cliente) continue;
         encomenda* atual = &(e->data[i]);
+        if (atual->tipoEstado != ENCOMENDA_ESTADO_ENTREGUE) continue;
         menu_printEncomendaBrief(atual, uv);
         printf("\n");
         size_t art;
-        for(art = 0; art < atual->artigos.size; ++art) {
+        for (art = 0; art < atual->artigos.size; ++art) {
             printf("\t");
             menu_printArtigo(&(atual->artigos.data[art]));
             printf("\n");
@@ -279,7 +408,7 @@ void menu_printReciboMensal (uint64_t ID_U, int mes, int ano, encomendavec* e, u
     printf("\n");
     ano += 1900;
     mes += 1;
-    printf("*** Encomendas feitas (%d/%d):    %lu\n",  ano, mes, tot_enc);
-    printf("*** Artigos encomendados (%d/%d): %lu\n",  ano, mes, tot_art);
+    printf("*** Encomendas feitas (%d/%d):    %lu\n", ano, mes, tot_enc);
+    printf("*** Artigos encomendados (%d/%d): %lu\n", ano, mes, tot_art);
     printf("*** Preço final do mês (%d/%d):   %luc\n", ano, mes, tot_preco);
 }
