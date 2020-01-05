@@ -152,6 +152,7 @@ void listagem_Utilizadores_Mais_Gasto() {
         }
     }
 
+    // Organizar a lista por total gasto (ordem descendente)
     // l1 maior da lista
     par_idc_tG tmp;
     for (size_t l1 = 0; l1 < lista.size - 1; ++l1) {
@@ -164,6 +165,7 @@ void listagem_Utilizadores_Mais_Gasto() {
         }
     }
 
+    // Fazer o display da lista
     menu_printDiv();
     menu_printHeader("Utilizadores Encontrados");
     for (size_t l = 0; l < lista.size; ++l) {
@@ -172,6 +174,7 @@ void listagem_Utilizadores_Mais_Gasto() {
         printf("  Total gasto: %luc\n", lista.data[l].totalGasto);
     }
 
+    // Libertar lista
     pidctgvec_free(&lista);
 }
 
@@ -196,18 +199,20 @@ typedef struct {
  * @brief Lista encomendas com um certo estado e tipo ordenadas por preço.
  */
 void listagem_Encomenda_EmEstado_PorPreco() {
-    menu_printDiv();
-    menu_printHeader("Encomendas Filtradas e Ordenadas");
-    uint8_t  estadoPesquisa = 0;
+    uint8_t  estadoPesquisa = 0; // Tipo e estado que será pesquisado
     pidepvec lista          = pidepvec_new();
 
+    menu_printDiv();
+    menu_printHeader("Encomendas Filtradas e Ordenadas");
+
+    // Obter tipo e estado da encomenda do utilizador
     while (1) {
         printf("*** Pesquisa irá encontrar encomendas: ");
         switch (estadoPesquisa & 0xF0) {
-            case ENCOMENDA_ESTADO_EM_ENTREGA: printf("em entrega"); break;
-            case ENCOMENDA_ESTADO_EXPEDIDA: printf("expedidas"); break;
-            case ENCOMENDA_ESTADO_ENTREGUE: printf("entregues"); break;
-            case ENCOMENDA_ESTADO_CANCELADA: printf("canceladas"); break;
+            case ENCOMENDA_ESTADO_EM_ENTREGA: printf("Em entrega"); break;
+            case ENCOMENDA_ESTADO_EXPEDIDA: printf("Expedidas"); break;
+            case ENCOMENDA_ESTADO_ENTREGUE: printf("Entregues"); break;
+            case ENCOMENDA_ESTADO_CANCELADA: printf("Canceladas"); break;
             default: printf("desconhecido"); break;
         }
 
@@ -251,7 +256,7 @@ void listagem_Encomenda_EmEstado_PorPreco() {
             case 5: estadoPesquisa = (estadoPesquisa & 0xF) | ENCOMENDA_ESTADO_EXPEDIDA; break;
             case 6: estadoPesquisa = (estadoPesquisa & 0xF) | ENCOMENDA_ESTADO_ENTREGUE; break;
             case 7: estadoPesquisa = (estadoPesquisa & 0xF) | ENCOMENDA_ESTADO_CANCELADA; break;
-            case 8: goto EXIT_LABEL; break;
+            case 8: goto EXIT_LABEL; break; // Sair do loop
         }
     }
 
@@ -272,10 +277,11 @@ EXIT_LABEL:
            (estadoPesquisa & ENCOMENDA_TIPO_VOLUMOSO) ? "volumosas" : "pequenas" //
     );
 
+    // Criar uma lista com todas as encomendas com 'tipoEstado' compativel.
     protectFcnCall(pidepvec_reserve(&lista, encomendas.size),
-                   "listagem_Encomenda_EmEstado_PorPreco - pidepvec_reserve falhou.")
+                   "listagem_Encomenda_EmEstado_PorPreco - pidepvec_reserve falhou.");
 
-        for (uint64_t e = 0; e < encomendas.size; ++e) {
+    for (uint64_t e = 0; e < encomendas.size; ++e) {
         if (encomendas.data[e].tipoEstado == estadoPesquisa) {
             protectFcnCall(pidepvec_push(&lista, (par_ide_p) {.ID_encomenda = e,
                                                               .preco = encomenda_CalcPreco(&encomendas.data[e])}),
@@ -283,6 +289,7 @@ EXIT_LABEL:
         }
     }
 
+    // Organizar lista por preço (descendente)
     // l1 maior da lista
     par_ide_p tmp;
     for (size_t l1 = 0; l1 < lista.size - 1; ++l1) {
@@ -295,6 +302,7 @@ EXIT_LABEL:
         }
     }
 
+    // Fazer o display das encomendas
     menu_printDiv();
     menu_printHeader("Encomendas Encontradas");
     for (size_t l = 0; l < lista.size; ++l) {
@@ -303,6 +311,7 @@ EXIT_LABEL:
         printf("  Preço: %luc\n", lista.data[l].preco);
     }
 
+    // Libertar lista
     pidepvec_free(&lista);
 }
 
@@ -318,9 +327,11 @@ EXIT_LABEL:
 void listagem_Artigos_Semana() {
     menu_printDiv();
     menu_printHeader("Encomendas Nos Ultimos Sete Dias");
+
     time_t now = time(NULL);
     for (size_t e = 0; e < encomendas.size; ++e) {
-        if (difftime(now, encomendas.data[e].criacao) <= SEGUNDOS_EM_7_DIAS) {
+        const double dt = difftime(now, encomendas.data[e].criacao);
+        if ((dt > 0) && (dt < SEGUNDOS_EM_7_DIAS)) {
             printf("   %8lu   |   ", e);
             menu_printEncomendaBrief(&encomendas.data[e], &utilizadores);
             printf("   Artigos:\n");
@@ -350,6 +361,8 @@ void listagem_imprimir_recibo() {
         menu_printDiv();
     }
     if (op == -1) return;
+    // Verificar se o utilizador atual é um diretor ou se a encomenda que
+    // foi selecionada foi formalizada pelo utilizador atual.
     if ((utilizadores.data[utilizadorAtual].tipo != UTILIZADOR_DIRETOR) &&
         (utilizadorAtual != encomendas.data[op].ID_cliente)) {
         menu_printError("não tem premissões para imprimir este recibo!");

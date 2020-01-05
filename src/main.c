@@ -532,9 +532,9 @@ void interface_diretor() {
 /**
  * @brief Função auxiliar que premite desátivar o prefil do utilizador atual.
  */
-void funcional_desativar_perfil() {
+void funcional_desativar_perfil_atual() {
     utilizadores.data[utilizadorAtual].tipo = UTILIZADOR_DESATIVADO;
-    utilizadorAtual                         = ~0;
+    utilizadorAtual                         = U_INVAL;
     menu_printInfo("utilizador desativado com sucesso!");
 }
 
@@ -843,7 +843,7 @@ void interface_cliente() {
         switch (menu_selection(&vetorOp)) {
             case -1: return;
             case 0: funcional_editar_utilizador(utilizadorAtual); break;
-            case 1: funcional_desativar_perfil(); break;
+            case 1: funcional_desativar_perfil_atual(); break;
             case 2: interface_criar_encomenda(); break;
             case 3:
                 menu_printDiv();
