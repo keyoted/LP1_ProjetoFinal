@@ -63,13 +63,13 @@ void listagem_Encomendas_Periodo_de_Tempo() {
     menu_printDiv();
     menu_printHeader("Encomendas Encontradas");
     for (size_t i = 0; i < encomendas.size; ++i) {
-        struct tm* const t   = localtime(&(encomendas.data[i].criacao));
+        struct tm* const t   = localtime(&encomendas.data[i].criacao);
         const int        ano = t->tm_year;
         const int        mes = t->tm_mon;
         // imprimir sse inicio <= X <= mes
         if ((anoi < ano && ano < anof) || ((anoi == ano) && (mesi <= mes)) || ((anof == ano) && (mes <= mesf))) {
             printf("   %*lu   |   ", 8, i);
-            menu_printEncomendaBrief(&(encomendas.data[i]), &utilizadores);
+            menu_printEncomendaBrief(&encomendas.data[i], &utilizadores);
             printf("\n");
         }
     }
@@ -110,7 +110,7 @@ void listagem_Utilizadores_Mais_Gasto() {
     // Calcular o valor das encomendas feitas por utilizador
     for (size_t e = 0; e < encomendas.size; ++e) {
         if (!(encomendas.data[e].tipoEstado & ENCOMENDA_ESTADO_CANCELADA)) {
-            lista.data[encomendas.data[e].ID_cliente].totalGasto += encomenda_CalcPreco(&(encomendas.data[e]));
+            lista.data[encomendas.data[e].ID_cliente].totalGasto += encomenda_CalcPreco(&encomendas.data[e]);
         }
     }
 
@@ -240,7 +240,7 @@ EXIT_LABEL:
         for (uint64_t e = 0; e < encomendas.size; ++e) {
         if (encomendas.data[e].tipoEstado == estadoPesquisa) {
             protectFcnCall(pidepvec_push(&lista, (par_ide_p) {.ID_encomenda = e,
-                                                              .preco = encomenda_CalcPreco(&(encomendas.data[e]))}),
+                                                              .preco = encomenda_CalcPreco(&encomendas.data[e])}),
                            "listagem_Encomenda_EmEstado_PorPreco - pidepvec_push falhou.");
         }
     }
@@ -261,7 +261,7 @@ EXIT_LABEL:
     menu_printHeader("Encomendas Encontradas");
     for (size_t l = 0; l < lista.size; ++l) {
         printf("   %8lu   |   ", lista.data[l].ID_encomenda);
-        menu_printEncomendaBrief(&(encomendas.data[lista.data[l].ID_encomenda]), &utilizadores);
+        menu_printEncomendaBrief(&encomendas.data[lista.data[l].ID_encomenda], &utilizadores);
         printf("  Preço: %luc\n", lista.data[l].preco);
     }
 
@@ -284,11 +284,11 @@ void listagem_Artigos_Semana() {
     for (size_t e = 0; e < encomendas.size; ++e) {
         if (difftime(now, encomendas.data[e].criacao) <= SEGUNDOS_EM_7_DIAS) {
             printf("   %8lu   |   ", e);
-            menu_printEncomendaBrief(&(encomendas.data[e]), &utilizadores);
+            menu_printEncomendaBrief(&encomendas.data[e], &utilizadores);
             printf("   Artigos:\n");
             for (size_t a = 0; a < artigos.size; ++a) {
                 printf("             %8lu   |   ", a);
-                menu_printArtigo(&(artigos.data[a]));
+                menu_printArtigo(&artigos.data[a]);
                 printf("\n");
             }
         }
@@ -316,7 +316,7 @@ void listagem_imprimir_recibo() {
         (utilizadorAtual != encomendas.data[op].ID_cliente)) {
         menu_printError("não tem premissões para imprimir este recibo!");
     } else
-        menu_printEncomendaDetail(&(encomendas.data[op]), &utilizadores);
+        menu_printEncomendaDetail(&encomendas.data[op], &utilizadores);
 }
 
 /**

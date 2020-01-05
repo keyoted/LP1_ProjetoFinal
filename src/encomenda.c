@@ -34,9 +34,9 @@ encomenda newEncomenda() {
  * @param e         Encomenda para ser libertado.
  */
 void freeEncomenda(encomenda* const e) {
-    artigovec_free(&(e->artigos));
-    freeMorada(&(e->origem));
-    freeMorada(&(e->destino));
+    artigovec_free(&e->artigos);
+    freeMorada(&e->origem);
+    freeMorada(&e->destino);
 }
 
 /**
@@ -280,7 +280,7 @@ encomenda encomenda_formalizar(const artigovec artigos, const precos_cent precos
     e.precos       = precos;
     e.tipoEstado   = ENCOMENDA_ESTADO_EM_ENTREGA;
     e.criacao      = time(NULL);
-    for (int i = 0; i < 10; i++) { memcpy(&(e.precos.MULT_CP[i]), &(precos.MULT_CP[i]), 10); }
+    for (int i = 0; i < 10; i++) { memcpy(&e.precos.MULT_CP[i], &precos.MULT_CP[i], 10); }
     encomenda_TIPO_VOLUMOSO(&e);
     encomenda_TIPO_FRAGIL(&e);
     encomenda_TIPO_PESADO(&e);
@@ -296,19 +296,19 @@ encomenda encomenda_formalizar(const artigovec artigos, const precos_cent precos
  */
 int save_encomenda(FILE* const f, const encomenda* const data) {
     size_t written = 0;
-    written += fwrite(&(data->artigos.size), sizeof(uint64_t), 1, f);
+    written += fwrite(&data->artigos.size, sizeof(uint64_t), 1, f);
     if (data->artigos.size == 0) {
         menu_printError("ao gravar encomenda - encomenda sem artigos.");
         written = 0;
     }
-    for (uint64_t i = 0; i < data->artigos.size; ++i) { written += save_artigo(f, &(data->artigos.data[i])); }
-    written += save_morada(f, &(data->origem));
-    written += save_morada(f, &(data->destino));
-    written += fwrite(&(data->distancia_km), sizeof(uint64_t), 1, f);
-    written += fwrite(&(data->tipoEstado), sizeof(uint8_t), 1, f);
-    written += save_precos(f, &(data->precos));
-    written += fwrite(&(data->ID_cliente), sizeof(uint64_t), 1, f);
-    written += fwrite(&(data->criacao), sizeof(time_t), 1, f);
+    for (uint64_t i = 0; i < data->artigos.size; ++i) { written += save_artigo(f, &data->artigos.data[i]); }
+    written += save_morada(f, &data->origem);
+    written += save_morada(f, &data->destino);
+    written += fwrite(&data->distancia_km, sizeof(uint64_t), 1, f);
+    written += fwrite(&data->tipoEstado, sizeof(uint8_t), 1, f);
+    written += save_precos(f, &data->precos);
+    written += fwrite(&data->ID_cliente, sizeof(uint64_t), 1, f);
+    written += fwrite(&data->criacao, sizeof(time_t), 1, f);
     return written == (1 + data->artigos.size + 5 + 1 + 1);
 }
 
@@ -322,23 +322,23 @@ int save_encomenda(FILE* const f, const encomenda* const data) {
 int load_encomenda(FILE* const f, encomenda* const data) {
     size_t   written  = 0;
     uint64_t size_tmp = 0;
-    written += fread(&(size_tmp), sizeof(uint64_t), 1, f);
+    written += fread(&size_tmp, sizeof(uint64_t), 1, f);
     if (size_tmp == 0) {
         menu_printError("ao carregar encomenda - encomenda sem artigos.");
         written = 0;
     }
     data->artigos = artigovec_new();
-    protectFcnCall(artigovec_reserve(&(data->artigos), size_tmp), "load_encomenda - artigovec_reserve fallhou.");
+    protectFcnCall(artigovec_reserve(&data->artigos, size_tmp), "load_encomenda - artigovec_reserve fallhou.");
     for (uint64_t i = 0; i < size_tmp; ++i) {
-        written += load_artigo(f, &(data->artigos.data[i]));
+        written += load_artigo(f, &data->artigos.data[i]);
         ++data->artigos.size;
     }
-    written += load_morada(f, &(data->origem));
-    written += load_morada(f, &(data->destino));
-    written += fread(&(data->distancia_km), sizeof(uint64_t), 1, f);
-    written += fread(&(data->tipoEstado), sizeof(uint8_t), 1, f);
-    written += load_precos(f, &(data->precos));
-    written += fread(&(data->ID_cliente), sizeof(uint64_t), 1, f);
-    written += fread(&(data->criacao), sizeof(time_t), 1, f);
+    written += load_morada(f, &data->origem);
+    written += load_morada(f, &data->destino);
+    written += fread(&data->distancia_km, sizeof(uint64_t), 1, f);
+    written += fread(&data->tipoEstado, sizeof(uint8_t), 1, f);
+    written += load_precos(f, &data->precos);
+    written += fread(&data->ID_cliente, sizeof(uint64_t), 1, f);
+    written += fread(&data->criacao, sizeof(time_t), 1, f);
     return written == (1 + size_tmp + 5 + 1 + 1);
 }

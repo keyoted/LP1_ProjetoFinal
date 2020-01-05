@@ -232,7 +232,7 @@ void menu_printEncomendaBrief(const encomenda* const e, const utilizadorvec* con
     }
 
     printf(" (%.9s) ", uv->data[e->ID_cliente].NIF);
-    struct tm* lt = localtime(&(e->criacao));
+    struct tm* lt = localtime(&e->criacao);
     printf(" %d/%d/%d %d:%d  -  ", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min);
     printf("%luc", encomenda_CalcPreco(e));
 }
@@ -273,16 +273,16 @@ void menu_printEncomendaDetail(const encomenda* const e, const utilizadorvec* co
     menu_printHeader("Recibo de Encomenda");
     printf("*** NIF do Cliente: %.9s\n", uv->data[e->ID_cliente].NIF);
 
-    struct tm* lt = localtime(&(e->criacao));
+    struct tm* lt = localtime(&e->criacao);
     printf("Data de criação: %d/%d/%d %d:%d", 1900 + lt->tm_year, 1 + lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min);
 
     menu_printHeader("Origem");
     printf("*** Morada: %s\n", protectStr(e->origem.morada));
-    printf("*** Código Postal: %.4s-%.3s\n", e->origem.codigoPostal, &(e->origem.codigoPostal[4]));
+    printf("*** Código Postal: %.4s-%.3s\n", e->origem.codigoPostal, &e->origem.codigoPostal[4]);
 
     menu_printHeader("Destino");
     printf("*** Morada: %s\n", protectStr(e->destino.morada));
-    printf("*** Código Postal: %.4s-%.3s\n", e->destino.codigoPostal, &(e->destino.codigoPostal[4]));
+    printf("*** Código Postal: %.4s-%.3s\n", e->destino.codigoPostal, &e->destino.codigoPostal[4]);
 
 
     menu_printHeader("Artigos");
@@ -396,14 +396,14 @@ void menu_printReciboMensal(const uint64_t ID_U, int mes, int ano, const encomen
     for (size_t i = 0; i < e->size; ++i) {
         struct tm* enctm = localtime(&e->data[i].criacao);
         if (enctm->tm_year != ano || enctm->tm_mon != mes || ID_U != e->data[i].ID_cliente) continue;
-        encomenda* atual = &(e->data[i]);
+        encomenda* atual = &e->data[i];
         if (atual->tipoEstado != ENCOMENDA_ESTADO_ENTREGUE) continue;
         menu_printEncomendaBrief(atual, uv);
         printf("\n");
         size_t art;
         for (art = 0; art < atual->artigos.size; ++art) {
             printf("\t");
-            menu_printArtigo(&(atual->artigos.data[art]));
+            menu_printArtigo(&atual->artigos.data[art]);
             printf("\n");
         }
         tot_art += art;

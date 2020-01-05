@@ -117,14 +117,14 @@ void funcional_consultar_estados_encomendas() {
     if (utilizadores.data[utilizadorAtual].tipo == UTILIZADOR_DIRETOR) {
         for (size_t i = 0; i < encomendas.size; ++i) {
             printf("   %*lu   |   ", 8, i);
-            menu_printEncomendaBrief(&(encomendas.data[i]), &utilizadores);
+            menu_printEncomendaBrief(&encomendas.data[i], &utilizadores);
             printf("\n");
         }
     } else {
         for (size_t i = 0; i < encomendas.size; ++i) {
             if (utilizadorAtual == encomendas.data[i].ID_cliente) {
                 printf("   %*lu   |   ", 8, i);
-                menu_printEncomendaBrief(&(encomendas.data[i]), &utilizadores);
+                menu_printEncomendaBrief(&encomendas.data[i], &utilizadores);
                 printf("\n");
             }
         }
@@ -151,7 +151,7 @@ void interface_editar_morada(morada* const m, int isNew) {
         if (isNew)
             printf("Introduzir Código Postal (XXXX-XXX)");
         else
-            printf("Introduzir Código Postal (XXXX-XXX) (%.4s-%.3s)", m->codigoPostal, &(m->codigoPostal[4]));
+            printf("Introduzir Código Postal (XXXX-XXX) (%.4s-%.3s)", m->codigoPostal, &m->codigoPostal[4]);
         menu_readNotNulStr(&stmp);
 
         if (strlen(stmp) != 8) {
@@ -206,7 +206,7 @@ void funcional_editar_diretor(size_t op) {
     menu_printDiv();
     menu_printHeader("Editar Diretor");
 
-    freeUtilizador(&(utilizadores.data[op]));
+    freeUtilizador(&utilizadores.data[op]);
     utilizadores.data[op] = newUtilizador();
     utilizador* diretor   = &utilizadores.data[op];
     diretor->tipo         = UTILIZADOR_DIRETOR;
@@ -223,12 +223,12 @@ void funcional_editar_diretor(size_t op) {
 void funcional_editar_utilizador(size_t index) {
     menu_printDiv();
     menu_printHeader("Edição de Utilizador");
-    utilizador* u = &(utilizadores.data[index]);
+    utilizador* u = &utilizadores.data[index];
 
     printf("Introduzir Nome (%s)", protectStr(u->nome));
     menu_readNotNulStr(&u->nome);
 
-    interface_editar_morada(&(u->endereco), 0);
+    interface_editar_morada(&u->endereco, 0);
 
     char* stmp = NULL;
     while (1) {
@@ -447,7 +447,7 @@ void interface_alterar_utilizadores() {
  */
 int vecPrintEncomendaPredicate(encomenda item, size_t* userdata) {
     printf("   %*lu   |   ", 8, (*userdata)++);
-    menu_printEncomendaBrief(&(item), &utilizadores);
+    menu_printEncomendaBrief(&item, &utilizadores);
     printf("\n");
     return 0;
 }
@@ -473,7 +473,7 @@ void interface_editar_estados_encomendas() {
         }
         if (op == -1) return;
 
-        encomenda* e = &(encomendas.data[op]);
+        encomenda* e = &encomendas.data[op];
         menu_printDiv();
         while (1) {
             menu_printHeader("Selecionar operação:");
@@ -610,7 +610,7 @@ END_OF_LOOP:
  */
 int vecPrintArtigoPredicate(artigo item, size_t* userdata) {
     printf("   %*lu   |   ", 8, (*userdata)++);
-    menu_printArtigo(&(item));
+    menu_printArtigo(&item);
     printf("\n");
     return 0;
 }
@@ -695,7 +695,7 @@ void funcional_editar_artigos(artigovec* ar) {
         if (op == -1) return;
         if (op == max - 1)
             protectFcnCall(artigovec_push(ar, newArtigo()), "funcional_editar_artigos - artigovec_push falhou.");
-        if (!funcional_editar_artigo(&(ar->data[op]), (op != max - 1))) {
+        if (!funcional_editar_artigo(&ar->data[op], (op != max - 1))) {
             artigovec_moveBelow(ar, op);
             menu_printInfo("Artigo removido.");
         }
@@ -757,7 +757,7 @@ void interface_editar_encomendas() {
         menu_printDiv();
     }
     if (op == -1) return;
-    encomenda* e = &(encomendas.data[op]);
+    encomenda* e = &encomendas.data[op];
     menu_printEncomendaDetail(e, &utilizadores);
 
     if (e->tipoEstado & ENCOMENDA_ESTADO_EM_ENTREGA) {
@@ -776,7 +776,7 @@ void interface_editar_encomendas() {
                                               .size = 6})) {
                 case -1: return;
                 case 0: {
-                    funcional_editar_artigos(&(e->artigos));
+                    funcional_editar_artigos(&e->artigos);
                     menu_printInfo("a formalizar encomenda...");
                     e->tipoEstado = ENCOMENDA_ESTADO_EM_ENTREGA;
                     if (e->artigos.size == 0) {
@@ -792,8 +792,8 @@ void interface_editar_encomendas() {
                 case 1: encomenda_ESTADO_CANCELADA(e); return;
                 case 2: encomenda_TIPO_URGENTE(e); break;
                 case 3: encomenda_TIPO_FRAGIL_togle(e); break;
-                case 4: interface_editar_morada(&(e->origem), 0); break;
-                case 5: interface_editar_morada(&(e->destino), 0); break;
+                case 4: interface_editar_morada(&e->origem, 0); break;
+                case 5: interface_editar_morada(&e->destino, 0); break;
             }
         }
     } else if (e->tipoEstado & ENCOMENDA_ESTADO_CANCELADA) {
@@ -929,7 +929,7 @@ void funcional_carregarDados() {
         return;
     }
     uint64_t size_tmp = 0;
-    if (!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
+    if (!fread(&size_tmp, sizeof(uint64_t), 1, f)) {
         menu_printError("impossivel ler tamanho de utilizadores :%d!", errno);
         funcional_carregarDados_err(f);
         return;
@@ -938,14 +938,14 @@ void funcional_carregarDados() {
                    "funcional_carregarDados - utilizadorvec_reserve falhou.");
     for (uint64_t i = 0; i < size_tmp; ++i) {
         ++utilizadores.size;
-        if (!load_utilizador(f, &(utilizadores.data[i]))) {
+        if (!load_utilizador(f, &utilizadores.data[i])) {
             menu_printError("impossivel carregar utilizador [%lu] :%d!", i, errno);
             --utilizadores.size;
             funcional_carregarDados_err(f);
             return;
         }
     }
-    if (!fread(&(size_tmp), sizeof(uint64_t), 1, f)) {
+    if (!fread(&size_tmp, sizeof(uint64_t), 1, f)) {
         menu_printError("impossivel carregar tamanho de encomendas :%d!", errno);
         funcional_carregarDados_err(f);
         return;
@@ -954,7 +954,7 @@ void funcional_carregarDados() {
                    "funcional_carregarDados - encomendavec_reserve falhou.");
     for (uint64_t i = 0; i < size_tmp; ++i) {
         ++encomendas.size;
-        if (!load_encomenda(f, &(encomendas.data[i]))) {
+        if (!load_encomenda(f, &encomendas.data[i])) {
             menu_printError("impossivel carregar encomenda [%lu] :%d!", i, errno);
             --encomendas.size;
             funcional_carregarDados_err(f);
@@ -1128,25 +1128,25 @@ void funcional_guardarDados() {
         fclose(f);
         return;
     }
-    if (!fwrite(&(utilizadores.size), sizeof(uint64_t), 1, f)) {
+    if (!fwrite(&utilizadores.size, sizeof(uint64_t), 1, f)) {
         menu_printError("impossivel guardar tamanho de utilizadores :%d!", errno);
         fclose(f);
         return;
     }
     for (uint64_t i = 0; i < utilizadores.size; ++i) {
-        if (!save_utilizador(f, &(utilizadores.data[i]))) {
+        if (!save_utilizador(f, &utilizadores.data[i])) {
             menu_printError("impossivel guardar utilizador [%lu] :%d!", i, errno);
             fclose(f);
             return;
         }
     }
-    if (!fwrite(&(encomendas.size), sizeof(uint64_t), 1, f)) {
+    if (!fwrite(&encomendas.size, sizeof(uint64_t), 1, f)) {
         menu_printError("impossivel guardar tamanho de encomendas :%d!", errno);
         fclose(f);
         return;
     }
     for (uint64_t i = 0; i < encomendas.size; ++i) {
-        if (!save_encomenda(f, &(encomendas.data[i]))) {
+        if (!save_encomenda(f, &encomendas.data[i])) {
             menu_printError("impossivel guardar encomenda [%lu] :%d!", i, errno);
             fclose(f);
             return;

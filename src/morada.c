@@ -45,7 +45,7 @@ int morada_eCPValido(const uint8_t* const CP) {
  */
 morada morada_dup(const morada m) {
     morada mcp = (morada) {.morada = strdup(m.morada)};
-    memcpy(&(mcp.codigoPostal[0]), &(m.codigoPostal[0]), 7);
+    memcpy(&mcp.codigoPostal[0], &m.codigoPostal[0], 7);
     return mcp;
 }
 
@@ -76,7 +76,7 @@ int save_morada(FILE* const f, const morada* const data) {
  */
 int load_morada(FILE* const f, morada* const data) {
     int written = 0;
-    written += load_str(f, &(data->morada));
+    written += load_str(f, &data->morada);
     if (!data->morada) {
         menu_printError("ao carregar morada - morada inválida.");
         data->morada = strdup("Inválido");

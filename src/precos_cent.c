@@ -20,12 +20,12 @@
  */
 int save_precos(FILE* const f, const precos_cent* const data) {
     size_t written = 0;
-    written += fwrite(&(data->REGULAR), sizeof(uint64_t), 1, f);
-    written += fwrite(&(data->URGENTE), sizeof(uint64_t), 1, f);
-    written += fwrite(&(data->VOLUMOSO), sizeof(uint64_t), 1, f);
-    written += fwrite(&(data->FRAGIL), sizeof(uint64_t), 1, f);
-    written += fwrite(&(data->PESADO), sizeof(uint64_t), 1, f);
-    written += fwrite(&(data->POR_KM), sizeof(uint64_t), 1, f);
+    written += fwrite(&data->REGULAR, sizeof(uint64_t), 1, f);
+    written += fwrite(&data->URGENTE, sizeof(uint64_t), 1, f);
+    written += fwrite(&data->VOLUMOSO, sizeof(uint64_t), 1, f);
+    written += fwrite(&data->FRAGIL, sizeof(uint64_t), 1, f);
+    written += fwrite(&data->PESADO, sizeof(uint64_t), 1, f);
+    written += fwrite(&data->POR_KM, sizeof(uint64_t), 1, f);
     for (int org = 0; org < 10; ++org) { written += fwrite(data->MULT_CP[org], sizeof(_Float32), 10, f); }
     return written == 106;
 }
@@ -39,12 +39,12 @@ int save_precos(FILE* const f, const precos_cent* const data) {
  */
 int load_precos(FILE* const f, precos_cent* const data) {
     size_t written = 0;
-    written += fread(&(data->REGULAR), sizeof(uint64_t), 1, f);
-    written += fread(&(data->URGENTE), sizeof(uint64_t), 1, f);
-    written += fread(&(data->VOLUMOSO), sizeof(uint64_t), 1, f);
-    written += fread(&(data->FRAGIL), sizeof(uint64_t), 1, f);
-    written += fread(&(data->PESADO), sizeof(uint64_t), 1, f);
-    written += fread(&(data->POR_KM), sizeof(uint64_t), 1, f);
+    written += fread(&data->REGULAR, sizeof(uint64_t), 1, f);
+    written += fread(&data->URGENTE, sizeof(uint64_t), 1, f);
+    written += fread(&data->VOLUMOSO, sizeof(uint64_t), 1, f);
+    written += fread(&data->FRAGIL, sizeof(uint64_t), 1, f);
+    written += fread(&data->PESADO, sizeof(uint64_t), 1, f);
+    written += fread(&data->POR_KM, sizeof(uint64_t), 1, f);
     for (int org = 0; org < 10; ++org) { written += fread(data->MULT_CP[org], sizeof(_Float32), 10, f); }
     return written == 106;
 }

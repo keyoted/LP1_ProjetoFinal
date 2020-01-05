@@ -173,7 +173,7 @@ int VEC_FUN(_push)(VEC_NAME* const v, VEC_TYPE const newObj) {
  * @warning         O objecto no index 'i' não é dealocado por esta função
  */
 void VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i) {
-    memmove(&(v->data[i]), &(v->data[i + 1]), (v->size - i - 1) * sizeof(VEC_TYPE));
+    memmove(&v->data[i], &v->data[i + 1], (v->size - i - 1) * sizeof(VEC_TYPE));
     --(v->size);
 }
 
@@ -193,7 +193,7 @@ void VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i) {
  */
 int VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i) {
     if (!VEC_FUN(_addCell)(v)) return 0;
-    memmove(&(v->data[i + 1]), &(v->data[i]), (v->size - i) * sizeof(VEC_TYPE));
+    memmove(&v->data[i + 1], &v->data[i], (v->size - i) * sizeof(VEC_TYPE));
     ++(v->size);
     return 1;
 }

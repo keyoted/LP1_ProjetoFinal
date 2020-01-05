@@ -64,7 +64,7 @@ utilizador newUtilizador() {
  */
 void freeUtilizador(utilizador* const u) {
     freeN(u->nome);
-    freeMorada(&(u->endereco));
+    freeMorada(&u->endereco);
 }
 
 /**
@@ -81,10 +81,10 @@ int save_utilizador(FILE* const f, const utilizador* const data) {
         menu_printError("ao gravar utilizador - nome inválido.");
         written = 0;
     }
-    written += fwrite(&(data->NIF), sizeof(uint8_t), 9, f);
-    written += fwrite(&(data->CC), sizeof(uint8_t), 12, f);
-    written += save_morada(f, &(data->endereco));
-    written += fwrite(&(data->tipo), sizeof(uint8_t), 1, f);
+    written += fwrite(&data->NIF, sizeof(uint8_t), 9, f);
+    written += fwrite(&data->CC, sizeof(uint8_t), 12, f);
+    written += save_morada(f, &data->endereco);
+    written += fwrite(&data->tipo, sizeof(uint8_t), 1, f);
     return written == (1 + 9 + 12 + 1 + 1);
 }
 
@@ -97,15 +97,15 @@ int save_utilizador(FILE* const f, const utilizador* const data) {
  */
 int load_utilizador(FILE* const f, utilizador* const data) {
     int written = 0;
-    written += load_str(f, &(data->nome));
+    written += load_str(f, &data->nome);
     if (!data->nome) {
         menu_printError("ao carregar utilizador - nome inválido.");
         data->nome = strdup("Inválido");
         written    = 0;
     }
-    written += fread(&(data->NIF), sizeof(uint8_t), 9, f);
-    written += fread(&(data->CC), sizeof(uint8_t), 12, f);
-    written += load_morada(f, &(data->endereco));
-    written += fread(&(data->tipo), sizeof(uint8_t), 1, f);
+    written += fread(&data->NIF, sizeof(uint8_t), 9, f);
+    written += fread(&data->CC, sizeof(uint8_t), 12, f);
+    written += load_morada(f, &data->endereco);
+    written += fread(&data->tipo, sizeof(uint8_t), 1, f);
     return written == (1 + 9 + 12 + 1 + 1);
 }
