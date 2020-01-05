@@ -29,7 +29,6 @@
  * #define  intVec_H
  * #define  VEC_TYPE             int
  * #define  VEC_NAME             intVec
- * #define  VEC_DEALOC(X)
  * #include "./vector.h"
  * #endif
  * @endcode
@@ -42,7 +41,8 @@
  *                  Nome da nova struct, todas as funções têm este nome como
  *                  prefixo.
  * @def VEC_DEALOC(X)
- *                  Maneira de dealocar VEC_TYPE, se necessário.
+ *                  Maneira de dealocar VEC_TYPE, se necessário
+ *                  (pode não ser definido).
  * @def PASTER(X, Y)
  *                  Macro auxiliar para juntar VEC_NAME e Y.
  * @def EVAL(X, Y)
@@ -71,10 +71,6 @@
 
 #ifndef VEC_NAME
 #    define VEC_NAME vector
-#endif
-
-#ifndef VEC_DEALOC
-#    define VEC_DEALOC(x)
 #endif
 
 #define PASTER(X, Y) X##Y
@@ -258,7 +254,9 @@ VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const uint64_t position) {
  * @note            'v' em si não é dealocado.
  */
 void VEC_FUN(_free)(VEC_NAME* const v) {
+#    ifdef VEC_DEALOC
     for (uint64_t i = 0; i < v->size; i++) { VEC_DEALOC(v->data[i]); }
+#    endif
     if (v->alocated != 0) free(v->data);
     v->data     = NULL;
     v->size     = 0;
@@ -273,7 +271,9 @@ void VEC_FUN(_free)(VEC_NAME* const v) {
  * @param position  Index do elemento a remover.
  */
 void VEC_FUN(_removeAt)(VEC_NAME* const v, uint64_t position) {
+#    ifdef VEC_DEALOC
     VEC_DEALOC(v->data[position]);
+#    endif
     VEC_FUN(_moveBelow)(v, position);
 }
 
@@ -375,24 +375,28 @@ int VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space) {
  *                  a inclusão do ficheio vector.h.
  * @param X         O parametro X do macro 'VEC_DEALOC'.
  */
+#    ifdef VEC_DEALOC
 void VEC_FUN(_DEALOC)(VEC_TYPE* const X) { VEC_DEALOC(*X); }
+#    endif
 #endif
 
 #ifdef VEC_DECLARATION
-int      VEC_FUN(_addCell)(VEC_NAME* const v);
 VEC_NAME VEC_FUN(_new)();
+VEC_TYPE VEC_FUN(_pop)(VEC_NAME* const v);
+void     VEC_FUN(_free)(VEC_NAME* const v);
+int      VEC_FUN(_adjust)(VEC_NAME* const v);
+int      VEC_FUN(_addCell)(VEC_NAME* const v);
+int      VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space);
 int      VEC_FUN(_push)(VEC_NAME* const v, VEC_TYPE const newObj);
 void     VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i);
-int      VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i);
-VEC_TYPE VEC_FUN(_pop)(VEC_NAME* const v);
-VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const uint64_t position);
-void     VEC_FUN(_free)(VEC_NAME* const v);
 void     VEC_FUN(_removeAt)(VEC_NAME* const v, uint64_t position);
-int      VEC_FUN(_adjust)(VEC_NAME* const v);
-int      VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space);
-void     VEC_FUN(_DEALOC)(VEC_TYPE* const X);
+int      VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i);
+VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const uint64_t position);
 uint64_t VEC_FUN(_iterateFW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
 uint64_t VEC_FUN(_iterateBW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
+#    ifdef VEC_DEALOC
+void VEC_FUN(_DEALOC)(VEC_TYPE* const X);
+#    endif
 #endif
 
 #undef VEC_TYPE

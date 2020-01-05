@@ -89,7 +89,6 @@ typedef struct {
 #    define pidctgvec_H
 #    define VEC_TYPE par_idc_tG
 #    define VEC_NAME pidctgvec
-#    define VEC_DEALOC(X)
 #    include "./vector.h"
 #endif
 #undef VEC_IMPLEMENTATION
@@ -151,7 +150,6 @@ typedef struct {
 #    define pidepvec_H
 #    define VEC_TYPE par_ide_p
 #    define VEC_NAME pidepvec
-#    define VEC_DEALOC(X)
 #    include "./vector.h"
 #endif
 #undef VEC_IMPLEMENTATION
