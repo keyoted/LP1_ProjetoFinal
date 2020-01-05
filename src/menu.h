@@ -47,6 +47,7 @@
 void  menu_readIntMinMax(const int min, const int max, int* const op);
 int   menu_selection(const strvec* const itens);
 char* menu_readString();
+void  menu_readNotNulStr(char** X);
 void  menu_printDiv();
 void  menu_printError(const char* const err, ...);
 void  menu_printInfo(const char* const info, ...);

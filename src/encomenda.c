@@ -269,7 +269,7 @@ void encomenda_ESTADO_CANCELADA(encomenda* const e) {
  * @returns          A encomenda formalizada, com todos os parametros
  *                   corretamente definidos, incluindo 'tipoEstado' e 'criacao'.
  */
-encomenda encomenda_formalizar(const artigovec artigos, const precos_tt_cent precos, const uint64_t ID_cliente,
+encomenda encomenda_formalizar(const artigovec artigos, const precos_cent precos, const uint64_t ID_cliente,
                                const morada org, const morada dest, const uint64_t dist) {
     encomenda e;
     e.artigos      = artigos;

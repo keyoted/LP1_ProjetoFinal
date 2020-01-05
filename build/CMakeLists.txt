@@ -18,5 +18,5 @@ add_executable(main.x86
                ../src/encomenda.c
                ../src/utilities.c
                ../src/utilizador.c
-               ../src/precos_tt_cent.c
+               ../src/precos_cent.c
                ../src/outrasListagens.c)

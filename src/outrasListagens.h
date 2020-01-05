@@ -17,7 +17,7 @@
 
 #include "artigo.h"
 #include "encomenda.h"
-#include "precos_tt_cent.h"
+#include "precos_cent.h"
 #include "utilizador.h"
 
 #ifndef artigovec_H
@@ -44,12 +44,12 @@
 #    include "./vector.h"
 #endif
 
-artigovec      artigos;         ///< Artigos da seção atual, que ainda não foram formalizados numa encomenda.
-encomendavec   encomendas;      ///< Encomendas formalizadas.
-utilizadorvec  utilizadores;    ///< Utilizadores existentes no registo, index 0 é sempre o diretor.
-precos_tt_cent tabelaPrecos;    ///< Preço em centimos do transporte.
-size_t         utilizadorAtual; ///< Index do utilizador atual.
-void           funcional_consultar_estados_encomendas();
+artigovec     artigos;         ///< Artigos da seção atual, que ainda não foram formalizados numa encomenda.
+encomendavec  encomendas;      ///< Encomendas formalizadas.
+utilizadorvec utilizadores;    ///< Utilizadores existentes no registo, index 0 é sempre o diretor.
+precos_cent   tabelaPrecos;    ///< Preço em centimos do transporte.
+size_t        utilizadorAtual; ///< Index do utilizador atual.
+void          funcional_consultar_estados_encomendas();
 
 
 void listagem_Encomendas_Periodo_de_Tempo();

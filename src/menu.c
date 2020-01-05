@@ -79,6 +79,11 @@ char* menu_readString() {
     return trimed;
 }
 
+void menu_readNotNulStr(char** X) {
+    freeN(*X);
+    while (!(*X)) { *X = menu_readString(); }
+}
+
 /**
  * @brief       Lê uma float do standard input.
  * @param value Valor para onde será guardado o valor.

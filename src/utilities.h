@@ -28,7 +28,7 @@ int   load_str(FILE* const f, char** const data);
  *          Adiciona o simbolo (") antes e depois do indenificador X.
  * @def __MACRO_QUOTE_INTERNAL(X)
  *          Auxiliar para avaliar X.
- * @def readNotNulStr(X)
+ * @def menu_readNotNulStr(&X)
  *          Liberta X e lê uma string vâlida, guardando-a em X.
  * @def protectVarFcnCall(VAR, FCN, ERRMSG)
  *          Realiza VAR = FCN(), e se var for nullo imprime o erro ERRMSG e
@@ -45,13 +45,6 @@ int   load_str(FILE* const f, char** const data);
 
 #define MACRO_QUOTE(X) __MACRO_QUOTE_INTERNAL(X)
 #define __MACRO_QUOTE_INTERNAL(X) #X
-
-#define readNotNulStr(X)                                                                                               \
-    if (X) {                                                                                                           \
-        free(X);                                                                                                       \
-        X = NULL;                                                                                                      \
-    }                                                                                                                  \
-    while (!X) { X = menu_readString(); }
 
 #ifdef DEBUG_BUILD
 #    define protectVarFcnCall(VAR, FCN, ERRMSG)                                                                        \

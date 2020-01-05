@@ -1,5 +1,5 @@
 /**
- * @file    precos_tt_cent.h
+ * @file    precos_cent.h
  * @author  André Botelho (keyoted@gmail.com)
  * @brief   Capaz de capturar os preços atuais que a empresa transportadora
  * fixou. Os preços são fixados em cêntimos.
@@ -9,8 +9,8 @@
  * @copyright Copyright (c) 2020
  */
 
-#ifndef PRECOS_TT_CENT_h
-#define PRECOS_TT_CENT_h
+#ifndef precos_cent_h
+#define precos_cent_h
 
 #include <stdint.h>
 #include <stdio.h>
@@ -28,9 +28,9 @@ typedef struct {
     uint64_t PESADO;          ///< Preço base de um artigo pesado.
     uint64_t POR_KM;          ///< Preço por kilometro transportado.
     _Float32 MULT_CP[10][10]; ///< Mapeia o multiplicador do código postal do modo: [origem][destino].
-} precos_tt_cent;
+} precos_cent;
 
-int save_precos(FILE* const f, const precos_tt_cent* const data);
-int load_precos(FILE* const f, precos_tt_cent* const data);
+int save_precos(FILE* const f, const precos_cent* const data);
+int load_precos(FILE* const f, precos_cent* const data);
 
 #endif

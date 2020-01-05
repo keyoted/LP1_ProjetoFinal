@@ -44,7 +44,7 @@
 
 #include "artigo.h"
 #include "morada.h"
-#include "precos_tt_cent.h"
+#include "precos_cent.h"
 
 #ifndef artigovec_H
 #    define artigovec_H
@@ -75,15 +75,15 @@ typedef struct {
     morada    destino;  ///< Destino da encomenda.
     uint8_t tipoEstado; ///< Os quatro bits de baixo são flags e indicam o tipo da encomenda, os quatro de cima são o
                         ///< estado e apenas um dos bits deverá de estar ativo.
-    uint64_t       distancia_km; ///< Distancia(em km) da origem até ao destino.
-    precos_tt_cent precos;       ///< Tabela de preços na altura em que a encomenda foi formalizada.
-    time_t         criacao;      ///< Data da criação da encomenda.
-    uint64_t       ID_cliente;   ///< ID do cliente que formalizou a encomenda.
+    uint64_t    distancia_km; ///< Distancia(em km) da origem até ao destino.
+    precos_cent precos;       ///< Tabela de preços na altura em que a encomenda foi formalizada.
+    time_t      criacao;      ///< Data da criação da encomenda.
+    uint64_t    ID_cliente;   ///< ID do cliente que formalizou a encomenda.
 } encomenda;
 
 encomenda newEncomenda();
 void      freeEncomenda(encomenda* const e);
-encomenda encomenda_formalizar(const artigovec artigos, const precos_tt_cent precos, const uint64_t ID_cliente,
+encomenda encomenda_formalizar(const artigovec artigos, const precos_cent precos, const uint64_t ID_cliente,
                                const morada org, const morada dest, const uint64_t dist);
 
 int save_encomenda(FILE* const f, const encomenda* const data);
