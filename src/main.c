@@ -179,7 +179,7 @@ void interface_editar_morada(morada* const m, int isNew) {
  * @param element Utilizador a ser comparado.
  * @param compare NIF a comparar.
  * @returns       1 se o NIF do 'element' for igual ao 'compare'.
- * @return        0 caso contrário.
+ * @returns       0 caso contrário.
  */
 int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t compare[9]) {
     if (element.tipo == UTILIZADOR_DESATIVADO) return 0;
@@ -192,7 +192,7 @@ int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t compare[
  * @param element Utilizador a ser comparado.
  * @param compare NIF a comparar.
  * @returns       1 se o NIF do 'element' for igual ao 'compare'.
- * @return        0 caso contrário.
+ * @returns       0 caso contrário.
  */
 int utilizadorNIFCompareVecPredicate(utilizador element, uint8_t compare[9]) {
     return memcmp(element.NIF, compare, 9) == 0;
@@ -516,6 +516,7 @@ void interface_diretor() {
     while (1) {
         menu_printDiv();
         menu_printHeader("Menu de Diretor");
+        menu_printInfo("Bem vindo(a) %s!\n", protectStr(utilizadores.data[utilizadorAtual].nome));
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
                                                   "Editar dados de acesso",                  //
@@ -842,6 +843,7 @@ void interface_cliente() {
         if (utilizadorAtual == U_INVAL) return;
         menu_printDiv();
         menu_printHeader("Menu de Cliente");
+        menu_printInfo("Bem vindo(a) %s!\n", protectStr(utilizadores.data[utilizadorAtual].nome));
         strvec vetorOp = (strvec) {.data =
                                        (char*[]) {
                                            "Editar perfil",                  //
@@ -851,7 +853,7 @@ void interface_cliente() {
                                            "Consultar tabela de preços",     //
                                            "Editar encomendas",              //
                                            "Imprimir recibo de encomenda",   //
-                                           "Imprimir recibo de um mês"       //
+                                           "Imprimir recibo mensal"          //
                                        },
                                    .size = 8};
         switch (menu_selection(&vetorOp)) {

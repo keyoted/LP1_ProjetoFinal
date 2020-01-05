@@ -1,0 +1,2 @@
+# Renomiar para data.bin
+01.bin - 1 Diretor (987654321); 1 Cliente (123456789); Tabela de preços editada
