@@ -32,17 +32,20 @@ void listagem_Encomendas_Periodo_de_Tempo() {
     menu_readIntMinMax(1, 12, &mesi);
 
     printf("Introduzir ano de inicio para a pesquisa");
-    menu_readIntMinMax(1900, tmnow->tm_year + 1970, &anoi);
+    menu_readIntMinMax(1900, tmnow->tm_year + 1900, &anoi);
 
     printf("Introduzir mês de fim para a pesquisa");
     menu_readIntMinMax(1, 12, &mesf);
 
     printf("Introduzir ano de fim para a pesquisa");
-    menu_readIntMinMax(1900, tmnow->tm_year + 1970, &anof);
+    menu_readIntMinMax(1900, tmnow->tm_year + 1900, &anof);
 
+    // Garantir que a data de início é mais "antiga" que a de fim.
     // 0 --- inicio --- fim --- +infinito
     // inicio < fim
     if (anoi > anof) {
+        // Se o ano de inicio for mais "recente"
+        // Trocar ano e mes
         int tmp = anoi;
         anoi    = anof;
         anof    = tmp;
@@ -50,24 +53,59 @@ void listagem_Encomendas_Periodo_de_Tempo() {
         mesi    = mesf;
         mesf    = tmp;
     } else if ((anoi == anof) && (mesi > mesf)) {
+        // Se os anos forem iguais e o mes de inicio for mais "recente"
+        // Trocar os meses
         int tmp = mesi;
         mesi    = mesf;
         mesf    = tmp;
     }
 
-    anoi -= 1970;
-    anof -= 1970;
+    // Converter os anos para funcionarem com o o output de 'localtime'
+    anoi -= 1900;
+    anof -= 1900;
     mesi -= 1;
     mesf -= 1;
 
+    // Criar novos tempos
+    struct tm* tm_tF = &(struct tm) {
+        .tm_sec   = 0,               // int - seconds after the minute	0-61*
+        .tm_min   = 0,               // int - minutes after the hour	0-59
+        .tm_hour  = 0,               // int - hours since midnight	0-23
+        .tm_mday  = 1,               // int - day of the month	1-31
+        .tm_mon   = mesf,            // int - months since January	0-11
+        .tm_year  = anof,            // int - years since 1900
+        .tm_isdst = tmnow->tm_isdst, // int - Daylight Saving Time flag
+    };
+    struct tm* tm_tI = &(struct tm) {
+        .tm_sec   = 0,               // int - seconds after the minute	0-61*
+        .tm_min   = 0,               // int - minutes after the hour	0-59
+        .tm_hour  = 0,               // int - hours since midnight	0-23
+        .tm_mday  = 1,               // int - day of the month	1-31
+        .tm_mon   = mesi,            // int - months since January	0-11
+        .tm_year  = anoi,            // int - years since 1900
+        .tm_isdst = tmnow->tm_isdst, // int - Daylight Saving Time flag
+    };
+    // 0 --t1--- ti --t2-- tf --t3-- +infinity
+    //      5    10   15   20   25
+    // td = difftime(tf, ti) = 10
+    // difftime(tf, t1) = 15 (>td)
+    // difftime(tf, t2) = 5
+    // difftime(tf, t3) = -5 (<0)
+    const time_t tf = mktime(tm_tF);
+    const time_t ti = mktime(tm_tI);
+    const double td = difftime(tf, ti);
+
+
+
     menu_printDiv();
     menu_printHeader("Encomendas Encontradas");
+    // Por cada encomenda
     for (size_t i = 0; i < encomendas.size; ++i) {
-        struct tm* const t   = localtime(&encomendas.data[i].criacao);
-        const int        ano = t->tm_year;
-        const int        mes = t->tm_mon;
-        // imprimir sse inicio <= X <= mes
-        if ((anoi < ano && ano < anof) || ((anoi == ano) && (mesi <= mes)) || ((anof == ano) && (mes <= mesf))) {
+        // Obter os segundos entre a criação desta encomenda e o tempo final
+        const double diff_tempo = difftime(tf, encomendas.data[i].criacao);
+        // Imprimir sse: fim >= [esta encomenda] >= inicio
+        // td >= diff_tempo >= 0
+        if ((td >= diff_tempo) && (diff_tempo >= 0)) {
             printf("   %*lu   |   ", 8, i);
             menu_printEncomendaBrief(&encomendas.data[i], &utilizadores);
             printf("\n");
