@@ -50,6 +50,7 @@ char* subStringTrimWhiteSpace(char* str) {
  * @brief   Lê uma string do standard input.
  * @returns O ponteiro para uma string sem espaços extra no início ou no fim.
  * @returns NULL caso só tenham sido introduzidos espaços.
+ * @warning Pode retornar NULL.
  */
 char* menu_readString() {
     const int STEP     = 16;
@@ -79,6 +80,11 @@ char* menu_readString() {
     return trimed;
 }
 
+/**
+ * @brief   Liberta X e lê uma string vâlida (não nula e não só espaços),
+ *          guardando-a em X.
+ * @param X O ponteiro que será libertado e terá a string final.
+ */
 void menu_readNotNulStr(char** X) {
     freeN(*X);
     while (!(*X)) { *X = menu_readString(); }
