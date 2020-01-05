@@ -59,6 +59,8 @@
  *                  Se este macro estiver definido as declarações das funções do
  *                  vetor são ativadas. VEC_DECLARATION é definida por omição de
  *                  VEC_IMPLEMENTATION e VEC_DECLARATION.
+ * @def INVAL_INDEX
+ *                  O valor máximo que o tamanho do vetor pode ter.
  */
 
 #include <inttypes.h>
@@ -82,11 +84,13 @@
 #    define VEC_DECLARATION
 #endif
 
+#define INVAL_INDEX ~((uint64_t) 0)
+
 /**
  * @struct          VEC_NAME
  * @brief           Struct com o nome VEC_NAME que contém o tipo de dados
  *                  VEC_TYPE e informação sobre o numero de objetos guardados,
- *                  pode guardar [0, ~((uint64_t)0)[ elemntos.
+ *                  pode guardar [0, INVAL_INDEX[ elemntos.
  */
 typedef struct {
     uint64_t  alocated; ///< Tamanho alocado de objetos.
@@ -311,14 +315,14 @@ int VEC_FUN(_adjust)(VEC_NAME* const v) {
  * @param userData  Dados passados pelo utilizador à função 'predicate'.
  * @returns         O index do objeto cuja função predicate primeiro returnou
  *                  verdade.
- * @returns         ~0 caso a todos os elementos foram iterados sem que
+ * @returns         INVAL_INDEX caso a todos os elementos foram iterados sem que
  *                  'predicate' tenha retornado 0.
  */
 uint64_t VEC_FUN(_iterateFW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
     for (uint64_t i = 0; i < v->size; i++) {
         if (predicate(v->data[i], userData)) return i;
     }
-    return ~((uint64_t) 0);
+    return INVAL_INDEX;
 }
 
 /**
@@ -336,14 +340,14 @@ uint64_t VEC_FUN(_iterateFW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void*
  * @param userData  Dados passados pelo utilizador à função 'predicate'.
  * @returns         O index do objeto cuja função predicate primeiro returnou
  *                  verdade.
- * @returns         ~0 caso a todos os elementos foram iterados sem que
+ * @returns         INVAL_INDEX caso a todos os elementos foram iterados sem que
  *                  'predicate' tenha retornado 0.
  */
 uint64_t VEC_FUN(_iterateBW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
-    for (uint64_t i = v->size - 1; i != ~((uint64_t) 0); i--) {
+    for (uint64_t i = v->size - 1; i != INVAL_INDEX; i--) {
         if (predicate(v->data[i], userData)) return i;
     }
-    return ~((uint64_t) 0);
+    return INVAL_INDEX;
 }
 
 /**

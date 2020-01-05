@@ -17,7 +17,9 @@
  * @brief   Cria uma nova morada.
  * @returns Uma morada válida.
  */
-morada newMorada() { return (morada) {.morada = strdup("Rua")}; }
+morada newMorada() {
+    return (morada) {.morada = strdup("Rua e Número da Porta"), .codigoPostal = {'0', '0', '0', '0', '0', '0', '0'}};
+}
 
 /**
  * @brief   Dealoca memória de uma morada.

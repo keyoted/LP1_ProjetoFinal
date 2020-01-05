@@ -199,38 +199,56 @@ int utilizadorNIFCompareVecPredicate(utilizador element, uint8_t compare[9]) {
 }
 
 /**
- * @brief    Premite editar um diretor.
- * @param op ID do diretor a editar.
+ * @brief            Premite editar um utilizador.
+ * @param ID         ID do utilizador a editar.
+ * @param isDirector Se 1 premite editar diretores
+ * @warning          Utilizadores[ID] é assumido existir.
  */
-void funcional_editar_diretor(size_t op) {
+void funcional_editar_utilizador(size_t ID, int isDirector) {
     menu_printDiv();
-    menu_printHeader("Editar Diretor");
+    if (isDirector)
+        menu_printHeader("Edição de Diretor");
+    else
+        menu_printHeader("Edição de Cliente");
 
-    freeUtilizador(&utilizadores.data[op]);
-    utilizadores.data[op] = newUtilizador();
-    utilizador* diretor   = &utilizadores.data[op];
-    diretor->tipo         = UTILIZADOR_DIRETOR;
+    if (isDirector) { utilizadores.data[ID].tipo = UTILIZADOR_DIRETOR; }
 
-    printf("Introduzir Nome");
-    menu_readNotNulStr(&diretor->nome);
-    menu_printInfo("diretor editado com sucesso!");
-}
-
-/**
- * @brief       Premite editar um utilizador.
- * @param index ID do utilizador a editar.
- */
-void funcional_editar_utilizador(size_t index) {
-    menu_printDiv();
-    menu_printHeader("Edição de Utilizador");
-    utilizador* u = &utilizadores.data[index];
+    utilizador* u = &utilizadores.data[ID];
 
     printf("Introduzir Nome (%s)", protectStr(u->nome));
     menu_readNotNulStr(&u->nome);
 
+    char* stmp = NULL;
+    while (1) {
+        printf("Introduzir NIF (%.9s)", u->NIF);
+        menu_readNotNulStr(&stmp);
+        if (strlen(stmp) != 9) {
+            menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
+        } else if (!utilizador_eNIFValido((uint8_t*) stmp)) {
+            menu_printError("NIF introduzido é inválido.");
+        } else {
+            // Verificar que o nif não é repetido
+            size_t index = utilizadorvec_iterateFW(&utilizadores,
+                                                   (utilizadorvec_predicate_t) &utilizadorNIFCompareVecPredicate, stmp);
+            if (index != INVAL_INDEX && index != ID) {
+                // Nif existe e é diferente do utilizador atual
+                menu_printError("NIF já existente no sistema.");
+                continue;
+            } else {
+                memcpy(u->NIF, stmp, 9);
+                break;
+            }
+        }
+    }
+    freeN(stmp);
+
+    if (isDirector) {
+        menu_printInfo("diretor editado com sucesso!");
+        return;
+    }
+
     interface_editar_morada(&u->endereco, 0);
 
-    char* stmp = NULL;
     while (1) {
         printf("Introduzir numero do cartao de cidadão (%.12s)", u->CC);
         menu_readNotNulStr(&stmp);
@@ -245,11 +263,7 @@ void funcional_editar_utilizador(size_t index) {
     }
     free(stmp);
 
-    if (u->nome) {
-        menu_printInfo("utilizador %s (%.9s) editado com sucesso!", u->nome, u->NIF);
-    } else {
-        menu_printInfo("utilizador UTILIZADOR (%.9s) editado com sucesso!", u->NIF);
-    }
+    menu_printInfo("utilizador %s (%.9s) editado com sucesso!", protectStr(u->nome), u->NIF);
 }
 
 /**
@@ -257,7 +271,7 @@ void funcional_editar_utilizador(size_t index) {
  * @param printDist  Se diferente de 0 imprime informação sobre a tabela de
  *                   distancias (multiplicadores de código postal.)
  * @param printTable Se diferente de 0 imprime informação sobre a tabela de
- *                   preços.
+ *                   preços base.
  */
 void funcional_consultar_tabela_de_precos(int printDist, int printTable) {
     if (printDist) {
@@ -290,7 +304,7 @@ void interface_alterar_tabela_precos() {
     while (1) {
         funcional_consultar_tabela_de_precos(0, 1);
         menu_printDiv();
-        menu_printHeader("Editar preços");
+        menu_printHeader("Editar Preços Base");
         menu_printInfo("selecione o que editar:");
         int edit = menu_selection(&(strvec) {.data =
                                                  (char*[]) {
@@ -425,12 +439,12 @@ void interface_alterar_utilizadores() {
             case 2: utilizadores.data[op].tipo = UTILIZADOR_DIRETOR; break;
             case 3:
                 switch (utilizadores.data[op].tipo) {
-                    case UTILIZADOR_CLIENTE: funcional_editar_utilizador(op); break;
+                    case UTILIZADOR_CLIENTE: funcional_editar_utilizador(op, 0); break;
                     case UTILIZADOR_DESATIVADO:
                         menu_printInfo("está a editar um utilizador desativado.");
-                        funcional_editar_utilizador(op);
+                        funcional_editar_utilizador(op, 0);
                         break;
-                    case UTILIZADOR_DIRETOR: funcional_editar_diretor(op); break;
+                    case UTILIZADOR_DIRETOR: funcional_editar_utilizador(op, 1); break;
                 }
                 break;
         }
@@ -505,7 +519,7 @@ void interface_diretor() {
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
                                                   "Editar dados de acesso",                  //
-                                                  "Alterar tabela de preços",                //
+                                                  "Alterar tabela de preços base",           //
                                                   "Alterar tabela de distancias",            //
                                                   "Alterar estado dos utilizadores",         //
                                                   "Alterar estados das encomendas",          //
@@ -516,7 +530,7 @@ void interface_diretor() {
                                               },
                                           .size = 9})) {
             case -1: return;
-            case 0: funcional_editar_diretor(utilizadorAtual); break;
+            case 0: funcional_editar_utilizador(utilizadorAtual, 1); break;
             case 1: interface_alterar_tabela_precos(); break;
             case 2: interface_alterar_tabela_distancias(); break;
             case 3: interface_alterar_utilizadores(); break;
@@ -842,7 +856,7 @@ void interface_cliente() {
                                    .size = 8};
         switch (menu_selection(&vetorOp)) {
             case -1: return;
-            case 0: funcional_editar_utilizador(utilizadorAtual); break;
+            case 0: funcional_editar_utilizador(utilizadorAtual, 0); break;
             case 1: funcional_desativar_perfil_atual(); break;
             case 2: interface_criar_encomenda(); break;
             case 3:
@@ -888,7 +902,7 @@ void interface_novoRegisto() {
 
     protectFcnCall(utilizadorvec_push(&utilizadores, newUtilizador()),
                    "interface_novoRegisto - utilizadorvec_push falhou.");
-    funcional_editar_diretor(0);
+    funcional_editar_utilizador(0, 1);
     menu_printInfo("diretor criado com sucesso!");
 }
 
@@ -987,73 +1001,13 @@ void interface_registoUtilizador() {
     }
 
     menu_printHeader("Registar Novo Utilizador");
-    utilizador u = newUtilizador();
-
-    printf("Introduzir Nome");
-    menu_readNotNulStr(&u.nome);
-
-    char* stmp = NULL;
-    while (1) {
-        printf("Introduzir NIF");
-        menu_readNotNulStr(&stmp);
-        if (strlen(stmp) != 9) {
-            menu_printError("tem que introduzir 9 characteres, %d introduzidos.", strlen(stmp));
-        } else if (!utilizador_eNIFValido((uint8_t*) stmp)) {
-            menu_printError("NIF introduzido é inválido.");
-        } else {
-            size_t index = utilizadorvec_iterateFW(&utilizadores,
-                                                   (utilizadorvec_predicate_t) &utilizadorNIFCompareVecPredicate, stmp);
-            if (index != (~((size_t) 0))) {
-                menu_printError("NIF já existente no sistema.");
-                return;
-            } else {
-                memcpy(&u.NIF, stmp, sizeof(uint8_t) * 9);
-                break;
-            }
-        }
-    }
-
-    printf("Introduzir Morada");
-    menu_readNotNulStr(&u.endereco.morada);
-
-    while (1) {
-        printf("Introduzir Código Postal (XXXX-XXX)");
-        menu_readNotNulStr(&stmp);
-        if (strlen(stmp) != 8) {
-            menu_printError("tem que introduzir 8 characteres, %d introduzidos.", strlen(stmp));
-        } else {
-            u.endereco.codigoPostal[0] = stmp[0];
-            u.endereco.codigoPostal[1] = stmp[1];
-            u.endereco.codigoPostal[2] = stmp[2];
-            u.endereco.codigoPostal[3] = stmp[3];
-            u.endereco.codigoPostal[4] = stmp[5];
-            u.endereco.codigoPostal[5] = stmp[6];
-            u.endereco.codigoPostal[6] = stmp[7];
-            if (!morada_eCPValido(u.endereco.codigoPostal)) {
-                menu_printError("Código Postal introduzido é inválido.");
-            } else
-                break;
-        }
-    }
-
-    while (1) {
-        printf("Introduzir numero do cartao de cidadão");
-        menu_readNotNulStr(&stmp);
-        if (strlen(stmp) != 12) {
-            menu_printError("tem que introduzir 12 characteres, %d introduzidos.", strlen(stmp));
-        } else if (!utilizador_eCCValido((uint8_t*) stmp)) {
-            menu_printError("CC introduzido é inválido.");
-        } else {
-            memcpy(&u.CC, stmp, sizeof(uint8_t) * 12);
-            break;
-        }
-    }
-    free(stmp);
-
-    u.tipo = UTILIZADOR_CLIENTE;
-    protectFcnCall(utilizadorvec_push(&utilizadores, u), "interface_registoUtilizador - utilizadorvec_push falhou.");
-    if (u.nome) menu_printInfo("utilizador %s (%.9s) adicionado com sucesso!", u.nome, u.NIF);
-    menu_printInfo("utilizador INDEFINIDO (%.9s) adicionado com sucesso!", u.NIF);
+    protectFcnCall(utilizadorvec_push(&utilizadores, newUtilizador()),
+                   "interface_registoUtilizador - utilizadorvec_push falhou.");
+    funcional_editar_utilizador(utilizadores.size - 1, 0);
+    utilizadores.data[utilizadores.size - 1].tipo = UTILIZADOR_CLIENTE;
+    menu_printInfo("utilizador %s (%.9s) adicionado com sucesso!",
+                   protectStr(utilizadores.data[utilizadores.size - 1].nome),
+                   utilizadores.data[utilizadores.size - 1].NIF);
 }
 
 /**

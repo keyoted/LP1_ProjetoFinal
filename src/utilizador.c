@@ -55,7 +55,11 @@ int utilizador_eNIFValido(const uint8_t* const NIF) {
  * @returns Um novo utilizador válido.
  */
 utilizador newUtilizador() {
-    return (utilizador) {.tipo = UTILIZADOR_DESATIVADO, .endereco = newMorada(), .nome = strdup("Utilizador")};
+    return (utilizador) {.tipo     = UTILIZADOR_DESATIVADO,
+                         .endereco = newMorada(),
+                         .nome     = strdup("Utilizador"),
+                         .NIF      = {'0', '0', '0', '0', '0', '0', '0', '0', '0'},
+                         .CC       = {'0', '0', '0', '0', '0', '0', '0', '0', '0', 'X', 'Y', '0'}};
 }
 
 /**
