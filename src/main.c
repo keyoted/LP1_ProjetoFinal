@@ -84,10 +84,10 @@ void funcional_recibo_mensal() {
     int mes = 0;
     int ano = 0;
 
-    printf("Inserir mês do recibo");
+    menu_printInfo("Inserir mês do recibo");
     menu_readIntMinMax(1, 12, &mes);
 
-    printf("Inserir ano do recibo");
+    menu_printInfo("Inserir ano do recibo");
     menu_readIntMinMax(1900, tmnow->tm_year + 1900, &ano);
 
     if (utilizadores.data[utilizadorAtual].tipo != UTILIZADOR_DIRETOR) {

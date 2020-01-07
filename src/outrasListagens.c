@@ -60,6 +60,8 @@ void listagem_Encomendas_Periodo_de_Tempo() {
         mesf    = tmp;
     }
 
+    menu_printInfo("encomendas de %d/%d até %d/%d", anoi, mesi, anof, mesf);
+
     // Converter os anos para funcionarem com o o output de 'localtime'
     anoi -= 1900;
     anof -= 1900;
@@ -199,7 +201,7 @@ typedef struct {
  * @brief Lista encomendas com um certo estado e tipo ordenadas por preço.
  */
 void listagem_Encomenda_EmEstado_PorPreco() {
-    uint8_t  estadoPesquisa = 0; // Tipo e estado que será pesquisado
+    uint8_t  estadoPesquisa = ENCOMENDA_ESTADO_EM_ENTREGA; // Tipo e estado que será pesquisado
     pidepvec lista          = pidepvec_new();
 
     menu_printDiv();
@@ -289,15 +291,17 @@ EXIT_LABEL:
         }
     }
 
-    // Organizar lista por preço (descendente)
-    // l1 maior da lista
-    par_ide_p tmp;
-    for (size_t l1 = 0; l1 < lista.size - 1; ++l1) {
-        for (size_t l2 = l1 + 1; l2 < lista.size; ++l2) {
-            if (lista.data[l1].preco < lista.data[l2].ID_encomenda) {
-                tmp            = lista.data[l1];
-                lista.data[l1] = lista.data[l2];
-                lista.data[l2] = tmp;
+    if(lista.size > 1) {
+        // Organizar lista por preço (descendente)
+        // l1 maior da lista
+        par_ide_p tmp;
+        for (size_t l1 = 0; l1 < lista.size - 1; ++l1) {
+            for (size_t l2 = l1 + 1; l2 < lista.size; ++l2) {
+                if (lista.data[l1].preco < lista.data[l2].ID_encomenda) {
+                    tmp            = lista.data[l1];
+                    lista.data[l1] = lista.data[l2];
+                    lista.data[l2] = tmp;
+                }
             }
         }
     }
@@ -349,6 +353,7 @@ void listagem_Artigos_Semana() {
  * realizadas no mês.
  */
 void listagem_imprimir_recibo() {
+    menu_printDiv();
     menu_printHeader("Selecionar Encomenda Para Imprimir");
     int op  = -2;
     int max = encomendas.size - 1;
@@ -375,6 +380,7 @@ void listagem_imprimir_recibo() {
  */
 void interface_outrasListagens() {
     while (1) {
+        menu_printDiv();
         switch (menu_selection(&(strvec) {.size = 5,
                                           .data = (char*[]) {
                                               "Listagem - Recibo de Encomenda",                        //

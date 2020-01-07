@@ -262,8 +262,8 @@ void menu_printUtilizador(const utilizador u) {
  * @param a Artigo para ser impresso.
  */
 void menu_printArtigo(const artigo* const a) {
-    // nome gramas cm2 tratamento especial
-    printf("%s  -   %lug   %lucm2   * %s", protectStr(a->nome), a->peso_gramas, a->cmCubicos,
+    // nome gramas 3 tratamento especial
+    printf("%s  -   %lug   %lucm3   * %s", protectStr(a->nome), a->peso_gramas, a->cmCubicos,
            protectStr(a->tratamentoEspecial));
 }
 

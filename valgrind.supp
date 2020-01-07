@@ -7,14 +7,9 @@
    <strnlen_sup>
    Memcheck:Addr1
    fun:strnlen
-   fun:__vfprintf_internal
-   fun:buffered_vfprintf
-   fun:__vfprintf_internal
-   fun:printf
-   fun:menu_printEncomendaDetail
-   fun:interface_imprimir_recibo
-   fun:interface_cliente
-   fun:interface_login
-   fun:interface_inicio
-   fun:main
+}
+{
+   <memcpysup>
+   Memcheck:Addr1
+   fun:memcpy
 }
