@@ -149,20 +149,23 @@ void listagem_Utilizadores_Mais_Gasto() {
 
     // Calcular o valor das encomendas feitas por utilizador
     for (size_t e = 0; e < encomendas.size; ++e) {
+        const encomenda* encomendaAtual = &encomendas.data[e];
         if (!(encomendas.data[e].tipoEstado & ENCOMENDA_ESTADO_CANCELADA)) {
-            lista.data[encomendas.data[e].ID_cliente].totalGasto += encomenda_CalcPreco(&encomendas.data[e]);
+            lista.data[encomendaAtual->ID_cliente].totalGasto += encomenda_CalcPreco(encomendaAtual);
         }
     }
 
-    // Organizar a lista por total gasto (ordem descendente)
-    // l1 maior da lista
-    par_idc_tG tmp;
-    for (size_t l1 = 0; l1 < lista.size - 1; ++l1) {
-        for (size_t l2 = l1 + 1; l2 < lista.size; ++l2) {
-            if (lista.data[l1].totalGasto < lista.data[l2].totalGasto) {
-                tmp            = lista.data[l1];
-                lista.data[l1] = lista.data[l2];
-                lista.data[l2] = tmp;
+    if(lista.size > 1) {
+        // Organizar a lista por total gasto (ordem descendente)
+        // l1 maior da lista
+        par_idc_tG tmp;
+        for (size_t l1 = 0; l1 < lista.size - 1; ++l1) {
+            for (size_t l2 = l1 + 1; l2 < lista.size; ++l2) {
+                if (lista.data[l1].totalGasto < lista.data[l2].totalGasto) {
+                    tmp            = lista.data[l1];
+                    lista.data[l1] = lista.data[l2];
+                    lista.data[l2] = tmp;
+                }
             }
         }
     }
@@ -215,7 +218,7 @@ void listagem_Encomenda_EmEstado_PorPreco() {
             case ENCOMENDA_ESTADO_EXPEDIDA: printf("Expedidas"); break;
             case ENCOMENDA_ESTADO_ENTREGUE: printf("Entregues"); break;
             case ENCOMENDA_ESTADO_CANCELADA: printf("Canceladas"); break;
-            default: printf("desconhecido"); break;
+            default: printf("Desconhecido"); break;
         }
 
         printf(" - %s, %s, %s e %s.\n",                                              //
@@ -323,7 +326,7 @@ EXIT_LABEL:
  * @def SEGUNDOS_EM_7_DIAS
  *              O número de segundos numa semana.
  */
-#define SEGUNDOS_EM_7_DIAS 7 * 24 * 60 * 60
+#define SEGUNDOS_EM_7_DIAS (7 * 24 * 60 * 60)
 
 /**
  * @brief Imprime encomendas realizadas nos últimos 7 dias.
