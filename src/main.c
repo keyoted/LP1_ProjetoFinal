@@ -151,7 +151,7 @@ void interface_editar_morada(morada* const m, int isNew) {
         if (isNew)
             printf("Introduzir Código Postal (XXXX-XXX)");
         else
-            printf("Introduzir Código Postal (XXXX-XXX) (%.4s-%.3s)", m->codigoPostal, &m->codigoPostal[4]);
+            printf("Introduzir Código Postal (%.4s-%.3s)", m->codigoPostal, &m->codigoPostal[4]);
         menu_readNotNulStr(&stmp);
 
         if (strlen(stmp) != 8) {
@@ -276,7 +276,8 @@ void funcional_editar_utilizador(size_t ID, int isDirector) {
 void funcional_consultar_tabela_de_precos(int printDist, int printTable) {
     if (printDist) {
         menu_printHeader("Tabela de Distancia");
-        printf("ORIGEM DESTINO  0           1           2           3           4 "
+        // TODO: partir por 80 colunas?
+        printf("ORIGEM DESTINO   0           1           2           3           4 "
                "          5           6           7           8           9\n");
         for (int origem = 0; origem < 10; ++origem) {
             printf("  %d  |        ", origem);
@@ -637,8 +638,8 @@ int vecPrintArtigoPredicate(artigo item, size_t* userdata) {
  * @returns           0 se o artigo foi eleminado.
  * @returns           1 se o artigo foi editado.
  */
-int funcional_editar_artigo(artigo* a, int isDeletable) {
-    if (isDeletable) {
+int funcional_editar_artigo(artigo* a, int isNew) {
+    if (!isNew) {
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
                                                   "Apagar artigo", //
@@ -657,9 +658,10 @@ int funcional_editar_artigo(artigo* a, int isDeletable) {
     if (a->tratamentoEspecial) {
         printf("Introduzir Tratamento especial para o artigo Artigo (%s)", a->tratamentoEspecial);
         freeN(a->tratamentoEspecial);
-    } else
+    } else {
         printf("Introduzir Tratamento especial para o artigo Artigo");
-    menu_readNotNulStr(&a->tratamentoEspecial);
+    }
+    a->tratamentoEspecial = menu_readString();
 
     int tmp = 0;
     while (1) {
@@ -695,22 +697,22 @@ void funcional_editar_artigos(artigovec* ar) {
         menu_printInfo("numero de artigos atuais: %lu.", ar->size);
         menu_printHeader("Selecionar Artigo Para Editar:");
         int op  = -2;
-        int max = ar->size + 1;
+        size_t max = 0;
         while (op == -2) {
             printf("   Opção      |   Item\n");
             printf("         -2   |   Reimprimir\n");
             printf("         -1   |   Sair\n");
-            size_t i = 0;
-            artigovec_iterateFW(ar, (artigovec_predicate_t) &vecPrintArtigoPredicate, (void*) &i);
-            printf("   %*lu   |   Criar Novo Artigo\n", 8, ++i);
+            artigovec_iterateFW(ar, (artigovec_predicate_t) &vecPrintArtigoPredicate, (void*) &max);
+            printf("   %*lu   |   Criar Novo Artigo\n", 8, max);
             menu_readIntMinMax(-2, max, &op);
             menu_printDiv();
         }
         // Option was gotten -------------------------
         if (op == -1) return;
-        if (op == max - 1)
+        if (op == (int)max) {
             protectFcnCall(artigovec_push(ar, newArtigo()), "funcional_editar_artigos - artigovec_push falhou.");
-        if (!funcional_editar_artigo(&ar->data[op], (op != max - 1))) {
+        }
+        if (!funcional_editar_artigo(&ar->data[op], (op == (int)max))) {
             artigovec_moveBelow(ar, op);
             menu_printInfo("Artigo removido.");
         }
@@ -881,8 +883,8 @@ void interface_novoRegisto() {
     menu_printDiv();
     menu_printHeader("Novo Registo");
     if (utilizadores.size != 0) {
-        menu_printInfo("ainda tem um registo aberto, tem a certeza que quer "
-                       "descartar os dados do registo?");
+        menu_printInfo("ainda tem um registo aberto!");
+        menu_printInfo("tem a certeza que quer descartar os dados do registo?");
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
                                                   "Descartar registo" //
@@ -927,6 +929,15 @@ void funcional_carregarDados_err(FILE* f) {
  * @brief Carrega o estado do programa de ficheiro.
  */
 void funcional_carregarDados() {
+    menu_printInfo("tem a certeza que quer CARREGAR os dados de ficheiro?");
+    switch (menu_selection(&(strvec) {.data =
+                                          (char*[]) {
+                                              "Descartar registo e carregar dados de ficheiro" //
+                                          },
+                                      .size = 1})) {
+        case -1: return;
+        case 0: break;
+    }
     artigovec_free(&artigos);
     encomendavec_free(&encomendas);
     utilizadorvec_free(&utilizadores);
@@ -1074,6 +1085,15 @@ void interface_login() {
  * @brief Guarda o estado atual do programa.
  */
 void funcional_guardarDados() {
+    menu_printInfo("tem a certeza que quer GRAVAR os dados em ficheiro?");
+    switch (menu_selection(&(strvec) {.data =
+                                          (char*[]) {
+                                              "Gravar dados e substituir o ficheiro anterior" //
+                                          },
+                                      .size = 1})) {
+        case -1: return;
+        case 0: break;
+    }
     FILE* f = fopen("data.bin", "wb");
     if (!f) {
         menu_printError("impossivel abrir ficheiro :%d!", errno);

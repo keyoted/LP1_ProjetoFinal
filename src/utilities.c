@@ -20,7 +20,6 @@ char* strdup(const char* const s) {
     size_t len = strlen(s) + 1; // Make room for '\0'
     char* new;
     protectVarFcnCall(new, malloc(len), "strdup - alocação de memória recusada.");
-
     memcpy(new, s, len);
     return new;
 }
