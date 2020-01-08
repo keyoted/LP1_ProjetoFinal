@@ -81,13 +81,13 @@ uint64_t encomenda_CalcPreco(const encomenda* const e) {
     if (e->tipoEstado & ENCOMENDA_TIPO_VOLUMOSO) precoFinal += e->precos.VOLUMOSO;
 
     // Final do cálculo
-    if (e->origem.codigoPostal[0] > '9' || e->origem.codigoPostal[0] < '0' || e->destino.codigoPostal[0] > '9' ||
-        e->destino.codigoPostal[0] < '0') {
+    if (e->origem.codigoPostal[0] > '9' || e->origem.codigoPostal[0] < '1' || e->destino.codigoPostal[0] > '9' ||
+        e->destino.codigoPostal[0] < '1') {
         printf("\n");
         menu_printError("ao calcular preço da encomenda - codigo postal defeituoso.");
         return 0;
     }
-    const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0] - '0'][e->destino.codigoPostal[0] - '0'];
+    const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0] - '1'][e->destino.codigoPostal[0] - '1'];
     return (precoFinal + e->distancia_km * e->precos.POR_KM) * multcp;
 }
 
@@ -280,7 +280,7 @@ encomenda encomenda_formalizar(const artigovec artigos, const precos_cent precos
     e.precos       = precos;
     e.tipoEstado   = ENCOMENDA_ESTADO_EM_ENTREGA;
     e.criacao      = time(NULL);
-    for (int i = 0; i < 10; i++) { memcpy(&e.precos.MULT_CP[i], &precos.MULT_CP[i], 10); }
+    for (int i = 0; i < 9; i++) { memcpy(&e.precos.MULT_CP[i], &precos.MULT_CP[i], 9); }
     encomenda_TIPO_VOLUMOSO(&e);
     encomenda_TIPO_FRAGIL(&e);
     encomenda_TIPO_PESADO(&e);

@@ -172,8 +172,7 @@ int menu_selection(const strvec* const itens) {
  * @brief Imprime uma divisória.
  */
 void menu_printDiv() {
-    printf("-------------------------------------------------------------------"
-           "-------------\n");
+    printf( "--------------------------------------------------------------------------------\n");
 }
 
 /**
@@ -361,15 +360,15 @@ void menu_printEncomendaDetail(const encomenda* const e, const utilizadorvec* co
     } else
         printf(" %*luc |\n", 8, (uint64_t) 0);
 
-    printf("*** Preçco base: %luc\n", tpt);
+    printf("*** Preço base: %luc\n", tpt);
     printf("*** Distancia: %luKm\n", e->distancia_km);
     printf("*** Preço Por Km: %luc\n", e->precos.POR_KM);
-    if (e->origem.codigoPostal[0] > '9' || e->origem.codigoPostal[0] < '0' || e->destino.codigoPostal[0] > '9' ||
-        e->destino.codigoPostal[0] < '0') {
+    if (e->origem.codigoPostal[0] > '9' || e->origem.codigoPostal[0] < '1' || e->destino.codigoPostal[0] > '9' ||
+        e->destino.codigoPostal[0] < '1') {
         printf("*** Multiplicador de Código Postal: ERRO\n");
         printf("*** Preço Final em Cêntimos: ERRO\n");
     } else {
-        const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0] - '0'][e->destino.codigoPostal[0] - '0'];
+        const _Float32 multcp = e->precos.MULT_CP[e->origem.codigoPostal[0] - '1'][e->destino.codigoPostal[0] - '1'];
         printf("*** Multiplicador de Código Postal: %f\n", (double) multcp);
         printf("*** Preço Final em Cêntimos: %luc\n", encomenda_CalcPreco(e));
     }
@@ -388,14 +387,51 @@ void menu_printEncomendaDetail(const encomenda* const e, const utilizadorvec* co
  */
 void menu_printReciboMensal(const uint64_t ID_U, int mes, int ano, const encomendavec* const e,
                             const utilizadorvec* const uv) {
-    size_t tot_enc   = 0;
-    size_t tot_art   = 0;
-    size_t tot_preco = 0;
-
     ano -= 1900;
     mes -= 1;
+    int isImprimirNosDois = 0;
+    FILE* const stdoutTMP = stdout;
+    char* nomeFicheiro = NULL;
+
+    switch (menu_selection(&(strvec){
+        .size = 3,
+        .data = (char*[]) {
+            "Imprimir fatura no ecrâ",//
+            "Imprimir fatura em ficheiro",//
+            "Imprimir fatura no ecrâ e em ficheiro"//
+        }
+    })) {
+        case -1: return;
+        case 0: break;
+        case 2: isImprimirNosDois = 1;
+        case 1:{
+            menu_printInfo("Inserir nome do ficheiro");
+            menu_readNotNulStr(&nomeFicheiro);
+            while(strcmp(nomeFicheiro, "data.bin") == 0) {
+                menu_printError("nome de ficheiro não pode ser data.bin");
+                menu_printInfo("Inserir nome do ficheiro");
+                menu_readNotNulStr(&nomeFicheiro);
+            }
+            stdout = fopen(nomeFicheiro, "w");
+            if (!stdout) {
+                menu_printError("impossivel abrir ficheiro '%s' :%d!", nomeFicheiro, errno);
+                stdout = stdoutTMP;
+                return;
+            }
+        } break;
+    }
+    size_t tot_enc  ;
+    size_t tot_art  ;
+    size_t tot_preco;
+
+INICIO:
+
+    tot_enc   = 0;
+    tot_art   = 0;
+    tot_preco = 0;
 
     menu_printDiv();
+    printf("*** Fatura de %d/%d\n", ano+1900, mes+1);
     printf("*** Nome: %s\n", protectStr(uv->data[ID_U].nome));
     printf("*** NIF: %.9s\n\n", uv->data[ID_U].NIF);
 
@@ -403,12 +439,12 @@ void menu_printReciboMensal(const uint64_t ID_U, int mes, int ano, const encomen
         struct tm* enctm = localtime(&e->data[i].criacao);
         if (enctm->tm_year != ano || enctm->tm_mon != mes || ID_U != e->data[i].ID_cliente) continue;
         encomenda* atual = &e->data[i];
-        if (atual->tipoEstado != ENCOMENDA_ESTADO_ENTREGUE) continue;
+        if (atual->tipoEstado == ENCOMENDA_ESTADO_CANCELADA) continue;
         menu_printEncomendaBrief(atual, uv);
         printf("\n");
         size_t art;
         for (art = 0; art < atual->artigos.size; ++art) {
-            printf("\t");
+            printf("    ");
             menu_printArtigo(&atual->artigos.data[art]);
             printf("\n");
         }
@@ -417,9 +453,17 @@ void menu_printReciboMensal(const uint64_t ID_U, int mes, int ano, const encomen
         tot_preco += encomenda_CalcPreco(atual);
     }
     printf("\n");
-    ano += 1900;
-    mes += 1;
-    printf("*** Encomendas feitas (%d/%d):    %lu\n", ano, mes, tot_enc);
-    printf("*** Artigos encomendados (%d/%d): %lu\n", ano, mes, tot_art);
-    printf("*** Preço final do mês (%d/%d):   %luc\n", ano, mes, tot_preco);
+    printf( "*** Encomendas feitas (%d/%d):    %lu\n",  ano + 1900, mes + 1, tot_enc);
+    printf( "*** Artigos encomendados (%d/%d): %lu\n",  ano + 1900, mes + 1, tot_art);
+    printf( "*** Preço final do mês (%d/%d):   %luc\n", ano + 1900, mes + 1, tot_preco);
+
+    if (stdout != stdoutTMP){
+        fclose(stdout);
+        stdout = stdoutTMP;
+    }
+    if(isImprimirNosDois) {
+        isImprimirNosDois = 0;
+        goto INICIO;
+    }
+
 }

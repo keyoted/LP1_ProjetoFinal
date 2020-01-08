@@ -277,11 +277,11 @@ void funcional_consultar_tabela_de_precos(int printDist, int printTable) {
     if (printDist) {
         menu_printHeader("Tabela de Distancia");
         // TODO: partir por 80 colunas?
-        printf("ORIGEM DESTINO   0           1           2           3           4 "
+        printf("ORIGEM DESTINO   1           2           3           4 "
                "          5           6           7           8           9\n");
-        for (int origem = 0; origem < 10; ++origem) {
-            printf("  %d  |        ", origem);
-            for (int destino = 0; destino < 10; ++destino) {
+        for (int origem = 0; origem < 9; ++origem) {
+            printf("  %d  |        ", origem+1);
+            for (int destino = 0; destino < 9; ++destino) {
                 printf("  %7.4f  |", (double) tabelaPrecos.MULT_CP[origem][destino]);
             }
             printf("\n");
@@ -359,11 +359,13 @@ void interface_alterar_tabela_distancias() {
     int      destino = 0;
     _Float32 novoVal = 0.0f;
     menu_printInfo("selecione linha de origem:");
-    menu_readIntMinMax(0, 9, &origem);
+    menu_readIntMinMax(1, 9, &origem);
+    origem--;
 
     if (modo == 0) {
         menu_printInfo("selecione coluna de destino:");
-        menu_readIntMinMax(0, 9, &destino);
+        menu_readIntMinMax(1, 9, &destino);
+        destino--;
         while (1) {
             printf("Introduza novo valor decimal para {origem:%d, destino:%d}", origem, destino);
             menu_read_Float32(&novoVal);
@@ -375,9 +377,9 @@ void interface_alterar_tabela_distancias() {
             }
         }
     } else {
-        for (destino = 0; destino < 10; ++destino) {
+        for (destino = 0; destino < 9; ++destino) {
             while (1) {
-                printf("Introduza novo valor decimal para {origem:%d, destino:%d}", origem, destino);
+                printf("Introduza novo valor decimal para {origem:%d, destino:%d}", origem, destino+1);
                 menu_read_Float32(&novoVal);
                 if (novoVal < 0) {
                     menu_printError("valor tem que ser maior que 0.");
