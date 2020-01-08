@@ -155,7 +155,7 @@ void listagem_Utilizadores_Mais_Gasto() {
         }
     }
 
-    if(lista.size > 1) {
+    if (lista.size > 1) {
         // Organizar a lista por total gasto (ordem descendente)
         // l1 maior da lista
         par_idc_tG tmp;
@@ -294,7 +294,7 @@ EXIT_LABEL:
         }
     }
 
-    if(lista.size > 1) {
+    if (lista.size > 1) {
         // Organizar lista por preço (descendente)
         // l1 maior da lista
         par_ide_p tmp;

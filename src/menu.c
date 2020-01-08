@@ -171,9 +171,7 @@ int menu_selection(const strvec* const itens) {
 /**
  * @brief Imprime uma divisória.
  */
-void menu_printDiv() {
-    printf( "--------------------------------------------------------------------------------\n");
-}
+void menu_printDiv() { printf("--------------------------------------------------------------------------------\n"); }
 
 /**
  * @brief     Utilizado para imprimir erros.
@@ -389,25 +387,23 @@ void menu_printReciboMensal(const uint64_t ID_U, int mes, int ano, const encomen
                             const utilizadorvec* const uv) {
     ano -= 1900;
     mes -= 1;
-    int isImprimirNosDois = 0;
-    FILE* const stdoutTMP = stdout;
-    char* nomeFicheiro = NULL;
+    int         isImprimirNosDois = 0;
+    FILE* const stdoutTMP         = stdout;
+    char*       nomeFicheiro      = NULL;
 
-    switch (menu_selection(&(strvec){
-        .size = 3,
-        .data = (char*[]) {
-            "Imprimir fatura no ecrâ",//
-            "Imprimir fatura em ficheiro",//
-            "Imprimir fatura no ecrâ e em ficheiro"//
-        }
-    })) {
+    switch (menu_selection(&(strvec) {.size = 3,
+                                      .data = (char*[]) {
+                                          "Imprimir fatura no ecrâ",              //
+                                          "Imprimir fatura em ficheiro",          //
+                                          "Imprimir fatura no ecrâ e em ficheiro" //
+                                      }})) {
         case -1: return;
         case 0: break;
         case 2: isImprimirNosDois = 1;
-        case 1:{
+        case 1: {
             menu_printInfo("Inserir nome do ficheiro");
             menu_readNotNulStr(&nomeFicheiro);
-            while(strcmp(nomeFicheiro, "data.bin") == 0) {
+            while (strcmp(nomeFicheiro, "data.bin") == 0) {
                 menu_printError("nome de ficheiro não pode ser data.bin");
                 menu_printInfo("Inserir nome do ficheiro");
                 menu_readNotNulStr(&nomeFicheiro);
@@ -420,8 +416,8 @@ void menu_printReciboMensal(const uint64_t ID_U, int mes, int ano, const encomen
             }
         } break;
     }
-    size_t tot_enc  ;
-    size_t tot_art  ;
+    size_t tot_enc;
+    size_t tot_art;
     size_t tot_preco;
 
 INICIO:
@@ -431,7 +427,7 @@ INICIO:
     tot_preco = 0;
 
     menu_printDiv();
-    printf("*** Fatura de %d/%d\n", ano+1900, mes+1);
+    printf("*** Fatura de %d/%d\n", ano + 1900, mes + 1);
     printf("*** Nome: %s\n", protectStr(uv->data[ID_U].nome));
     printf("*** NIF: %.9s\n\n", uv->data[ID_U].NIF);
 
@@ -453,17 +449,16 @@ INICIO:
         tot_preco += encomenda_CalcPreco(atual);
     }
     printf("\n");
-    printf( "*** Encomendas feitas (%d/%d):    %lu\n",  ano + 1900, mes + 1, tot_enc);
-    printf( "*** Artigos encomendados (%d/%d): %lu\n",  ano + 1900, mes + 1, tot_art);
-    printf( "*** Preço final do mês (%d/%d):   %luc\n", ano + 1900, mes + 1, tot_preco);
+    printf("*** Encomendas feitas (%d/%d):    %lu\n", ano + 1900, mes + 1, tot_enc);
+    printf("*** Artigos encomendados (%d/%d): %lu\n", ano + 1900, mes + 1, tot_art);
+    printf("*** Preço final do mês (%d/%d):   %luc\n", ano + 1900, mes + 1, tot_preco);
 
-    if (stdout != stdoutTMP){
+    if (stdout != stdoutTMP) {
         fclose(stdout);
         stdout = stdoutTMP;
     }
-    if(isImprimirNosDois) {
+    if (isImprimirNosDois) {
         isImprimirNosDois = 0;
         goto INICIO;
     }
-
 }

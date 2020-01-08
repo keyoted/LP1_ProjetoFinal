@@ -280,7 +280,7 @@ void funcional_consultar_tabela_de_precos(int printDist, int printTable) {
         printf("ORIGEM DESTINO   1           2           3           4 "
                "          5           6           7           8           9\n");
         for (int origem = 0; origem < 9; ++origem) {
-            printf("  %d  |        ", origem+1);
+            printf("  %d  |        ", origem + 1);
             for (int destino = 0; destino < 9; ++destino) {
                 printf("  %7.4f  |", (double) tabelaPrecos.MULT_CP[origem][destino]);
             }
@@ -379,7 +379,7 @@ void interface_alterar_tabela_distancias() {
     } else {
         for (destino = 0; destino < 9; ++destino) {
             while (1) {
-                printf("Introduza novo valor decimal para {origem:%d, destino:%d}", origem, destino+1);
+                printf("Introduza novo valor decimal para {origem:%d, destino:%d}", origem, destino + 1);
                 menu_read_Float32(&novoVal);
                 if (novoVal < 0) {
                     menu_printError("valor tem que ser maior que 0.");
@@ -698,7 +698,7 @@ void funcional_editar_artigos(artigovec* ar) {
     while (1) {
         menu_printInfo("numero de artigos atuais: %lu.", ar->size);
         menu_printHeader("Selecionar Artigo Para Editar:");
-        int op  = -2;
+        int    op  = -2;
         size_t max = 0;
         while (op == -2) {
             printf("   Opção      |   Item\n");
@@ -711,10 +711,10 @@ void funcional_editar_artigos(artigovec* ar) {
         }
         // Option was gotten -------------------------
         if (op == -1) return;
-        if (op == (int)max) {
+        if (op == (int) max) {
             protectFcnCall(artigovec_push(ar, newArtigo()), "funcional_editar_artigos - artigovec_push falhou.");
         }
-        if (!funcional_editar_artigo(&ar->data[op], (op == (int)max))) {
+        if (!funcional_editar_artigo(&ar->data[op], (op == (int) max))) {
             artigovec_moveBelow(ar, op);
             menu_printInfo("Artigo removido.");
         }

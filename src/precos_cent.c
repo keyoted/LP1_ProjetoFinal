@@ -27,7 +27,7 @@ int save_precos(FILE* const f, const precos_cent* const data) {
     written += fwrite(&data->PESADO, sizeof(uint64_t), 1, f);
     written += fwrite(&data->POR_KM, sizeof(uint64_t), 1, f);
     for (int org = 0; org < 9; ++org) { written += fwrite(data->MULT_CP[org], sizeof(_Float32), 9, f); }
-    return written == 6 + (9*9);
+    return written == 6 + (9 * 9);
 }
 
 /**
@@ -46,5 +46,5 @@ int load_precos(FILE* const f, precos_cent* const data) {
     written += fread(&data->PESADO, sizeof(uint64_t), 1, f);
     written += fread(&data->POR_KM, sizeof(uint64_t), 1, f);
     for (int org = 0; org < 9; ++org) { written += fread(data->MULT_CP[org], sizeof(_Float32), 9, f); }
-    return written == 6 + (9*9);
+    return written == 6 + (9 * 9);
 }
