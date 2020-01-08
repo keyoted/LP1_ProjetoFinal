@@ -230,15 +230,15 @@ void listagem_Encomenda_EmEstado_PorPreco() {
 
         switch (menu_selection(&(strvec) {.size = 9,
                                           .data = (char*[]) {
-                                              "Pesquisar por encomendas de tipo urgente",      //
-                                              "Pesquisar por encomendas de tipo fragil",       //
-                                              "Pesquisar por encomendas de tipo pesado",       //
-                                              "Pesquisar por encomendas de tipo volumoso",     //
-                                              "Pesquisar por encomendas de estado em entrega", //
-                                              "Pesquisar por encomendas de estado expedida",   //
-                                              "Pesquisar por encomendas de estado entregue",   //
-                                              "Pesquisar por encomendas de estado cancelada",  //
-                                              "Confirmar Pesquisar"                            //
+                                              "Pesquisar por encomendas de tipo urgente",      // 0
+                                              "Pesquisar por encomendas de tipo fragil",       // 1
+                                              "Pesquisar por encomendas de tipo pesado",       // 2
+                                              "Pesquisar por encomendas de tipo volumoso",     // 3
+                                              "Pesquisar por encomendas de estado em entrega", // 4
+                                              "Pesquisar por encomendas de estado expedida",   // 5
+                                              "Pesquisar por encomendas de estado entregue",   // 6
+                                              "Pesquisar por encomendas de estado cancelada",  // 7
+                                              "Confirmar Pesquisar"                            // 8
                                           }})) {
             case -1: return;
             case 0:
@@ -386,11 +386,11 @@ void interface_outrasListagens() {
         menu_printDiv();
         switch (menu_selection(&(strvec) {.size = 5,
                                           .data = (char*[]) {
-                                              "Listagem - Recibo de Encomenda",                        //
-                                              "Listagem - Encomendas num certo periodo de tempo",      //
-                                              "Listagem - Utilizadores que mais gastaram",             //
-                                              "Listagem - Encomendas filtradas e ordenadas por preço", //
-                                              "Listagem - Artigos propostos na ultima semana"          //
+                                              "Listagem - Recibo de Encomenda",                        // 0
+                                              "Listagem - Encomendas num certo periodo de tempo",      // 1
+                                              "Listagem - Utilizadores que mais gastaram",             // 2
+                                              "Listagem - Encomendas filtradas e ordenadas por preço", // 3
+                                              "Listagem - Artigos propostos na ultima semana"          // 4
                                           }})) {
             case -1: return;
             case 0: listagem_imprimir_recibo(); break;

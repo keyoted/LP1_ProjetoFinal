@@ -309,12 +309,12 @@ void interface_alterar_tabela_precos() {
         menu_printInfo("selecione o que editar:");
         int edit = menu_selection(&(strvec) {.data =
                                                  (char*[]) {
-                                                     "Editar preço regular",  //
-                                                     "Editar preço urgente",  //
-                                                     "Editar preço volumoso", //
-                                                     "Editar preço fragil",   //
-                                                     "Editar preço pesado",   //
-                                                     "Editar preço por Km"    //
+                                                     "Editar preço regular",  // 0
+                                                     "Editar preço urgente",  // 1
+                                                     "Editar preço volumoso", // 2
+                                                     "Editar preço fragil",   // 3
+                                                     "Editar preço pesado",   // 4
+                                                     "Editar preço por Km"    // 5
                                                  },
                                              .size = 6});
         if (edit == -1) return;
@@ -349,8 +349,8 @@ void interface_alterar_tabela_distancias() {
     menu_printInfo("selecione modo de edição:");
     int modo = menu_selection(&(strvec) {.data =
                                              (char*[]) {
-                                                 "Editar preço de elemento",                               //
-                                                 "Editar preço de linha (todos os destinos de uma origem)" //
+                                                 "Editar preço de elemento",                               // 0
+                                                 "Editar preço de linha (todos os destinos de uma origem)" // 1
                                              },
                                          .size = 2});
     if (modo == -1) return;
@@ -420,10 +420,10 @@ void interface_alterar_utilizadores() {
         printf("\n");
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
-                                                  "Marcar como cliente",    //
-                                                  "Marcar como desativado", //
-                                                  "Marcar como diretor",    //
-                                                  "Editar utilizador"       //
+                                                  "Marcar como cliente",    // 0
+                                                  "Marcar como desativado", // 1
+                                                  "Marcar como diretor",    // 2
+                                                  "Editar utilizador"       // 3
                                               },
                                           .size = 4})) {
             case -1: return;
@@ -496,10 +496,10 @@ void interface_editar_estados_encomendas() {
             menu_printHeader("Selecionar operação:");
             switch (menu_selection(&(strvec) {.data =
                                                   (char*[]) {
-                                                      "Marcar encomenda como cancelada",  //
-                                                      "Marcar encomenda como em entrega", //
-                                                      "Marcar encomenda como expedida",   //
-                                                      "Marcar encomenda como entregue"    //
+                                                      "Marcar encomenda como cancelada",  // 0
+                                                      "Marcar encomenda como em entrega", // 1
+                                                      "Marcar encomenda como expedida",   // 2
+                                                      "Marcar encomenda como entregue"    // 3
                                                   },
                                               .size = 4})) {
                 case -1: return;
@@ -522,15 +522,15 @@ void interface_diretor() {
         menu_printInfo("Bem vindo(a) %s!\n", protectStr(utilizadores.data[utilizadorAtual].nome));
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
-                                                  "Editar dados de acesso",                  //
-                                                  "Alterar tabela de preços base",           //
-                                                  "Alterar tabela de distancias",            //
-                                                  "Alterar estado dos utilizadores",         //
-                                                  "Alterar estados das encomendas",          //
-                                                  "Imprimir recibo de encomenda",            //
-                                                  "Imprimir recibo mensal de um utilizador", //
-                                                  "Consultar tabela de preços",              //
-                                                  "Outras listagens"                         //
+                                                  "Editar dados de acesso",                  // 0
+                                                  "Alterar tabela de preços base",           // 1
+                                                  "Alterar tabela de distancias",            // 2
+                                                  "Alterar estado dos utilizadores",         // 3
+                                                  "Alterar estados das encomendas",          // 4
+                                                  "Imprimir recibo de encomenda",            // 5
+                                                  "Imprimir recibo mensal de um utilizador", // 6
+                                                  "Consultar tabela de preços",              // 7
+                                                  "Outras listagens"                         // 8
                                               },
                                           .size = 9})) {
             case -1: return;
@@ -574,8 +574,8 @@ int funcional_formalizar_encomenda(artigovec* artigos, encomenda* e) {
     morada dest;
     switch (menu_selection(&(strvec) {.data =
                                           (char*[]) {
-                                              "Utilizar a minha morada como morada de entrega", //
-                                              "Definir outra morada como morada de entrega"     //
+                                              "Utilizar a minha morada como morada de entrega", // 0
+                                              "Definir outra morada como morada de entrega"     // 1
                                           },
                                       .size = 2})) {
         case -1: return 0;
@@ -602,9 +602,9 @@ int funcional_formalizar_encomenda(artigovec* artigos, encomenda* e) {
         menu_printInfo("definir encomenda como urgente e/ou fragil?");
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
-                                                  "Definir encomenda como urgente", //
-                                                  "Definir encomenda como fragil",  //
-                                                  "Continuar"                       //
+                                                  "Definir encomenda como urgente", // 0
+                                                  "Definir encomenda como fragil",  // 1
+                                                  "Continuar"                       // 2
                                               },
                                           .size = 3})) {
             case -1: goto END_OF_LOOP;
@@ -644,8 +644,8 @@ int funcional_editar_artigo(artigo* a, int isNew) {
     if (!isNew) {
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
-                                                  "Apagar artigo", //
-                                                  "Editar Artigo"  //
+                                                  "Apagar artigo", // 0
+                                                  "Editar Artigo"  // 1
                                               },
                                           .size = 2})) {
             case -1: return 1;
@@ -731,8 +731,8 @@ void interface_criar_encomenda() {
         menu_printInfo("encomenda por formalizar encontrada, o que deseja fazer?");
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
-                                                  "Descartar encomenda anterior", //
-                                                  "Continuar encomenda anterior"  //
+                                                  "Descartar encomenda anterior", // 0
+                                                  "Continuar encomenda anterior"  // 1
                                               },
                                           .size = 2})) {
             case -1: return;
@@ -785,12 +785,12 @@ void interface_editar_encomendas() {
             menu_printHeader("Encomenda Por Entregar");
             switch (menu_selection(&(strvec) {.data =
                                                   (char*[]) {
-                                                      "Editar artigos da encomenda",    //
-                                                      "Cancelar encomenda",             //
-                                                      "Definir encomenda como urgente", //
-                                                      "Definir encomenda como fragil",  //
-                                                      "Alterar morada de origem",       //
-                                                      "Alterar morada de destino"       //
+                                                      "Editar artigos da encomenda",    // 0
+                                                      "Cancelar encomenda",             // 1
+                                                      "Definir encomenda como urgente", // 2
+                                                      "Definir encomenda como fragil",  // 3
+                                                      "Alterar morada de origem",       // 4
+                                                      "Alterar morada de destino"       // 5
                                                   },
                                               .size = 6})) {
                 case -1: return;
@@ -819,7 +819,7 @@ void interface_editar_encomendas() {
         menu_printHeader("Encomenda Cancelada");
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
-                                                  "Reativar encomenda" //
+                                                  "Reativar encomenda" // 0
                                               },
                                           .size = 1})) {
             case -1: return;
@@ -850,14 +850,14 @@ void interface_cliente() {
         menu_printInfo("Bem vindo(a) %s!\n", protectStr(utilizadores.data[utilizadorAtual].nome));
         strvec vetorOp = (strvec) {.data =
                                        (char*[]) {
-                                           "Editar perfil",                  //
-                                           "Remover perfil",                 //
-                                           "Criar nova encomenda",           //
-                                           "Consultar estado de encomendas", //
-                                           "Consultar tabela de preços",     //
-                                           "Editar encomendas",              //
-                                           "Imprimir recibo de encomenda",   //
-                                           "Imprimir recibo mensal"          //
+                                           "Editar perfil",                  // 0
+                                           "Remover perfil",                 // 1
+                                           "Criar nova encomenda",           // 2
+                                           "Consultar estado de encomendas", // 3
+                                           "Consultar tabela de preços",     // 4
+                                           "Editar encomendas",              // 5
+                                           "Imprimir recibo de encomenda",   // 6
+                                           "Imprimir recibo mensal"          // 7
                                        },
                                    .size = 8};
         switch (menu_selection(&vetorOp)) {
@@ -889,7 +889,7 @@ void interface_novoRegisto() {
         menu_printInfo("tem a certeza que quer descartar os dados do registo?");
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
-                                                  "Descartar registo" //
+                                                  "Descartar registo" // 0
                                               },
                                           .size = 1})) {
             case -1: return;
@@ -934,7 +934,7 @@ void funcional_carregarDados() {
     menu_printInfo("tem a certeza que quer CARREGAR os dados de ficheiro?");
     switch (menu_selection(&(strvec) {.data =
                                           (char*[]) {
-                                              "Descartar registo e carregar dados de ficheiro" //
+                                              "Descartar registo e carregar dados de ficheiro" // 0
                                           },
                                       .size = 1})) {
         case -1: return;
@@ -1005,8 +1005,8 @@ void interface_registoUtilizador() {
         menu_printInfo("ainda não tem um registo aberto, quer criar um novo registo?");
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
-                                                  "Criar um novo registo",       //
-                                                  "Carregar registo de ficheiro" //
+                                                  "Criar um novo registo",       // 0
+                                                  "Carregar registo de ficheiro" // 1
                                               },
                                           .size = 2})) {
             case -1: return;
@@ -1075,7 +1075,7 @@ void interface_login() {
         menu_printHeader("Efetuar Login ?");
         switch (menu_selection(&(strvec) {.data =
                                               (char*[]) {
-                                                  "Efetuar login" //
+                                                  "Efetuar login" // 0
                                               },
                                           .size = 1})) {
             case -1: freeN(stmp); return;
@@ -1090,7 +1090,7 @@ void funcional_guardarDados() {
     menu_printInfo("tem a certeza que quer GRAVAR os dados em ficheiro?");
     switch (menu_selection(&(strvec) {.data =
                                           (char*[]) {
-                                              "Gravar dados e substituir o ficheiro anterior" //
+                                              "Gravar dados e substituir o ficheiro anterior" // 0
                                           },
                                       .size = 1})) {
         case -1: return;
@@ -1143,11 +1143,11 @@ void interface_inicio() {
         menu_printHeader("Início");
         switch (menu_selection(&(strvec) {.size = 5,
                                           .data = (char*[]) {
-                                              "Log In",              //
-                                              "Registar utilizador", //
-                                              "Carregar dados",      //
-                                              "Guardar dados",       //
-                                              "Novo registo"         //
+                                              "Log In",              // 0
+                                              "Registar utilizador", // 1
+                                              "Carregar dados",      // 2
+                                              "Guardar dados",       // 3
+                                              "Novo registo"         // 4
                                           }})) {
             case -1: return;
             case 0: interface_login(); break;
