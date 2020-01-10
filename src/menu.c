@@ -161,7 +161,7 @@ int menu_selection(const strvec* const itens) {
         printf("         -2   |   Reimprimir\n");
         printf("         -1   |   Sair\n");
         size_t i = 0;
-        strvec_iterateFW((strvec*) itens, (strvec_predicate_t) &vecPrintItemPredicate, &i);
+        strvec_iterateFW((strvec*) itens, (strvec_pred_t) &printItemVP, &i);
         menu_readIntMinMax(-2, max - 1, &op);
         menu_printDiv();
     }

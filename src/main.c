@@ -32,6 +32,8 @@
 #    define VEC_TYPE artigo
 #    define VEC_NAME artigovec
 #    define VEC_DEALOC(X) freeArtigo(&X)
+#    define VEC_WRITE(X, F) save_artigo(F, X)
+#    define VEC_READ(X, F) load_artigo(F, X)
 #    include "./vector.h"
 #endif
 
@@ -40,6 +42,8 @@
 #    define VEC_TYPE encomenda
 #    define VEC_NAME encomendavec
 #    define VEC_DEALOC(X) freeEncomenda(&X)
+#    define VEC_WRITE(X, F) save_encomenda(F, X)
+#    define VEC_READ(X, F) load_encomenda(F, X)
 #    include "./vector.h"
 #endif
 
@@ -48,6 +52,8 @@
 #    define VEC_TYPE utilizador
 #    define VEC_NAME utilizadorvec
 #    define VEC_DEALOC(X) freeUtilizador(&X)
+#    define VEC_WRITE(X, F) save_utilizador(F, X)
+#    define VEC_READ(X, F) load_utilizador(F, X)
 #    include "./vector.h"
 #endif
 
@@ -66,9 +72,9 @@ size_t        utilizadorAtual = U_INVAL; ///< Index do utilizador atual.
  *                 utilizadores impresso.
  * @returns        0
  */
-int vecPrintUserPredicate(utilizador item, int* userdata) {
+int printUserVP(utilizador* item, int* userdata) {
     printf("   %*d   |   ", 8, ++(*userdata));
-    menu_printUtilizador(item);
+    menu_printUtilizador(*item);
     printf("\n");
     return 0;
 }
@@ -101,7 +107,7 @@ void funcional_recibo_mensal() {
             printf("         -2   |   Reimprimir\n");
             printf("         -1   |   Sair\n");
             int i = -1;
-            utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_predicate_t) &vecPrintUserPredicate, (void*) &i);
+            utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_pred_t) &printUserVP, (void*) &i);
             menu_readIntMinMax(-2, max, &op);
             menu_printDiv();
         }
@@ -181,9 +187,9 @@ void interface_editar_morada(morada* const m, int isNew) {
  * @returns       1 se o NIF do 'element' for igual ao 'compare'.
  * @returns       0 caso contrário.
  */
-int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t compare[9]) {
-    if (element.tipo == UTILIZADOR_DESATIVADO) return 0;
-    return memcmp(element.NIF, compare, 9) == 0;
+int uAtivadoNIFcmpVP(utilizador* element, uint8_t compare[9]) {
+    if (element->tipo == UTILIZADOR_DESATIVADO) return 0;
+    return memcmp(element->NIF, compare, 9) == 0;
 }
 
 /**
@@ -194,9 +200,7 @@ int utilizadorAtivadoNIFCompareVecPredicate(utilizador element, uint8_t compare[
  * @returns       1 se o NIF do 'element' for igual ao 'compare'.
  * @returns       0 caso contrário.
  */
-int utilizadorNIFCompareVecPredicate(utilizador element, uint8_t compare[9]) {
-    return memcmp(element.NIF, compare, 9) == 0;
-}
+int uNIFcmpVP(utilizador* element, uint8_t compare[9]) { return memcmp(element->NIF, compare, 9) == 0; }
 
 /**
  * @brief            Premite editar um utilizador.
@@ -228,8 +232,7 @@ void funcional_editar_utilizador(size_t ID, int isDirector) {
             menu_printError("NIF introduzido é inválido.");
         } else {
             // Verificar que o nif não é repetido
-            size_t index = utilizadorvec_iterateFW(&utilizadores,
-                                                   (utilizadorvec_predicate_t) &utilizadorNIFCompareVecPredicate, stmp);
+            size_t index = utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_pred_t) &uNIFcmpVP, stmp);
             if (index != INVAL_INDEX && index != ID) {
                 // Nif existe e é diferente do utilizador atual
                 menu_printError("NIF já existente no sistema.");
@@ -407,7 +410,7 @@ void interface_alterar_utilizadores() {
             printf("         -2   |   Reimprimir\n");
             printf("         -1   |   Sair\n");
             int i = -1;
-            utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_predicate_t) &vecPrintUserPredicate, (void*) &i);
+            utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_pred_t) &printUserVP, (void*) &i);
             menu_readIntMinMax(-2, max, &op);
             menu_printDiv();
         }
@@ -462,9 +465,9 @@ void interface_alterar_utilizadores() {
  *                 encomendas impreço.
  * @returns        0
  */
-int vecPrintEncomendaPredicate(encomenda item, size_t* userdata) {
+int printEncomendaVP(encomenda* item, size_t* userdata) {
     printf("   %*lu   |   ", 8, (*userdata)++);
-    menu_printEncomendaBrief(&item, &utilizadores);
+    menu_printEncomendaBrief(item, &utilizadores);
     printf("\n");
     return 0;
 }
@@ -484,7 +487,7 @@ void interface_editar_estados_encomendas() {
             printf("         -2   |   Reimprimir\n");
             printf("         -1   |   Sair\n");
             size_t i = 0;
-            encomendavec_iterateFW(&encomendas, (encomendavec_predicate_t) &vecPrintEncomendaPredicate, (void*) &i);
+            encomendavec_iterateFW(&encomendas, (encomendavec_pred_t) &printEncomendaVP, (void*) &i);
             menu_readIntMinMax(-2, max, &op);
             menu_printDiv();
         }
@@ -626,9 +629,9 @@ END_OF_LOOP:
  *                 artigos impreço.
  * @returns        0
  */
-int vecPrintArtigoPredicate(artigo item, size_t* userdata) {
+int printArtigoVP(artigo* item, size_t* userdata) {
     printf("   %*lu   |   ", 8, (*userdata)++);
-    menu_printArtigo(&item);
+    menu_printArtigo(item);
     printf("\n");
     return 0;
 }
@@ -704,7 +707,7 @@ void funcional_editar_artigos(artigovec* ar) {
             printf("   Opção      |   Item\n");
             printf("         -2   |   Reimprimir\n");
             printf("         -1   |   Sair\n");
-            artigovec_iterateFW(ar, (artigovec_predicate_t) &vecPrintArtigoPredicate, (void*) &max);
+            artigovec_iterateFW(ar, (artigovec_pred_t) &printArtigoVP, (void*) &max);
             printf("   %*lu   |   Criar Novo Artigo\n", 8, max);
             menu_readIntMinMax(-2, max, &op);
             menu_printDiv();
@@ -957,38 +960,17 @@ void funcional_carregarDados() {
         funcional_carregarDados_err(f);
         return;
     }
-    uint64_t size_tmp = 0;
-    if (!fread(&size_tmp, sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel ler tamanho de utilizadores :%d!", errno);
+    // Carregar utilizadores
+    if (!utilizadorvec_read(&utilizadores, f)) {
+        menu_printError("impossivel carregar utilizadores %d!", errno);
         funcional_carregarDados_err(f);
         return;
     }
-    protectFcnCall(utilizadorvec_reserve(&utilizadores, size_tmp),
-                   "funcional_carregarDados - utilizadorvec_reserve falhou.");
-    for (uint64_t i = 0; i < size_tmp; ++i) {
-        ++utilizadores.size;
-        if (!load_utilizador(f, &utilizadores.data[i])) {
-            menu_printError("impossivel carregar utilizador [%lu] :%d!", i, errno);
-            --utilizadores.size;
-            funcional_carregarDados_err(f);
-            return;
-        }
-    }
-    if (!fread(&size_tmp, sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel carregar tamanho de encomendas :%d!", errno);
+    // Carregar encomendas
+    if (!encomendavec_read(&encomendas, f)) {
+        menu_printError("impossivel carregar encomendas %d!", errno);
         funcional_carregarDados_err(f);
         return;
-    }
-    protectFcnCall(encomendavec_reserve(&encomendas, size_tmp),
-                   "funcional_carregarDados - encomendavec_reserve falhou.");
-    for (uint64_t i = 0; i < size_tmp; ++i) {
-        ++encomendas.size;
-        if (!load_encomenda(f, &encomendas.data[i])) {
-            menu_printError("impossivel carregar encomenda [%lu] :%d!", i, errno);
-            --encomendas.size;
-            funcional_carregarDados_err(f);
-            return;
-        }
     }
     menu_printInfo("Dados carregados com sucesso!");
     fclose(f);
@@ -1047,8 +1029,7 @@ void interface_login() {
         } else if (!utilizador_eNIFValido((uint8_t*) stmp)) {
             menu_printError("NIF introduzido é inválido.");
         } else {
-            size_t index = utilizadorvec_iterateFW(
-                &utilizadores, (utilizadorvec_predicate_t) &utilizadorAtivadoNIFCompareVecPredicate, stmp);
+            size_t index = utilizadorvec_iterateFW(&utilizadores, (utilizadorvec_pred_t) &uAtivadoNIFcmpVP, stmp);
             if (index == U_INVAL) {
                 menu_printError("NIF não reconhecido como um utilizador.");
             } else {
@@ -1106,29 +1087,17 @@ void funcional_guardarDados() {
         fclose(f);
         return;
     }
-    if (!fwrite(&utilizadores.size, sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel guardar tamanho de utilizadores :%d!", errno);
+    // Gravar utilizadores
+    if (!utilizadorvec_write(&utilizadores, f)) {
+        menu_printError("impossivel guardar utilizadores :%d!", errno);
         fclose(f);
         return;
     }
-    for (uint64_t i = 0; i < utilizadores.size; ++i) {
-        if (!save_utilizador(f, &utilizadores.data[i])) {
-            menu_printError("impossivel guardar utilizador [%lu] :%d!", i, errno);
-            fclose(f);
-            return;
-        }
-    }
-    if (!fwrite(&encomendas.size, sizeof(uint64_t), 1, f)) {
-        menu_printError("impossivel guardar tamanho de encomendas :%d!", errno);
+    // Gravar encomendas
+    if (!encomendavec_write(&encomendas, f)) {
+        menu_printError("impossivel guardar encomendas :%d!", errno);
         fclose(f);
         return;
-    }
-    for (uint64_t i = 0; i < encomendas.size; ++i) {
-        if (!save_encomenda(f, &encomendas.data[i])) {
-            menu_printError("impossivel guardar encomenda [%lu] :%d!", i, errno);
-            fclose(f);
-            return;
-        }
     }
     menu_printInfo("Dados guardados com sucesso!");
     fclose(f);

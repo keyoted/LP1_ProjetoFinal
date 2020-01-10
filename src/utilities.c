@@ -31,8 +31,8 @@ char* strdup(const char* const s) {
  *                 strings impressas.
  * @returns        0
  */
-int vecPrintItemPredicate(char* const item, size_t* const userdata) {
-    printf("   %*lu   |   %s\n", 8, (*userdata)++, protectStr(item));
+int printItemVP(char** const item, size_t* const userdata) {
+    printf("   %*lu   |   %s\n", 8, (*userdata)++, protectStr(*item));
     return 0;
 }
 

@@ -17,18 +17,20 @@
  * @copyright Copyright (c) 2019
  * @section example_sec Exemplo
  * @code{c}
- * #ifndef  strPVec_H
- * #define  strPvec_H
+ * #ifndef  strvec_H
+ * #define  strvec_H
  * #define  VEC_TYPE             char*
- * #define  VEC_NAME             strVec
+ * #define  VEC_NAME             strvec
  * #define  VEC_DEALOC(X)        free(X)
  * #include "./vector.h"
  * #endif
  *
- * #ifndef  intVec_H
- * #define  intVec_H
+ * #ifndef  intvec_H
+ * #define  intvec_H
  * #define  VEC_TYPE             int
- * #define  VEC_NAME             intVec
+ * #define  VEC_NAME             intvec
+ * #define VEC_WRITE(X, F)       fwrite(X, sizeof(int), 1, F)
+ * #define VEC_READ(X, F)        fread (X, sizeof(int), 1, F)
  * #include "./vector.h"
  * #endif
  * @endcode
@@ -61,11 +63,22 @@
  *                  VEC_IMPLEMENTATION e VEC_DECLARATION.
  * @def INVAL_INDEX
  *                  O valor máximo que o tamanho do vetor pode ter.
+ * @def VEC_WRITE(X, F)
+ *                  Função para escrever o tipo 'VEC_TYPE' num ficheiro. Onde X
+ *                  é do tipo 'VEC_TYPE*' e F é do tipo FILE* e corresponde ao
+ *                  ficheiro onde gravar o objeto. Caso não esteja definido, a
+ *                  função _write não vai ser gerada.
+ * @def VEC_READ(X, F)
+ *                  Função para carregar o tipo 'VEC_TYPE' num ficheiro. Onde X
+ *                  é do tipo 'VEC_TYPE*' e F é do tipo FILE* e corresponde ao
+ *                  ficheiro onde gravar o objeto. Caso não esteja definido, a
+ *                  função _read não vai ser gerada.
  */
 
 #include <inttypes.h>
 #include <memory.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifndef VEC_TYPE
 #    define VEC_TYPE int
@@ -97,7 +110,7 @@ typedef struct {
     uint64_t  size;     ///< Tamanho de objetos que foi populado.
     VEC_TYPE* data;     ///< Começa em data[0] e acaba em data[size-1].
 } VEC_NAME;
-typedef int (*VEC_FUN(_predicate_t))(VEC_TYPE, void*);
+typedef int (*VEC_FUN(_pred_t))(VEC_TYPE*, void*);
 
 #ifdef VEC_IMPLEMENTATION
 /**
@@ -318,9 +331,9 @@ int VEC_FUN(_adjust)(VEC_NAME* const v) {
  * @returns         INVAL_INDEX caso a todos os elementos foram iterados sem que
  *                  'predicate' tenha retornado 0.
  */
-uint64_t VEC_FUN(_iterateFW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
+uint64_t VEC_FUN(_iterateFW)(VEC_NAME* const v, VEC_FUN(_pred_t) predicate, void* userData) {
     for (uint64_t i = 0; i < v->size; i++) {
-        if (predicate(v->data[i], userData)) return i;
+        if (predicate(&(v->data[i]), userData)) return i;
     }
     return INVAL_INDEX;
 }
@@ -343,9 +356,9 @@ uint64_t VEC_FUN(_iterateFW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void*
  * @returns         INVAL_INDEX caso a todos os elementos foram iterados sem que
  *                  'predicate' tenha retornado 0.
  */
-uint64_t VEC_FUN(_iterateBW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData) {
+uint64_t VEC_FUN(_iterateBW)(VEC_NAME* const v, VEC_FUN(_pred_t) predicate, void* userData) {
     for (uint64_t i = v->size - 1; i != INVAL_INDEX; i--) {
-        if (predicate(v->data[i], userData)) return i;
+        if (predicate(&(v->data[i]), userData)) return i;
     }
     return INVAL_INDEX;
 }
@@ -382,6 +395,54 @@ int VEC_FUN(_reserve)(VEC_NAME* const v, uint64_t space) {
 #    ifdef VEC_DEALOC
 void VEC_FUN(_DEALOC)(VEC_TYPE* const X) { VEC_DEALOC(*X); }
 #    endif
+
+#    ifdef VEC_WRITE
+/**
+ * @brief           Escreve num ficheiro utilizando o macro 'VEC_WRITE'.
+ * @details         Escreve um número de 64 bits a indicar o tamanho do vetor e
+ *                  de seguida escreve, um a um, utilizando o macro 'VEC_WRITE'
+ *                  os objetos do vetor.
+ * @param v         Ponteiro para o vetor sob o qual queremos operar.
+ * @param f         Ficheiro onde escrever os conteudos do vetor.
+ * @returns         1 se escreveu o vetor com sucesso.
+ * @returns         0 caso contrário.
+ */
+int VEC_FUN(_write)(const VEC_NAME* const v, FILE* f) {
+    // Gravar tamanho do vetor
+    if (!fwrite(&v->size, sizeof(uint64_t), 1, f)) return 0;
+    // Guardar objetos
+    for (uint64_t i = 0; i < v->size; i++) {
+        if (!VEC_WRITE(&(v->data[i]), f)) return 0;
+    }
+    return 1;
+}
+#    endif
+
+#    ifdef VEC_READ
+/**
+ * @brief           Lê de num ficheiro utilizando o macro 'VEC_READ'.
+ * @details         Lê um número de 64 bits a indicar o tamanho do vetor e
+ *                  de seguida lê, um a um, utilizando o macro 'VEC_READ' os
+ *                  objetos do vetor. Aloca espaço, se necessário.
+ * @param v         Ponteiro para o vetor sob o qual queremos operar.
+ * @param f         Ficheiro onde escrever os conteudos do vetor.
+ * @returns         1 se leu o vetor com sucesso.
+ * @returns         0 caso contrário.
+ */
+int VEC_FUN(_read)(VEC_NAME* const v, FILE* f) {
+    // Ler tamanho de vetor em ficheiro
+    uint64_t size = 0;
+    if (!fread(&size, sizeof(uint64_t), 1, f)) return 0;
+    // Reservar espaço para vetor
+    if (!VEC_FUN(_reserve)(v, size)) return 0;
+    // Ler objetos do ficheiro
+    for (uint64_t i = 0; i < size; i++) {
+        if (!VEC_READ(&(v->data[i]), f)) return 0;
+        v->size++;
+    }
+    return 1;
+}
+#    endif
 #endif
 
 #ifdef VEC_DECLARATION
@@ -396,13 +457,21 @@ void     VEC_FUN(_moveBelow)(VEC_NAME* const v, const uint64_t i);
 void     VEC_FUN(_removeAt)(VEC_NAME* const v, uint64_t position);
 int      VEC_FUN(_moveAbove)(VEC_NAME* const v, const uint64_t i);
 VEC_TYPE VEC_FUN(_popAt)(VEC_NAME* const v, const uint64_t position);
-uint64_t VEC_FUN(_iterateFW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
-uint64_t VEC_FUN(_iterateBW)(VEC_NAME* v, VEC_FUN(_predicate_t) predicate, void* userData);
+uint64_t VEC_FUN(_iterateFW)(VEC_NAME* const v, VEC_FUN(_pred_t) predicate, void* userData);
+uint64_t VEC_FUN(_iterateBW)(VEC_NAME* const v, VEC_FUN(_pred_t) predicate, void* userData);
 #    ifdef VEC_DEALOC
 void VEC_FUN(_DEALOC)(VEC_TYPE* const X);
+#    endif
+#    ifdef VEC_WRITE
+int VEC_FUN(_write)(const VEC_NAME* const v, FILE* f);
+#    endif
+#    ifdef VEC_READ
+int VEC_FUN(_read)(VEC_NAME* const v, FILE* f);
 #    endif
 #endif
 
 #undef VEC_TYPE
 #undef VEC_NAME
 #undef VEC_DEALOC
+#undef VEC_READ
+#undef VEC_WRITE

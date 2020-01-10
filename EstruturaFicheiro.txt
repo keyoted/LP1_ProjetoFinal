@@ -11,8 +11,8 @@ Estrutura do ficheiro:
         * uint64_t FRAGIL
         * uint64_t PESADO
         * uint64_t POR_KM
-        - _Float32[100] MULT_CP
-            * _Float32 (32b) de [0][0], [0][1] .. [0][9], [1][0] .. [9][9]
+        - _Float32[9*9] MULT_CP
+            * _Float32 (32b) de [0][0], [0][1] .. [0][8], [1][0] .. [8][8]
     * uint64_t tamanho_de_utilizadorvec
     - utilizador utilizadores[tamanho_de_utilizadorvec]
             - str nome

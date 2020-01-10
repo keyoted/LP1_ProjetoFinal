@@ -25,6 +25,8 @@
 #    define VEC_TYPE artigo
 #    define VEC_NAME artigovec
 #    define VEC_DEALOC(X) freeArtigo(&X)
+#    define VEC_WRITE(X, F) save_artigo(F, X)
+#    define VEC_READ(X, F) load_artigo(F, X)
 #    include "./vector.h"
 #endif
 
@@ -33,6 +35,8 @@
 #    define VEC_TYPE encomenda
 #    define VEC_NAME encomendavec
 #    define VEC_DEALOC(X) freeEncomenda(&X)
+#    define VEC_WRITE(X, F) save_encomenda(F, X)
+#    define VEC_READ(X, F) load_encomenda(F, X)
 #    include "./vector.h"
 #endif
 
@@ -41,6 +45,8 @@
 #    define VEC_TYPE utilizador
 #    define VEC_NAME utilizadorvec
 #    define VEC_DEALOC(X) freeUtilizador(&X)
+#    define VEC_WRITE(X, F) save_utilizador(F, X)
+#    define VEC_READ(X, F) load_utilizador(F, X)
 #    include "./vector.h"
 #endif
 

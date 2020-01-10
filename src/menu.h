@@ -20,12 +20,15 @@
 
 #include "encomenda.h"
 #include "utilizador.h"
+#include "utilities.h"
 
 #ifndef encomendavec_H
 #    define encomendavec_H
 #    define VEC_TYPE encomenda
 #    define VEC_NAME encomendavec
 #    define VEC_DEALOC(X) freeEncomenda(&X)
+#    define VEC_WRITE(X, F) save_encomenda(F, X)
+#    define VEC_READ(X, F) load_encomenda(F, X)
 #    include "./vector.h"
 #endif
 
@@ -34,6 +37,8 @@
 #    define VEC_TYPE char*
 #    define VEC_NAME strvec
 #    define VEC_DEALOC(X) free(X)
+#    define VEC_WRITE(X, F) save_str(F, *X)
+#    define VEC_READ(X, F) load_str(F, X)
 #    include "./vector.h"
 #endif
 
@@ -42,6 +47,8 @@
 #    define VEC_TYPE utilizador
 #    define VEC_NAME utilizadorvec
 #    define VEC_DEALOC(X) freeUtilizador(&X)
+#    define VEC_WRITE(X, F) save_utilizador(F, X)
+#    define VEC_READ(X, F) load_utilizador(F, X)
 #    include "./vector.h"
 #endif
 

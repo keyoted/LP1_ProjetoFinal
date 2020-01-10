@@ -51,6 +51,8 @@
 #    define VEC_TYPE artigo
 #    define VEC_NAME artigovec
 #    define VEC_DEALOC(X) freeArtigo(&X)
+#    define VEC_WRITE(X, F) save_artigo(F, X)
+#    define VEC_READ(X, F) load_artigo(F, X)
 #    include "./vector.h"
 #endif
 
