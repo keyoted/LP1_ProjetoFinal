@@ -60,7 +60,7 @@ void listagem_Encomendas_Periodo_de_Tempo() {
         mesf    = tmp;
     }
 
-    menu_printInfo("encomendas de %d/%d até %d/%d", anoi, mesi, anof, mesf);
+    menu_printInfo("encomendas de %d/%d/1 até %d/%d/1", anoi, mesi, anof, mesf);
 
     // Converter os anos para funcionarem com o o output de 'localtime'
     anoi -= 1900;
