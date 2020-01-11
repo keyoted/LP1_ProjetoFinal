@@ -456,9 +456,9 @@ INICIO:
     if (stdout != stdoutTMP) {
         fclose(stdout);
         stdout = stdoutTMP;
-    }
-    if (isImprimirNosDois) {
-        isImprimirNosDois = 0;
-        goto INICIO;
+        if (isImprimirNosDois) {
+            isImprimirNosDois = 0;
+            goto INICIO;
+        }
     }
 }

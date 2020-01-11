@@ -120,15 +120,15 @@ void listagem_Encomendas_Periodo_de_Tempo() {
  * gastou em encomendas.
  */
 typedef struct {
-    uint64_t ID_utilizador;
-    uint64_t totalGasto;
-} par_idc_tG;
+    uint64_t id;
+    uint64_t total;
+} PAR_ID_TOT;
 
 #define VEC_IMPLEMENTATION
-#ifndef pidctgvec_H
-#    define pidctgvec_H
-#    define VEC_TYPE par_idc_tG
-#    define VEC_NAME pidctgvec
+#ifndef pitvec_H
+#    define pitvec_H
+#    define VEC_TYPE PAR_ID_TOT
+#    define VEC_NAME pitvec
 #    include "./vector.h"
 #endif
 #undef VEC_IMPLEMENTATION
@@ -141,27 +141,32 @@ void listagem_Utilizadores_Mais_Gasto() {
     menu_printDiv();
     menu_printHeader("Utilizadores Ordenados Por Dinheiro Gasto");
     // Criar uma lista com todos os utilizadores
-    pidctgvec lista = pidctgvec_new();
+    // Par ID do utilizador, total gasto
+    pitvec lista = pitvec_new();
     for (size_t u = 0; u < utilizadores.size; ++u) {
-        protectFcnCall(pidctgvec_push(&lista, (par_idc_tG) {.totalGasto = 0, .ID_utilizador = u}),
-                       "listagem_Utilizadores_Mais_Gasto - pidctgvec_push falhou.");
+        protectFcnCall(pitvec_push(&lista,
+                                   (PAR_ID_TOT) {
+                                       .total = 0, // Total gasto em encomendas
+                                       .id    = u  // ID do utilizador
+                                   }),
+                       "listagem_Utilizadores_Mais_Gasto - pitvec_push falhou.");
     }
 
     // Calcular o valor das encomendas feitas por utilizador
     for (size_t e = 0; e < encomendas.size; ++e) {
         const encomenda* encomendaAtual = &encomendas.data[e];
         if (!(encomendas.data[e].tipoEstado & ENCOMENDA_ESTADO_CANCELADA)) {
-            lista.data[encomendaAtual->ID_cliente].totalGasto += encomenda_CalcPreco(encomendaAtual);
+            lista.data[encomendaAtual->ID_cliente].total += encomenda_CalcPreco(encomendaAtual);
         }
     }
 
     if (lista.size > 1) {
         // Organizar a lista por total gasto (ordem descendente)
         // l1 maior da lista
-        par_idc_tG tmp;
+        PAR_ID_TOT tmp;
         for (size_t l1 = 0; l1 < lista.size - 1; ++l1) {
             for (size_t l2 = l1 + 1; l2 < lista.size; ++l2) {
-                if (lista.data[l1].totalGasto < lista.data[l2].totalGasto) {
+                if (lista.data[l1].total < lista.data[l2].total) {
                     tmp            = lista.data[l1];
                     lista.data[l1] = lista.data[l2];
                     lista.data[l2] = tmp;
@@ -174,38 +179,21 @@ void listagem_Utilizadores_Mais_Gasto() {
     menu_printDiv();
     menu_printHeader("Utilizadores Encontrados");
     for (size_t l = 0; l < lista.size; ++l) {
-        printf("   %8lu   |   ", lista.data[l].ID_utilizador);
-        menu_printUtilizador(utilizadores.data[lista.data[l].ID_utilizador]);
-        printf("  Total gasto: %luc\n", lista.data[l].totalGasto);
+        printf("   %8lu   |   ", lista.data[l].id);
+        menu_printUtilizador(utilizadores.data[lista.data[l].id]);
+        printf("  Total gasto: %luc\n", lista.data[l].id);
     }
 
     // Libertar lista
-    pidctgvec_free(&lista);
+    pitvec_free(&lista);
 }
-
-/**
- * Define um par que liga o ID de uma encomenda com o seu preço.
- */
-typedef struct {
-    uint64_t ID_encomenda;
-    uint64_t preco;
-} par_ide_p;
-
-#define VEC_IMPLEMENTATION
-#ifndef pidepvec_H
-#    define pidepvec_H
-#    define VEC_TYPE par_ide_p
-#    define VEC_NAME pidepvec
-#    include "./vector.h"
-#endif
-#undef VEC_IMPLEMENTATION
 
 /**
  * @brief Lista encomendas com um certo estado e tipo ordenadas por preço.
  */
 void listagem_Encomenda_EmEstado_PorPreco() {
-    uint8_t  estadoPesquisa = ENCOMENDA_ESTADO_EM_ENTREGA; // Tipo e estado que será pesquisado
-    pidepvec lista          = pidepvec_new();
+    uint8_t estadoPesquisa = ENCOMENDA_ESTADO_EM_ENTREGA; // Tipo e estado que será pesquisado
+    pitvec  lista          = pitvec_new();
 
     menu_printDiv();
     menu_printHeader("Encomendas Filtradas e Ordenadas");
@@ -283,24 +271,27 @@ EXIT_LABEL:
     );
 
     // Criar uma lista com todas as encomendas com 'tipoEstado' compativel.
-    protectFcnCall(pidepvec_reserve(&lista, encomendas.size),
-                   "listagem_Encomenda_EmEstado_PorPreco - pidepvec_reserve falhou.");
+    protectFcnCall(pitvec_reserve(&lista, encomendas.size),
+                   "listagem_Encomenda_EmEstado_PorPreco - pitvec_reserve falhou.");
 
     for (uint64_t e = 0; e < encomendas.size; ++e) {
         if (encomendas.data[e].tipoEstado == estadoPesquisa) {
-            protectFcnCall(pidepvec_push(&lista, (par_ide_p) {.ID_encomenda = e,
-                                                              .preco = encomenda_CalcPreco(&encomendas.data[e])}),
-                           "listagem_Encomenda_EmEstado_PorPreco - pidepvec_push falhou.");
+            protectFcnCall(pitvec_push(&lista,
+                                       (PAR_ID_TOT) {
+                                           .id    = e,                                       // ID da encomenda
+                                           .total = encomenda_CalcPreco(&encomendas.data[e]) // Preço da encomenda
+                                       }),
+                           "listagem_Encomenda_EmEstado_PorPreco - pitvec_push falhou.");
         }
     }
 
     if (lista.size > 1) {
         // Organizar lista por preço (descendente)
         // l1 maior da lista
-        par_ide_p tmp;
+        PAR_ID_TOT tmp;
         for (size_t l1 = 0; l1 < lista.size - 1; ++l1) {
             for (size_t l2 = l1 + 1; l2 < lista.size; ++l2) {
-                if (lista.data[l1].preco < lista.data[l2].ID_encomenda) {
+                if (lista.data[l1].total < lista.data[l2].total) {
                     tmp            = lista.data[l1];
                     lista.data[l1] = lista.data[l2];
                     lista.data[l2] = tmp;
@@ -313,13 +304,13 @@ EXIT_LABEL:
     menu_printDiv();
     menu_printHeader("Encomendas Encontradas");
     for (size_t l = 0; l < lista.size; ++l) {
-        printf("   %8lu   |   ", lista.data[l].ID_encomenda);
-        menu_printEncomendaBrief(&encomendas.data[lista.data[l].ID_encomenda], &utilizadores);
-        printf("  Preço: %luc\n", lista.data[l].preco);
+        printf("   %8lu   |   ", lista.data[l].id);
+        menu_printEncomendaBrief(&encomendas.data[lista.data[l].id], &utilizadores);
+        printf("  Preço: %luc\n", lista.data[l].total);
     }
 
     // Libertar lista
-    pidepvec_free(&lista);
+    pitvec_free(&lista);
 }
 
 /**

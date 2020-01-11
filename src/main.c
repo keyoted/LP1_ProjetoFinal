@@ -793,9 +793,10 @@ void interface_editar_encomendas() {
                                                       "Definir encomenda como urgente", // 2
                                                       "Definir encomenda como fragil",  // 3
                                                       "Alterar morada de origem",       // 4
-                                                      "Alterar morada de destino"       // 5
+                                                      "Alterar morada de destino",      // 5
+                                                      "Alterar a distância"             // 6
                                                   },
-                                              .size = 6})) {
+                                              .size = 7})) {
                 case -1: return;
                 case 0: {
                     funcional_editar_artigos(&e->artigos);
@@ -816,6 +817,19 @@ void interface_editar_encomendas() {
                 case 3: encomenda_TIPO_FRAGIL_togle(e); break;
                 case 4: interface_editar_morada(&e->origem, 0); break;
                 case 5: interface_editar_morada(&e->destino, 0); break;
+                case 6: {
+                    while (1) {
+                        printf("Introduzir Distancia (em Km)");
+                        int d = 0;
+                        menu_readInt(&d);
+                        if (d < 0)
+                            menu_printError("distancia negativa não é possivél.");
+                        else {
+                            e->distancia_km = d;
+                            break;
+                        }
+                    }
+                } break;
             }
         }
     } else if (e->tipoEstado & ENCOMENDA_ESTADO_CANCELADA) {
